@@ -1,54 +1,260 @@
-# BlueprintAI
+<p align="center">
+  <img src="docs/assets/logo.svg" alt="BlueprintAI Logo" width="80" height="80">
+</p>
 
-AI-powered PRD & task management system.
+<h1 align="center">BlueprintAI</h1>
 
-## Overview
+<p align="center">
+  <strong>AI-powered PRD & task management system</strong>
+</p>
 
-BlueprintAI transforms AI-generated PRDs (Product Requirements Documents) into beautiful, trackable tasks. AI agents create structured markdown files that are rendered in a premium web UI.
+<p align="center">
+  Transform AI-generated PRDs into beautiful, trackable tasks
+</p>
 
-## Getting Started
+<p align="center">
+  <a href="#features">Features</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#for-ai-agents">For AI Agents</a> •
+  <a href="#tech-stack">Tech Stack</a> •
+  <a href="#roadmap">Roadmap</a>
+</p>
+
+---
+
+## ✨ Features
+
+- 🤖 **AI-First Design** - Structured markdown format optimized for AI agents to generate PRDs and tasks
+- 📋 **PRD Management** - Beautiful rendering of Product Requirements Documents with status tracking
+- ✅ **Task Tracking** - Hierarchical tasks with subtasks, priorities, and status filters
+- 🎨 **Premium UI** - Dark theme with glassmorphism effects, smooth animations, and responsive design
+- 📊 **Dashboard** - Overview of all projects with progress stats and metrics
+- 🔄 **Real-time Updates** - Hot reload when markdown files change during development
+
+## 📸 Screenshots
+
+<p align="center">
+  <img src="docs/assets/dashboard.png" alt="Dashboard" width="800">
+  <br>
+  <em>Dashboard with project overview and stats</em>
+</p>
+
+<p align="center">
+  <img src="docs/assets/project-detail.png" alt="Project Detail" width="800">
+  <br>
+  <em>Project detail with PRD and expandable tasks</em>
+</p>
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 18+
+- pnpm (recommended) or npm
+
+### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/1001Josias/blueprint-ai.git
+cd blueprint-ai
+
 # Install dependencies
 pnpm install
 
-# Run development server
+# Start development server
 pnpm dev
-
-# Build for production
-pnpm build
 ```
 
-## Project Structure
+Open [http://localhost:3000](http://localhost:3000) to see the app.
+
+### Creating Your First Project
+
+1. Create a new directory in `content/projects/`:
+   ```bash
+   mkdir -p content/projects/my-project
+   ```
+
+2. Create `prd.md` with your PRD:
+   ```markdown
+   ---
+   id: "my-project"
+   title: "My Awesome Project"
+   status: "draft"
+   version: "1.0"
+   created_at: "2026-01-05"
+   updated_at: "2026-01-05"
+   author: "ai-agent"
+   ---
+
+   # My Awesome Project
+
+   ## Objetivo
+   Description of what this project aims to achieve...
+   ```
+
+3. Create `tasks.md` with your tasks:
+   ```markdown
+   ---
+   project_id: "my-project"
+   prd_version: "1.0"
+   created_at: "2026-01-05"
+   updated_at: "2026-01-05"
+   ---
+
+   # Tasks: My Awesome Project
+
+   ## Task 1: First Task
+   - **id:** task-001
+   - **status:** todo
+   - **priority:** high
+   - **description:** Description of the task.
+
+   ### Subtasks
+
+   #### [ ] First subtask
+   Description of what needs to be done.
+   ```
+
+4. Refresh the browser to see your project!
+
+## 🤖 For AI Agents
+
+BlueprintAI is designed to work seamlessly with AI coding assistants. See the complete [Agent Guide](docs/agent-guide.md) for:
+
+- PRD markdown schema and examples
+- Tasks markdown schema with subtasks
+- Workflow recommendations
+- Best practices
+
+### Quick Reference
+
+| Field | PRD Values | Task Values |
+|-------|------------|-------------|
+| **Status** | `draft`, `in_review`, `approved`, `rejected` | `todo`, `in_progress`, `done`, `blocked` |
+| **Priority** | - | `low`, `medium`, `high`, `critical` |
+
+## 📁 Project Structure
 
 ```
 blueprint-ai/
 ├── content/
-│   └── projects/           # Markdown files (PRDs + Tasks)
-│       └── project-slug/
-│           ├── prd.md
-│           └── tasks.md
+│   └── projects/              # Your projects live here
+│       └── example-project/
+│           ├── prd.md         # Product Requirements Document
+│           └── tasks.md       # Tasks derived from PRD
 ├── src/
-│   ├── app/                # Next.js App Router pages
-│   ├── components/         # React components
-│   └── lib/                # Utilities and parsers
-└── docs/
-    └── agent-guide.md      # Instructions for AI agents
+│   ├── app/                   # Next.js App Router
+│   │   ├── layout.tsx         # Root layout with sidebar
+│   │   ├── page.tsx           # Dashboard page
+│   │   └── projects/[slug]/   # Dynamic project pages
+│   ├── components/            # React components
+│   │   ├── sidebar.tsx        # Navigation sidebar
+│   │   ├── project-card.tsx   # Project card for dashboard
+│   │   ├── task-list.tsx      # Task list with filters
+│   │   └── task-item.tsx      # Individual task with subtasks
+│   └── lib/
+│       ├── schemas.ts         # Zod validation schemas
+│       ├── markdown.ts        # Markdown parsing utilities
+│       └── utils.ts           # General utilities
+├── docs/
+│   └── agent-guide.md         # Instructions for AI agents
+└── package.json
 ```
 
-## For AI Agents
+## 🛠️ Tech Stack
 
-See [docs/agent-guide.md](docs/agent-guide.md) for detailed instructions on how to generate PRDs and tasks.
+| Category | Technology |
+|----------|------------|
+| **Framework** | [Next.js 15](https://nextjs.org/) (App Router) |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) |
+| **Styling** | [Tailwind CSS](https://tailwindcss.com/) |
+| **Markdown** | [gray-matter](https://github.com/jonschlinkert/gray-matter) + [remark](https://github.com/remarkjs/remark) |
+| **Validation** | [Zod](https://zod.dev/) |
+| **Package Manager** | [pnpm](https://pnpm.io/) |
 
-## Tech Stack
+## 🗺️ Roadmap
 
-- **Next.js 15** - React framework
-- **Tailwind CSS** - Styling
-- **gray-matter** - Markdown frontmatter parsing
-- **remark** - Markdown to HTML
-- **Zod** - Schema validation
-- **TypeScript** - Type safety
+### v1.0 (Current) - MVP ✅
+- [x] Dashboard with project overview
+- [x] PRD rendering with metadata
+- [x] Task list with status filters
+- [x] Expandable subtasks with descriptions
+- [x] Dark theme with premium UI
 
-## License
+### v1.1 - Edit via UI
+- [ ] Toggle task status with click
+- [ ] Edit task metadata (modal)
+- [ ] Create/delete tasks
+- [ ] Create new projects
+- [ ] i18n support (English/Portuguese)
 
-MIT
+### v1.2 - Integrations
+- [ ] Export to GitHub Issues
+- [ ] Export to Jira
+- [ ] Export to Linear
+- [ ] Bulk export
+
+### v2.0 - Enterprise Features
+- [ ] Multi-user support
+- [ ] Database backend (PostgreSQL)
+- [ ] Real-time collaboration
+- [ ] API for automations
+
+## � Future Features
+
+A comprehensive list of planned features for future releases:
+
+### UI/UX Enhancements
+| Feature | Description |
+|---------|-------------|
+| **Kanban View** | Drag-and-drop board view for tasks |
+| **Timeline/Gantt** | Visual timeline for project planning |
+| **Search & Filters** | Global search across all projects and tasks |
+| **Keyboard Shortcuts** | Power-user shortcuts for common actions |
+| **Customizable Themes** | Light mode and custom color schemes |
+| **Mobile Responsive** | Full mobile experience with touch gestures |
+
+### AI & Automation
+| Feature | Description |
+|---------|-------------|
+| **AI Task Suggestions** | Automatically suggest subtasks based on PRD |
+| **Smart Estimates** | AI-powered time estimation for tasks |
+| **Progress Insights** | AI analysis of project health and blockers |
+| **Auto-prioritization** | Intelligent task priority suggestions |
+
+### Collaboration
+| Feature | Description |
+|---------|-------------|
+| **Comments & Discussions** | Thread-based discussions on tasks |
+| **Mentions & Notifications** | @mention team members with alerts |
+| **Activity Feed** | Real-time feed of project changes |
+| **Role-based Access** | Admin, editor, and viewer roles |
+
+### Integrations
+| Feature | Description |
+|---------|-------------|
+| **GitHub Issues** | Two-way sync with GitHub Issues |
+| **Jira** | Export and sync with Jira projects |
+| **Linear** | Integration with Linear issues |
+| **Slack** | Notifications and commands in Slack |
+| **VS Code Extension** | Create/view tasks directly in IDE |
+| **Webhooks** | Custom webhooks for automation |
+
+### Data & Analytics
+| Feature | Description |
+|---------|-------------|
+| **Dashboard Analytics** | Charts and metrics for productivity |
+| **Export Formats** | PDF, CSV, and JSON exports |
+| **Backup & Restore** | Automated backups with restore points |
+| **Audit Log** | Complete history of all changes |
+
+## �📄 License
+
+MIT © [Josias Junior](https://github.com/1001Josias)
+
+---
+
+<p align="center">
+  Made with 💜 for AI-assisted development
+</p>
