@@ -201,7 +201,55 @@ blueprint-ai/
 - [ ] Real-time collaboration
 - [ ] API for automations
 
-## 📄 License
+## � Future Features
+
+A comprehensive list of planned features for future releases:
+
+### UI/UX Enhancements
+| Feature | Description |
+|---------|-------------|
+| **Kanban View** | Drag-and-drop board view for tasks |
+| **Timeline/Gantt** | Visual timeline for project planning |
+| **Search & Filters** | Global search across all projects and tasks |
+| **Keyboard Shortcuts** | Power-user shortcuts for common actions |
+| **Customizable Themes** | Light mode and custom color schemes |
+| **Mobile Responsive** | Full mobile experience with touch gestures |
+
+### AI & Automation
+| Feature | Description |
+|---------|-------------|
+| **AI Task Suggestions** | Automatically suggest subtasks based on PRD |
+| **Smart Estimates** | AI-powered time estimation for tasks |
+| **Progress Insights** | AI analysis of project health and blockers |
+| **Auto-prioritization** | Intelligent task priority suggestions |
+
+### Collaboration
+| Feature | Description |
+|---------|-------------|
+| **Comments & Discussions** | Thread-based discussions on tasks |
+| **Mentions & Notifications** | @mention team members with alerts |
+| **Activity Feed** | Real-time feed of project changes |
+| **Role-based Access** | Admin, editor, and viewer roles |
+
+### Integrations
+| Feature | Description |
+|---------|-------------|
+| **GitHub Issues** | Two-way sync with GitHub Issues |
+| **Jira** | Export and sync with Jira projects |
+| **Linear** | Integration with Linear issues |
+| **Slack** | Notifications and commands in Slack |
+| **VS Code Extension** | Create/view tasks directly in IDE |
+| **Webhooks** | Custom webhooks for automation |
+
+### Data & Analytics
+| Feature | Description |
+|---------|-------------|
+| **Dashboard Analytics** | Charts and metrics for productivity |
+| **Export Formats** | PDF, CSV, and JSON exports |
+| **Backup & Restore** | Automated backups with restore points |
+| **Audit Log** | Complete history of all changes |
+
+## �📄 License
 
 MIT © [Josias Junior](https://github.com/1001Josias)
 
