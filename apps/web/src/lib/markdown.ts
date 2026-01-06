@@ -14,18 +14,40 @@ import {
 
 const projectsDirectory = path.join(process.cwd(), "..", "..", "projects");
 
+export interface ProjectPath {
+  workspace: string;
+  slug: string;
+}
+
 /**
- * Get all project slugs (directory names)
+ * Get all project paths (workspace/project)
  */
-export function getProjectSlugs(): string[] {
+export function getAllProjectPaths(): ProjectPath[] {
   if (!fs.existsSync(projectsDirectory)) {
     return [];
   }
 
-  return fs.readdirSync(projectsDirectory).filter((name) => {
-    const projectPath = path.join(projectsDirectory, name);
-    return fs.statSync(projectPath).isDirectory();
+  const paths: ProjectPath[] = [];
+  const workspaces = fs.readdirSync(projectsDirectory).filter((name) => {
+    if (name.startsWith(".")) return false;
+    const wsPath = path.join(projectsDirectory, name);
+    return fs.statSync(wsPath).isDirectory();
   });
+
+  for (const ws of workspaces) {
+    const wsPath = path.join(projectsDirectory, ws);
+    const projects = fs.readdirSync(wsPath).filter((name) => {
+      if (name.startsWith(".")) return false;
+      const projPath = path.join(wsPath, name);
+      return fs.statSync(projPath).isDirectory();
+    });
+
+    for (const proj of projects) {
+      paths.push({ workspace: ws, slug: proj });
+    }
+  }
+
+  return paths;
 }
 
 /**
@@ -159,10 +181,10 @@ function parseTasks(content: string): Task[] {
 }
 
 /**
- * Get a project by slug with PRD and Tasks
+ * Get a project by workspace and slug
  */
-export async function getProjectBySlug(slug: string): Promise<Project | null> {
-  const projectPath = path.join(projectsDirectory, slug);
+export async function getProject(workspace: string, slug: string): Promise<Project | null> {
+  const projectPath = path.join(projectsDirectory, workspace, slug);
 
   if (!fs.existsSync(projectPath)) {
     return null;
@@ -189,6 +211,7 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
 
   return {
     slug,
+    workspace,
     prd: {
       frontmatter: prdFrontmatter,
       content: prdMatter.content,
@@ -205,11 +228,11 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
  * Get all projects with summary info
  */
 export async function getAllProjects(): Promise<ProjectSummary[]> {
-  const slugs = getProjectSlugs();
+  const paths = getAllProjectPaths();
   const projects: ProjectSummary[] = [];
 
-  for (const slug of slugs) {
-    const project = await getProjectBySlug(slug);
+  for (const { workspace, slug } of paths) {
+    const project = await getProject(workspace, slug);
     if (project) {
       const taskStats = {
         total: project.tasks.items.length,
@@ -221,6 +244,7 @@ export async function getAllProjects(): Promise<ProjectSummary[]> {
 
       projects.push({
         slug,
+        workspace,
         title: project.prd.frontmatter.title,
         status: project.prd.frontmatter.status,
         taskStats,

@@ -67,6 +67,7 @@ export type TaskPriority = z.infer<typeof taskPrioritySchema>;
 // Project (combined PRD + Tasks)
 export interface Project {
   slug: string;
+  workspace: string;
   prd: {
     frontmatter: PRDFrontmatter;
     content: string;
@@ -80,6 +81,7 @@ export interface Project {
 
 export interface ProjectSummary {
   slug: string;
+  workspace: string;
   title: string;
   status: PRDStatus;
   taskStats: {
