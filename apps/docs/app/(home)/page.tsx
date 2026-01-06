@@ -16,7 +16,7 @@ export default function HomePage() {
           Get Started
         </Link>
         <a 
-          href="https://github.com/josias-junior/blueprint-ai" 
+          href="https://github.com/1001Josias/blueprint-ai" 
           target="_blank" 
           rel="noreferrer"
           className="rounded-full border border-border px-6 py-3 font-medium transition-colors hover:bg-muted"
