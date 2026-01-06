@@ -120,12 +120,11 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 
 ## 🤖 For AI Agents
 
-BlueprintAI is designed to work seamlessly with AI coding assistants. See the complete [Agent Guide](docs/agent-guide.md) for:
+BlueprintAI is designed to work seamlessly with AI coding assistants. See [AGENTS.md](AGENTS.md) for:
 
-- PRD markdown schema and examples
-- Tasks markdown schema with subtasks
-- Workflow recommendations
-- Best practices
+- Setup commands and code style
+- PRD and Tasks markdown schemas
+- Git conventions and PR instructions
 
 ### Quick Reference
 
@@ -157,8 +156,7 @@ blueprint-ai/
 │       ├── schemas.ts         # Zod validation schemas
 │       ├── markdown.ts        # Markdown parsing utilities
 │       └── utils.ts           # General utilities
-├── docs/
-│   └── agent-guide.md         # Instructions for AI agents
+├── AGENTS.md                  # Instructions for AI agents
 └── package.json
 ```
 
