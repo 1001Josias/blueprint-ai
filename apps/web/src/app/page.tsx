@@ -1,8 +1,12 @@
 import { getAllProjects } from "@/lib/markdown";
 import { ProjectCard } from "@/components/project-card";
 
+import { headers } from "next/headers";
+
 export default async function Home() {
-  const projects = await getAllProjects();
+  const headersList = await headers();
+  const workspace = headersList.get("x-workspace") || undefined;
+  const projects = await getAllProjects(workspace);
 
   return (
     <div className="p-8">
@@ -16,25 +20,25 @@ export default async function Home() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div className="p-6 rounded-xl bg-gradient-to-br from-violet-600/20 to-purple-600/20 border border-violet-500/20">
+        <div className="p-6 rounded-xl bg-linear-to-br from-violet-600/20 to-purple-600/20 border border-violet-500/20">
           <div className="text-3xl font-bold text-white mb-1">
             {projects.length}
           </div>
           <div className="text-sm text-violet-300">Total Projects</div>
         </div>
-        <div className="p-6 rounded-xl bg-gradient-to-br from-green-600/20 to-emerald-600/20 border border-green-500/20">
+        <div className="p-6 rounded-xl bg-linear-to-br from-green-600/20 to-emerald-600/20 border border-green-500/20">
           <div className="text-3xl font-bold text-white mb-1">
             {projects.reduce((acc, p) => acc + p.taskStats.done, 0)}
           </div>
           <div className="text-sm text-green-300">Tasks Completed</div>
         </div>
-        <div className="p-6 rounded-xl bg-gradient-to-br from-yellow-600/20 to-orange-600/20 border border-yellow-500/20">
+        <div className="p-6 rounded-xl bg-linear-to-br from-yellow-600/20 to-orange-600/20 border border-yellow-500/20">
           <div className="text-3xl font-bold text-white mb-1">
             {projects.reduce((acc, p) => acc + p.taskStats.inProgress, 0)}
           </div>
           <div className="text-sm text-yellow-300">In Progress</div>
         </div>
-        <div className="p-6 rounded-xl bg-gradient-to-br from-slate-600/20 to-slate-700/20 border border-slate-500/20">
+        <div className="p-6 rounded-xl bg-linear-to-br from-slate-600/20 to-slate-700/20 border border-slate-500/20">
           <div className="text-3xl font-bold text-white mb-1">
             {projects.reduce((acc, p) => acc + p.taskStats.todo, 0)}
           </div>

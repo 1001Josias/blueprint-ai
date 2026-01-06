@@ -22,7 +22,7 @@ export interface ProjectPath {
 /**
  * Get all project paths (workspace/project)
  */
-export function getAllProjectPaths(): ProjectPath[] {
+export function getAllProjectPaths(workspaceFilter?: string): ProjectPath[] {
   if (!fs.existsSync(projectsDirectory)) {
     return [];
   }
@@ -30,6 +30,9 @@ export function getAllProjectPaths(): ProjectPath[] {
   const paths: ProjectPath[] = [];
   const workspaces = fs.readdirSync(projectsDirectory).filter((name) => {
     if (name.startsWith(".")) return false;
+    // If a filter is active, only include that workspace
+    if (workspaceFilter && name !== workspaceFilter) return false;
+    
     const wsPath = path.join(projectsDirectory, name);
     return fs.statSync(wsPath).isDirectory();
   });
@@ -227,8 +230,8 @@ export async function getProject(workspace: string, slug: string): Promise<Proje
 /**
  * Get all projects with summary info
  */
-export async function getAllProjects(): Promise<ProjectSummary[]> {
-  const paths = getAllProjectPaths();
+export async function getAllProjects(workspaceFilter?: string): Promise<ProjectSummary[]> {
+  const paths = getAllProjectPaths(workspaceFilter);
   const projects: ProjectSummary[] = [];
 
   for (const { workspace, slug } of paths) {

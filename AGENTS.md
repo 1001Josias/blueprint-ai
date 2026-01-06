@@ -103,6 +103,10 @@ This subtask is done.
 3. Generate `tasks.md` based on approved PRD
 4. Update `updated_at` when modifying files with current date
 5. **System Documentation**: When modifying the **BlueprintAI codebase** (e.g., adding features, updating APIs, changing schemas), you MUST check and update `apps/docs` to reflect these changes. This ensures the system documentation remains accurate.
+6. **Task Execution & Isolation**: 
+   - Treat each Task as a specific **deliverable** (analogous to a git branch). 
+   - **Work on ONLY ONE task per session**. 
+   - **STOP** after completing and verifying your SINGLE assigned task. Do NOT automatically proceed to the next task in the list. This avoids race conditions where multiple agents might accidentally duplicate work on the same future tasks.
 
 ## Git Conventions
 

@@ -7,6 +7,7 @@ import type { Task, TaskStatus } from "@/lib/schemas";
 
 interface TaskItemProps {
   task: Task;
+  workspace: string;
   projectSlug: string;
 }
 
@@ -26,7 +27,7 @@ const priorityConfig = {
   critical: { label: "Critical", color: "text-red-400" },
 };
 
-export function TaskItem({ task, projectSlug }: TaskItemProps) {
+export function TaskItem({ task, workspace, projectSlug }: TaskItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [currentStatus, setCurrentStatus] = useState<TaskStatus>(task.status);
   // Optimistic state for subtasks
@@ -60,7 +61,7 @@ export function TaskItem({ task, projectSlug }: TaskItemProps) {
       const response = await fetch(`/api/tasks/${task.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectSlug, status: newStatus }),
+        body: JSON.stringify({ workspace, projectSlug, status: newStatus }),
       });
 
       if (!response.ok) {
@@ -95,6 +96,7 @@ export function TaskItem({ task, projectSlug }: TaskItemProps) {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
+          workspace,
           projectSlug, 
           subtaskIndex: index, 
           completed: newCompleted 

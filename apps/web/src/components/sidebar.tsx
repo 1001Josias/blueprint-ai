@@ -20,6 +20,15 @@ const statusColors = {
 export function Sidebar({ projects }: SidebarProps) {
   const pathname = usePathname();
 
+  // Group projects by workspace
+  const projectsByWorkspace = projects.reduce((acc, project) => {
+    if (!acc[project.workspace]) {
+      acc[project.workspace] = [];
+    }
+    acc[project.workspace].push(project);
+    return acc;
+  }, {} as Record<string, ProjectSummary[]>);
+
   return (
     <aside className="w-72 h-screen bg-slate-900/50 backdrop-blur-xl border-r border-slate-700/50 flex flex-col">
       {/* Logo */}
@@ -41,61 +50,66 @@ export function Sidebar({ projects }: SidebarProps) {
 
       {/* Projects List */}
       <div className="flex-1 overflow-y-auto p-4">
-        <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-2">
-          Projects
-        </h2>
-        <nav className="space-y-1">
-          {projects.map((project) => {
-            const isActive = pathname === `/projects/${project.slug}`;
-            const progress = project.taskStats.total > 0
-              ? Math.round((project.taskStats.done / project.taskStats.total) * 100)
-              : 0;
+        {Object.entries(projectsByWorkspace).map(([workspace, workspaceProjects]) => (
+          <div key={workspace} className="mb-6">
+            <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-2 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-600" />
+              {workspace}
+            </h2>
+            <nav className="space-y-1">
+              {workspaceProjects.map((project) => {
+                const isActive = pathname === `/projects/${project.workspace}/${project.slug}`;
+                const progress = project.taskStats.total > 0
+                  ? Math.round((project.taskStats.done / project.taskStats.total) * 100)
+                  : 0;
 
-            return (
-              <Link
-                key={project.slug}
-                href={`/projects/${project.slug}`}
-                className={cn(
-                  "block p-3 rounded-lg transition-all duration-200",
-                  isActive
-                    ? "bg-violet-600/20 border border-violet-500/30"
-                    : "hover:bg-slate-800/50 border border-transparent"
-                )}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-white truncate">
-                    {project.title}
-                  </span>
-                  <span
+                return (
+                  <Link
+                    key={`${project.workspace}-${project.slug}`}
+                    href={`/projects/${project.workspace}/${project.slug}`}
                     className={cn(
-                      "w-2 h-2 rounded-full",
-                      statusColors[project.status]
+                      "block p-3 rounded-lg transition-all duration-200",
+                      isActive
+                        ? "bg-violet-600/20 border border-violet-500/30"
+                        : "hover:bg-slate-800/50 border border-transparent"
                     )}
-                  />
-                </div>
-                
-                {/* Progress bar */}
-                <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-violet-500 to-purple-500 rounded-full transition-all duration-300"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between mt-2 text-xs text-slate-400">
-                  <span>{project.taskStats.done}/{project.taskStats.total} tasks</span>
-                  <span>{progress}%</span>
-                </div>
-              </Link>
-            );
-          })}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-white truncate">
+                        {project.title}
+                      </span>
+                      <span
+                        className={cn(
+                          "w-2 h-2 rounded-full",
+                          statusColors[project.status]
+                        )}
+                      />
+                    </div>
+                    
+                    {/* Progress bar */}
+                    <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-violet-500 to-purple-500 rounded-full transition-all duration-300"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between mt-2 text-xs text-slate-400">
+                      <span>{project.taskStats.done}/{project.taskStats.total} tasks</span>
+                      <span>{progress}%</span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        ))}
 
-          {projects.length === 0 && (
-            <p className="text-sm text-slate-500 px-2 py-4 text-center">
-              No projects yet
-            </p>
-          )}
-        </nav>
+        {projects.length === 0 && (
+          <p className="text-sm text-slate-500 px-2 py-4 text-center">
+            No projects yet
+          </p>
+        )}
       </div>
 
       {/* Footer */}
