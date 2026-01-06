@@ -15,40 +15,8 @@ BlueprintAI was architected with a specific vision: **Bridging the gap between A
 - **Built for Humans**: While agents speak Markdown, humans prefer rich, interactive interfaces. BlueprintAI parses these agent-generated files to render a **premium, user-friendly UI**, providing a seamless experience for tracking progress, managing priorities, and visualizing project status.
 - **Bridge to Enterprise**: BlueprintAI isn't just a local sandbox. We are designing native integrations to seamlessly transform your local tasks into deliverables within your company's task management systems (like Jira, Linear, or Asana), closing the loop between AI planning and enterprise execution.
 
-## Quick Start
+> [!NOTE]
+> Are you a developer looking to contribute? Check out our [README](https://github.com/1001Josias/blueprint-ai) and [AGENTS.md](https://github.com/1001Josias/blueprint-ai/blob/main/AGENTS.md) for technical architecture and setup instructions.
 
-### Prerequisites
 
-- Node.js 18+
-- pnpm 8+
 
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/josias-junior/blueprint-ai.git
-   ```
-
-2. Install dependencies:
-   ```bash
-   pnpm install
-   ```
-
-3. Start the development server:
-   ```bash
-   pnpm dev
-   ```
-
-The application will be available at:
-- Web App: [http://localhost:3000](http://localhost:3000)
-- Documentation: [http://localhost:3001](http://localhost:3001)
-
-## Architecture
-
-BlueprintAI is built as a monorepo using **Turborepo**, containing:
-
-- **apps/web**: Next.js 16 Web Application (App Router)
-- **apps/docs**: Fumadocs Documentation Site
-- **packages/schemas**: Shared Zod schemas and types
-- **packages/utils**: Shared utility functions
-- **packages/ui**: Shared UI components

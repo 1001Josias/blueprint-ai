@@ -34,16 +34,16 @@ Adjust Tailwind colors to use BlueprintAI's violet/dark theme.
 
 ### Subtasks
 
-#### [ ] Migrate Getting Started
+#### [x] Migrate Getting Started
 Create `content/docs/index.mdx` page with introduction and setup (based on README).
 
-#### [ ] Create "Core Concepts" Guide
+#### [x] Create "Core Concepts" Guide
 Document PRD -> Tasks flow and `projects/` directory structure.
 
-#### [ ] Create Schema Reference
+#### [x] Create Schema Reference
 Document Zod schemas and frontmatter (based on `AGENTS.md`) using TypeTable if possible.
 
-#### [ ] Create API Guide
+#### [x] Create API Guide
 Document endpoints like `PATCH /api/tasks/[taskId]` using OpenAPI or manual MDX.
 
 ---
@@ -56,7 +56,7 @@ Document endpoints like `PATCH /api/tasks/[taskId]` using OpenAPI or manual MDX.
 
 ### Subtasks
 
-#### [ ] Configure Search
+#### [x] Configure Search
 Verify indexing and functionality of Fumadocs search.
 
 #### [ ] SEO Review
