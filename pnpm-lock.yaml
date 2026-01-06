@@ -12,7 +12,7 @@ importers:
         specifier: ^3.1.1
         version: 3.7.4
       turbo:
-        specifier: ^2.3.3
+        specifier: ^2.5.0
         version: 2.7.3
 
   apps/web:
@@ -112,6 +112,12 @@ importers:
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
+
+  packages/tailwind-config:
+    dependencies:
+      tailwindcss:
+        specifier: ^4.0.0
+        version: 4.1.18
 
   packages/tsconfig: {}
 
