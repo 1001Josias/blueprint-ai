@@ -1,0 +1,63 @@
+---
+title: Agents Config
+description: Configuration and Guidelines for AI Agents
+---
+
+# Agents Configuration
+
+This section provides instructions for AI coding agents working on BlueprintAI, based on the `AGENTS.md` specification.
+
+## Project Overview
+
+BlueprintAI is a task management system where AI agents generate PRDs (Product Requirements Documents) and tasks in markdown format.
+
+## Workflows
+
+### Creating Projects
+
+Agents should create files in `projects/<project-slug>/`:
+
+#### 1. PRD (`prd.md`)
+
+```markdown
+---
+id: "project-slug"
+title: "Project Title"
+status: "draft"
+version: "1.0"
+created_at: "YYYY-MM-DD"
+updated_at: "YYYY-MM-DD"
+author: "ai-agent"
+---
+
+# Project Title
+
+## Objective
+...
+```
+
+#### 2. Tasks (`tasks.md`)
+
+```markdown
+---
+project_id: "project-slug"
+prd_version: "1.0"
+created_at: "YYYY-MM-DD"
+updated_at: "YYYY-MM-DD"
+---
+
+# Tasks: Project Title
+
+## Task 1: Task Title
+- **id:** task-001
+- **status:** todo
+- **priority:** high
+- **description:** ...
+```
+
+## Code Style
+
+- **TypeScript**: Strict mode enabled.
+- **Styling**: Tailwind CSS (use `cn()` utility).
+- **Validation**: Zod schemas.
+- **Naming**: Kebab-case for files, PascalCase for components.

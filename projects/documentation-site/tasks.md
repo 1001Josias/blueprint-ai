@@ -9,19 +9,19 @@ updated_at: '2026-01-06'
 
 ## Task 1: Setup do Projeto de Docs
 - **id:** task-101
-- **status:** todo
+- **status:** done
 - **priority:** high
 - **description:** Inicializar o projeto de documentação usando Fumadocs (Next.js App Router).
 
 ### Subtasks
 
-#### [ ] Inicializar projeto Fumadocs
+#### [x] Inicializar projeto Fumadocs
 Criar estrutura inicial do projeto usando o CLI do Fumadocs (`create-fumadocs-app`).
 
-#### [ ] Configurar metadados do projeto
+#### [x] Configurar metadados do projeto
 Atualizar `source.config.ts` ou similar para definir título, descrição e estrutura de arquivos.
 
-#### [ ] Configurar tema (Tailwind CSS)
+#### [x] Configurar tema (Tailwind CSS)
 Ajustar cores do Tailwind para usar o tema violeta/dark do BlueprintAI.
 
 ---

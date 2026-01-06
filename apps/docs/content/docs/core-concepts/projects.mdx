@@ -1,0 +1,28 @@
+---
+title: Projects
+description: Organizing work with Projects
+---
+
+# Projects
+
+Projects are high-level containers for organizing Tasks. They usually represent a specific initiative, product, or large feature set.
+
+## Organization
+
+Projects are stored in the `projects/` directory at the root of the monorepo. Each project has its own workspace and configuration.
+
+### Structure
+
+A typical project structure looks like this:
+
+```
+projects/
+  ├── my-project/
+  │   ├── prd.md        # Product Requirement Document
+  │   ├── tasks.md      # Task list and status
+  │   └── ...
+```
+
+## Task Parsing
+
+BlueprintAI automatically parses `tasks.md` files within project directories to generate the task board and list views in the web application.

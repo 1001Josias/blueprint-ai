@@ -1,0 +1,26 @@
+---
+title: Tasks
+description: Understanding Tasks in BlueprintAI
+---
+
+# Tasks
+
+Tasks are the fundamental units of work in BlueprintAI. They represent actionable items that need to be completed.
+
+## Structure
+
+A Task consists of the following key properties:
+
+- **ID**: Unique identifier (UUID).
+- **Title**: A concise description of the task.
+- **Status**: The current state of the task (e.g., `todo`, `in-progress`, `done`).
+- **Priority**: Certainty of urgency (`low`, `medium`, `high`, `critical`).
+- **Label**: Categorization tag (e.g., `feature`, `bug`, `documentation`).
+
+## Subtasks
+
+Tasks can have subtasks, allowing for granular breakdown of complex activities. Subtasks share the same structure as parent tasks but are nested within them.
+
+## Markdown Support
+
+The core of a Task's detailed description is written in Markdown. This allows for rich text formatting, code blocks, and lists to clearly define requirements.

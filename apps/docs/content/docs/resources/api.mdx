@@ -1,0 +1,58 @@
+---
+title: API Reference
+description: API Endpoints for BlueprintAI
+---
+
+# API Reference
+
+## Tasks
+
+### Update Task Status
+
+Updates the status of a specific task or its subtasks.
+
+- **Endpoint**: `PATCH /api/tasks/[taskId]`
+- **Content-Type**: `application/json`
+
+#### Request Body
+
+| Field | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `projectSlug` | `string` | Yes | The slug of the project containing the task. |
+| `taskId` | `string` | Yes | The ID of the task to update (in URL and body). |
+| `status` | `string` | No | New status (`todo`, `in_progress`, `done`, `blocked`). |
+| `subtaskIndex` | `number` | No | Index of the subtask to update. |
+| `completed` | `boolean` | No | Completion status of the subtask. |
+
+#### Example: Update Main Task
+
+```bash
+curl -X PATCH http://localhost:3000/api/tasks/task-001 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "projectSlug": "my-project",
+    "status": "in_progress"
+  }'
+```
+
+#### Example: Update Subtask
+
+```bash
+curl -X PATCH http://localhost:3000/api/tasks/task-001 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "projectSlug": "my-project",
+    "subtaskIndex": 0,
+    "completed": true
+  }'
+```
+
+#### Response
+
+```json
+{
+  "success": true,
+  "taskId": "task-001",
+  "updatedAt": "2024-01-20"
+}
+```
