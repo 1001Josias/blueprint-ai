@@ -137,27 +137,18 @@ BlueprintAI is designed to work seamlessly with AI coding assistants. See [AGENT
 
 ```
 blueprint-ai/
+├── apps/
+│   ├── web/                   # Next.js App Router (Main App)
+│   └── docs/                  # Fumadocs Documentation Site
+├── packages/
+│   ├── ui/                    # Shared UI components
+│   ├── schemas/               # Shared Zod schemas
+│   ├── utils/                 # Shared utilities
+│   ├── tsconfig/              # Shared TypeScript configs
+│   └── eslint-config/         # Shared ESLint configs
 ├── content/
-│   └── projects/              # Your projects live here
-│       └── example-project/
-│           ├── prd.md         # Product Requirements Document
-│           └── tasks.md       # Tasks derived from PRD
-├── src/
-│   ├── app/                   # Next.js App Router
-│   │   ├── layout.tsx         # Root layout with sidebar
-│   │   ├── page.tsx           # Dashboard page
-│   │   └── projects/[slug]/   # Dynamic project pages
-│   ├── components/            # React components
-│   │   ├── sidebar.tsx        # Navigation sidebar
-│   │   ├── project-card.tsx   # Project card for dashboard
-│   │   ├── task-list.tsx      # Task list with filters
-│   │   └── task-item.tsx      # Individual task with subtasks
-│   └── lib/
-│       ├── schemas.ts         # Zod validation schemas
-│       ├── markdown.ts        # Markdown parsing utilities
-│       └── utils.ts           # General utilities
-├── AGENTS.md                  # Instructions for AI agents
-└── package.json
+│   └── projects/              # User projects (PRDs & Tasks)
+└── AGENTS.md                  # Instructions for AI agents
 ```
 
 ## 🛠️ Tech Stack
