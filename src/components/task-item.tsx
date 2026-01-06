@@ -29,13 +29,22 @@ const priorityConfig = {
 export function TaskItem({ task, projectSlug }: TaskItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [currentStatus, setCurrentStatus] = useState<TaskStatus>(task.status);
+  // Optimistic state for subtasks
+  const [optimisticSubtasks, setOptimisticSubtasks] = useState(task.subtasks);
+  
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
+  // Sync optimistic state with props when they change (e.g. after refresh)
+  const isValuesEqual = JSON.stringify(task.subtasks) === JSON.stringify(optimisticSubtasks);
+  if (!isValuesEqual && !isPending) {
+     setOptimisticSubtasks(task.subtasks);
+  }
+
   const status = statusConfig[currentStatus];
   const priority = priorityConfig[task.priority];
-  const completedSubtasks = task.subtasks.filter((s) => s.completed).length;
-  const totalSubtasks = task.subtasks.length;
+  const completedSubtasks = optimisticSubtasks.filter((s) => s.completed).length;
+  const totalSubtasks = optimisticSubtasks.length;
 
   const cycleStatus = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -56,7 +65,7 @@ export function TaskItem({ task, projectSlug }: TaskItemProps) {
 
       if (!response.ok) {
         // Revert on error
-        setCurrentStatus(currentStatus);
+        setCurrentStatus(task.status);
         console.error("Failed to update task status");
       } else {
         // Refresh the page data
@@ -66,8 +75,45 @@ export function TaskItem({ task, projectSlug }: TaskItemProps) {
       }
     } catch (error) {
       // Revert on error
-      setCurrentStatus(currentStatus);
+      setCurrentStatus(task.status);
       console.error("Error updating task status:", error);
+    }
+  };
+
+  const toggleSubtask = async (index: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    const newSubtasks = [...optimisticSubtasks];
+    const newCompleted = !newSubtasks[index].completed;
+    newSubtasks[index] = { ...newSubtasks[index], completed: newCompleted };
+
+    // Optimistic update
+    setOptimisticSubtasks(newSubtasks);
+
+    try {
+      const response = await fetch(`/api/tasks/${task.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          projectSlug, 
+          subtaskIndex: index, 
+          completed: newCompleted 
+        }),
+      });
+
+      if (!response.ok) {
+        // Revert
+        setOptimisticSubtasks(task.subtasks);
+        console.error("Failed to update subtask");
+      } else {
+        startTransition(() => {
+          router.refresh();
+        });
+      }
+    } catch (error) {
+       // Revert
+       setOptimisticSubtasks(task.subtasks);
+       console.error("Error updating subtask:", error);
     }
   };
 
@@ -151,17 +197,24 @@ export function TaskItem({ task, projectSlug }: TaskItemProps) {
       {isExpanded && task.subtasks.length > 0 && (
         <div className="border-t border-slate-700/50 bg-slate-900/30">
           <div className="p-4 space-y-3">
-            {task.subtasks.map((subtask, index) => (
+            {optimisticSubtasks.map((subtask, index) => (
               <div
                 key={index}
-                className="flex items-start gap-3 p-3 rounded-lg bg-slate-800/50"
+                className={cn(
+                  "flex items-start gap-3 p-3 rounded-lg border transition-all cursor-pointer",
+                  "hover:bg-slate-700/50",
+                  subtask.completed
+                     ? "bg-emerald-900/10 border-emerald-900/20" 
+                     : "bg-slate-800/50 border-transparent"
+                )}
+                onClick={(e) => toggleSubtask(index, e)}
               >
                 <div
                   className={cn(
-                    "w-5 h-5 rounded-md flex items-center justify-center text-xs shrink-0 mt-0.5",
+                    "w-5 h-5 rounded-md flex items-center justify-center text-xs shrink-0 mt-0.5 transition-colors",
                     subtask.completed
                       ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                      : "bg-slate-700 text-slate-500 border border-slate-600"
+                      : "bg-slate-700 text-slate-500 border border-slate-600 group-hover:border-slate-500"
                   )}
                 >
                   {subtask.completed ? "✓" : ""}
@@ -169,7 +222,7 @@ export function TaskItem({ task, projectSlug }: TaskItemProps) {
                 <div className="flex-1 min-w-0">
                   <p
                     className={cn(
-                      "text-sm font-medium",
+                      "text-sm font-medium transition-colors",
                       subtask.completed ? "text-slate-500 line-through" : "text-white"
                     )}
                   >
