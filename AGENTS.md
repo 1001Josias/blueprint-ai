@@ -102,7 +102,7 @@ This subtask is done.
 2. User reviews and approves (status → `approved`)
 3. Generate `tasks.md` based on approved PRD
 4. Update `updated_at` when modifying files with current date
-5. **Documentation Check**: Whenever implementing features or refactoring, always check if `apps/docs` needs updates (Getting Started, Core Concepts, API etc.) and update it accordingly.
+5. **System Documentation**: When modifying the **BlueprintAI codebase** (e.g., adding features, updating APIs, changing schemas), you MUST check and update `apps/docs` to reflect these changes. This ensures the system documentation remains accurate.
 
 ## Git Conventions
 
