@@ -208,6 +208,8 @@ A comprehensive list of planned features for future releases:
 ### UI/UX Enhancements
 | Feature | Description |
 |---------|-------------|
+| **PRD Enhanced Viewer** | Better PRD rendering with collapsible sections, table of contents, and syntax highlighting |
+| **PRD Editor** | Edit PRD content directly in the UI with live preview |
 | **Kanban View** | Drag-and-drop board view for tasks |
 | **Timeline/Gantt** | Visual timeline for project planning |
 | **Search & Filters** | Global search across all projects and tasks |
