@@ -102,6 +102,7 @@ This subtask is done.
 2. User reviews and approves (status → `approved`)
 3. Generate `tasks.md` based on approved PRD
 4. Update `updated_at` when modifying files
+5. **Documentation Check**: Whenever implementing features or refactoring, always check if `apps/docs` needs updates (Getting Started, Core Concepts, API) and update it accordingly.
 
 ## Git Conventions
 
