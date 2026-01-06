@@ -5,78 +5,78 @@ created_at: '2026-01-05'
 updated_at: '2026-01-05'
 ---
 
-# Tasks: Infraestrutura de Monorepo
+# Tasks: Monorepo Infrastructure
 
-## Task 1: Setup do Workspace
+## Task 1: Workspace Setup
 - **id:** task-201
 - **status:** done
 - **priority:** critical
-- **description:** Inicializar e configurar a raiz do monorepo.
+- **description:** Initialize and configure the monorepo root.
 
 ### Subtasks
 
-#### [x] Configurar pnpm workspaces
-Criar `pnpm-workspace.yaml` definindo `apps/*` e `packages/*`.
+#### [x] Configure pnpm workspaces
+Create `pnpm-workspace.yaml` defining `apps/*` and `packages/*`.
 
-#### [x] Inicializar Turborepo
-Criar `turbo.json` com pipelines de `build`, `dev`, `lint`.
+#### [x] Initialize Turborepo
+Create `turbo.json` with `build`, `dev`, `lint` pipelines.
 
-#### [x] Ajustar package.json raiz
-Definir scripts globais e remover dependências que serão movidas para os apps.
+#### [x] Adjust root package.json
+Define global scripts and remove dependencies that will be moved to apps.
 
 ---
 
-## Task 2: Extração de Configurações
+## Task 2: Configuration Extraction
 - **id:** task-202
 - **status:** done
 - **priority:** high
-- **description:** Criar pacotes de configuração compartilhada.
+- **description:** Create shared configuration packages.
 
 ### Subtasks
 
-#### [x] Criar packages/tsconfig
-Pacote com `tsconfig.base.json` e `tsconfig.next.json`.
+#### [x] Create packages/tsconfig
+Package with `tsconfig.base.json` and `tsconfig.next.json`.
 
-#### [x] Criar packages/eslint-config
-Pacote com configuração base do ESLint/Prettier.
+#### [x] Create packages/eslint-config
+Package with base ESLint/Prettier configuration.
 
-#### [x] Criar packages/tailwind-config
-Pacote com preset do Tailwind (cores, fontes do BlueprintAI).
+#### [x] Create packages/tailwind-config
+Package with Tailwind preset (BlueprintAI colors, fonts).
 
 ---
 
-## Task 3: Migração do Web App
+## Task 3: Web App Migration
 - **id:** task-203
 - **status:** done
 - **priority:** critical
-- **description:** Mover o código do app atual para `apps/web`.
+- **description:** Move current app code to `apps/web`.
 
 ### Subtasks
 
-#### [x] Mover arquivos
-Mover `src/`, `public/` e arquivos de config para `apps/web`.
+#### [x] Move files
+Move `src/`, `public/`, and config files to `apps/web`.
 
-#### [x] Ajustar imports internos
-Corrigir caminhos relativos e aliases (`@/*`).
+#### [x] Adjust internal imports
+Fix relative paths and aliases (`@/*`).
 
-#### [x] Validar execução isolada
-Garantir que o app roda corretamente dentro do novo local.
+#### [x] Validate isolated execution
+Ensure the app runs correctly within the new location.
 
 ---
 
-## Task 4: Extração de Código Compartilhado
+## Task 4: Shared Code Extraction
 - **id:** task-204
 - **status:** done
 - **priority:** medium
-- **description:** Extrair lógica business-agnostic para packages.
+- **description:** Extract business-agnostic logic to packages.
 
 ### Subtasks
 
-#### [x] Extrair packages/schemas
-Mover definições Zod para pacote compartilhado.
+#### [x] Extract packages/schemas
+Move Zod definitions to shared package.
 
-#### [x] Extrair packages/utils
-Mover helpers genéricos.
+#### [x] Extract packages/utils
+Move generic helpers.
 
-#### [x] Refatorar Web App para usar packages
-Substituir imports locais por imports de `@blueprint/schemas` e `@blueprint/utils`.
+#### [x] Refactor Web App to use packages
+Replace local imports with `@blueprint/schemas` and `@blueprint/utils` imports.

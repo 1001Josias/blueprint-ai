@@ -5,62 +5,62 @@ created_at: '2026-01-05'
 updated_at: '2026-01-06'
 ---
 
-# Tasks: Site de Documentação
+# Tasks: Documentation Site
 
-## Task 1: Setup do Projeto de Docs
+## Task 1: Docs Project Setup
 - **id:** task-101
 - **status:** done
 - **priority:** high
-- **description:** Inicializar o projeto de documentação usando Fumadocs (Next.js App Router).
+- **description:** Initialize documentation project using Fumadocs (Next.js App Router).
 
 ### Subtasks
 
-#### [x] Inicializar projeto Fumadocs
-Criar estrutura inicial do projeto usando o CLI do Fumadocs (`create-fumadocs-app`).
+#### [x] Initialize Fumadocs project
+Create initial project structure using Fumadocs CLI (`create-fumadocs-app`).
 
-#### [x] Configurar metadados do projeto
-Atualizar `source.config.ts` ou similar para definir título, descrição e estrutura de arquivos.
+#### [x] Configure project metadata
+Update `source.config.ts` or similar to define title, description, and file structure.
 
-#### [x] Configurar tema (Tailwind CSS)
-Ajustar cores do Tailwind para usar o tema violeta/dark do BlueprintAI.
+#### [x] Configure theme (Tailwind CSS)
+Adjust Tailwind colors to use BlueprintAI's violet/dark theme.
 
 ---
 
-## Task 2: Migração e Criação de Conteúdo
+## Task 2: Content Migration and Creation
 - **id:** task-102
 - **status:** todo
 - **priority:** high
-- **description:** Migrar conteúdo existente e criar novas páginas de documentação.
+- **description:** Migrate existing content and create new documentation pages.
 
 ### Subtasks
 
-#### [ ] Migrar Getting Started
-Criar página `content/docs/index.mdx` com introdução e setup (baseado no README).
+#### [ ] Migrate Getting Started
+Create `content/docs/index.mdx` page with introduction and setup (based on README).
 
-#### [ ] Criar Guia "Core Concepts"
-Documentar o fluxo de PRD -> Tasks e estrutura de pastas `projects/`.
+#### [ ] Create "Core Concepts" Guide
+Document PRD -> Tasks flow and `projects/` directory structure.
 
-#### [ ] Criar Referência de Schemas
-Documentar os schemas Zod e frontmatter (baseado no `AGENTS.md`) usando TypeTable se possível.
+#### [ ] Create Schema Reference
+Document Zod schemas and frontmatter (based on `AGENTS.md`) using TypeTable if possible.
 
-#### [ ] Criar Guia de API
-Documentar endpoints como o `PATCH /api/tasks/[taskId]` usando OpenAPI ou MDX manual.
+#### [ ] Create API Guide
+Document endpoints like `PATCH /api/tasks/[taskId]` using OpenAPI or manual MDX.
 
 ---
 
-## Task 3: Integração e Deploy
+## Task 3: Integration and Deploy
 - **id:** task-103
 - **status:** todo
 - **priority:** medium
-- **description:** Ajustes finais e preparação para deploy.
+- **description:** Final adjustments and deployment preparation.
 
 ### Subtasks
 
-#### [ ] Configurar Search
-Verificar indexação e funcionamento da busca do Fumadocs.
+#### [ ] Configure Search
+Verify indexing and functionality of Fumadocs search.
 
-#### [ ] Revisão de SEO
-Adicionar meta tags e descrições apropriadas.
+#### [ ] SEO Review
+Add appropriate meta tags and descriptions.
 
-#### [ ] Validar links cruzados
-Garantir que todos os links internos funcionam corretamente.
+#### [ ] Validate cross-links
+Ensure all internal links work correctly.

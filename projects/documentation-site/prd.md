@@ -1,6 +1,6 @@
 ---
 id: documentation-site
-title: Site de Documentação
+title: Documentation Site
 status: draft
 version: '1.1'
 created_at: '2026-01-05'
@@ -8,47 +8,47 @@ updated_at: '2026-01-05'
 author: ai-agent
 ---
 
-# Site de Documentação
+# Documentation Site
 
-## Objetivo
+## Objective
 
-Criar um site de documentação dedicado para o BlueprintAI, separado do aplicativo principal. O objetivo é fornecer um guia completo e profissional para usuários e desenvolvedores, facilitando a adoção e contribuição para o projeto.
+Create a dedicated documentation site for BlueprintAI, separate from the main application. The goal is to provide a complete and professional guide for users and developers, facilitating project adoption and contribution.
 
-## Contexto
+## Context
 
-Atualmente, a documentação está dispersa em arquivos Markdown dentro do repositório (`README.md`, `AGENTS.md`). Com o crescimento do projeto, é necessário centralizar essas informações em um portal acessível, pesquisável e bem estruturado.
+Currently, documentation is scattered across Markdown files within the repository (`README.md`, `AGENTS.md`). As the project grows, it is necessary to centralize this information in an accessible, searchable, and well-structured portal.
 
-## Requisitos Funcionais
+## Functional Requirements
 
-### Plataforma de Documentação
-1. **Framework**: Utilizar **Fumadocs** (Next.js App Router).
-2. **Estrutura de Conteúdo**:
-   - **Getting Started**: Instalação, configuração local e "Hello World".
-   - **Guia do Usuário**: Como criar PRDs, Tasks e usar as features do BlueprintAI.
-   - **Referência para Agentes**: Documentação técnica dos schemas e padrões. **Nota:** O arquivo `AGENTS.md` será mantido na raiz para consumo por LLMs; o site servirá como visualização para humanos.
-   - **API Reference**: Documentação dos endpoints internos (ex: update de tasks).
-   
-### Features do Site
-1. **Busca Full-text**: Indexação de todo o conteúdo usando o search do Fumadocs.
-2. **Dark Mode**: Suporte a tema escuro, alinhado com a identidade visual do app principal.
-3. **MDX**: Suporte a componentes React e TypeTable para documentação de props/schemas.
-4. **Navegação**: Sidebar automática baseada na estrutura de pastas (File-system routing).
+### Documentation Platform
+1. **Framework**: Use **Fumadocs** (Next.js App Router).
+2. **Content Structure**:
+   - **Getting Started**: Installation, local configuration, and "Hello World".
+   - **User Guide**: How to create PRDs, Tasks, and use BlueprintAI features.
+   - **Agent Reference**: Technical documentation of schemas and standards. **Note:** The `AGENTS.md` file will be kept in the root for LLM consumption; the site will serve as a visualization for humans.
+   - **API Reference**: Documentation of internal endpoints (e.g., task updates).
 
-## Requisitos Não-Funcionais
+### Site Features
+1. **Full-text Search**: Indexing of all content using Fumadocs search.
+2. **Dark Mode**: Support for dark theme, aligned with the main app's visual identity.
+3. **MDX**: Support for React components and TypeTable for props/schema documentation.
+4. **Navigation**: Automatic sidebar based on folder structure (File-system routing).
 
-- **Performance**: O site deve carregar instantaneamente (Next.js SSG/SSR).
-- **Design**: Manter consistência visual com o BlueprintAI (paleta de cores violeta/dark).
-- **Manutenibilidade**: Conteúdo escrito em MDX.
-- **Riqueza Visual**: Priorizar inclusão de screenshots/GIFs sempre que descrever funcionalidades de UI.
+## Non-Functional Requirements
 
-## Fora do Escopo
+- **Performance**: The site must load instantly (Next.js SSG/SSR).
+- **Design**: Maintain visual consistency with BlueprintAI (violet/dark color palette).
+- **Maintainability**: Content written in MDX.
+- **Visual Richness**: Prioritize inclusion of screenshots/GIFs whenever describing UI functionalities.
 
-- Migração para monorepo (será tratado em um projeto de infraestrutura separado).
-- Sistema de login ou controle de acesso (documentação será pública).
-- Tradução/i18n (inicialmente apenas em uma língua, Português ou Inglês conforme padrão do projeto).
+## Out of Scope
 
-## Métricas de Sucesso
+- Migration to monorepo (will be handled in a separate infrastructure project).
+- Login system or access control (documentation will be public).
+- Translation/i18n (initially only in one language, Portuguese or English as per project standard).
 
-1. Site publicado e acessível.
-2. Todo o conteúdo atual do `README.md` e `AGENTS.md` migrado e expandido.
-3. Funcionalidade de busca retornando resultados relevantes.
+## Success Metrics
+
+1. Site published and accessible.
+2. All current content from `README.md` and `AGENTS.md` migrated and expanded.
+3. Search functionality returning relevant results.

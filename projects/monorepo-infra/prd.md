@@ -1,6 +1,6 @@
 ---
 id: monorepo-infra
-title: Infraestrutura de Monorepo
+title: Monorepo Infrastructure
 status: draft
 version: '1.0'
 created_at: '2026-01-05'
@@ -8,45 +8,45 @@ updated_at: '2026-01-05'
 author: ai-agent
 ---
 
-# Infraestrutura de Monorepo
+# Monorepo Infrastructure
 
-## Objetivo
+## Objective
 
-Migrar a estrutura do projeto BlueprintAI para um monorepo escalável utilizando Turborepo, permitindo a coexistência do Web App atual e do futuro Site de Documentação, com compartilhamento eficiente de código e configurações.
+Migrate the BlueprintAI project structure to a scalable monorepo using Turborepo, allowing the coexistence of the current Web App and the future Documentation Site, with efficient sharing of code and configurations.
 
-## Contexto
+## Context
 
-A migração é um pré-requisito para o desenvolvimento do site de documentação. Precisamos garantir que a experiência de desenvolvimento (DX) permaneça fluida e que não haja regressões no app principal durante a transição.
+Migration is a prerequisite for the development of the documentation site. We need to ensure that the developer experience (DX) remains fluid and that there are no regressions in the main app during the transition.
 
-## Requisitos Funcionais
+## Functional Requirements
 
-### Estrutura de Monorepo
-1. **Turborepo**: Configuração da raiz com `turbo.json` para orquestração de scripts.
-2. **Package Manager**: Uso de `pnpm workspaces` para gerenciamento de dependências.
+### Monorepo Structure
+1. **Turborepo**: Root configuration with `turbo.json` for script orchestration.
+2. **Package Manager**: Use `pnpm workspaces` for dependency management.
 3. **Workspace Organization**:
-   - `apps/web`: O Web App Next.js atual (migrado da raiz).
-   - `apps/docs`: O futuro site de documentação (placeholder/inicialização).
-   - `packages/*`: Bibliotecas compartilhadas.
+   - `apps/web`: The current Next.js Web App (migrated from root).
+   - `apps/docs`: The future documentation site (placeholder/initialization).
+   - `packages/*`: Shared libraries.
 
-### Packages Compartilhados
-1. **`packages/ui`**: Componentes de UI base (shadcn/ui) compartilhados.
-2. **`packages/schemas`**: Schemas Zod (PRD, Tasks) que serão usados tanto pelo app quanto pela documentação.
-3. **`packages/utils`**: Funções utilitárias (formatters, parsers).
-4. **`packages/config`**: Configurações base para TypeScript, ESLint e Tailwind.
+### Shared Packages
+1. **`packages/ui`**: Shared base UI components (shadcn/ui).
+2. **`packages/schemas`**: Zod schemas (PRD, Tasks) to be used by both the app and documentation.
+3. **`packages/utils`**: Utility functions (formatters, parsers).
+4. **`packages/config`**: Base configurations for TypeScript, ESLint, and Tailwind.
 
-## Requisitos Não-Funcionais
+## Non-Functional Requirements
 
-- **Zero Downtime**: O app web deve continuar funcionando normalmente após a migração.
-- **Build Performance**: Utilizar cache do Turborepo para builds incrementais.
-- **DX**: Scripts unificados na raiz (`pnpm dev`, `pnpm build`, `pnpm lint`).
+- **Zero Downtime**: The web app must continue working normally after the migration.
+- **Build Performance**: Use Turborepo cache for incremental builds.
+- **DX**: Unified scripts in the root (`pnpm dev`, `pnpm build`, `pnpm lint`).
 
-## Fora do Escopo
+## Out of Scope
 
-- Implementação do conteúdo do site de documentação (será feito no projeto `documentation-site`).
-- Alterações funcionais no Web App (apenas refatoração estrutural).
+- Implementation of documentation site content (will be done in the `documentation-site` project).
+- Functional changes in the Web App (structural refactoring only).
 
-## Métricas de Sucesso
+## Success Metrics
 
-1. `pnpm install` na raiz instala dependências de todos os workspaces.
-2. `pnpm dev` inicia web app e docs simultaneamente.
-3. Build e Lint passam com sucesso em todos os workspaces.
+1. `pnpm install` in the root installs dependencies for all workspaces.
+2. `pnpm dev` starts web app and docs simultaneously.
+3. Build and Lint pass successfully in all workspaces.
