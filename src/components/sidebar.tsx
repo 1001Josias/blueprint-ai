@@ -30,6 +30,7 @@ export function Sidebar({ projects }: SidebarProps) {
             alt="BlueprintAI Logo" 
             width={40}
             height={40}
+            priority
           />
           <div>
             <h1 className="text-lg font-bold text-white">BlueprintAI</h1>
