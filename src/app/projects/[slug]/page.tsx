@@ -145,7 +145,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             </h2>
           </div>
 
-          <TaskList tasks={tasks.items} />
+          <TaskList tasks={tasks.items} projectSlug={slug} />
         </div>
       </div>
     </div>

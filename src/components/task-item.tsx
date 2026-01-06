@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import type { Task } from "@/lib/schemas";
+import type { Task, TaskStatus } from "@/lib/schemas";
 
 interface TaskItemProps {
   task: Task;
+  projectSlug: string;
 }
 
 const statusConfig = {
@@ -15,6 +17,8 @@ const statusConfig = {
   blocked: { label: "Blocked", color: "bg-red-500/20 text-red-400 border-red-500/30", icon: "✕" },
 };
 
+const statusOrder: TaskStatus[] = ["todo", "in_progress", "done", "blocked"];
+
 const priorityConfig = {
   low: { label: "Low", color: "text-slate-400" },
   medium: { label: "Medium", color: "text-blue-400" },
@@ -22,13 +26,50 @@ const priorityConfig = {
   critical: { label: "Critical", color: "text-red-400" },
 };
 
-export function TaskItem({ task }: TaskItemProps) {
+export function TaskItem({ task, projectSlug }: TaskItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState<TaskStatus>(task.status);
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
-  const status = statusConfig[task.status];
+  const status = statusConfig[currentStatus];
   const priority = priorityConfig[task.priority];
   const completedSubtasks = task.subtasks.filter((s) => s.completed).length;
   const totalSubtasks = task.subtasks.length;
+
+  const cycleStatus = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    const currentIndex = statusOrder.indexOf(currentStatus);
+    const nextIndex = (currentIndex + 1) % statusOrder.length;
+    const newStatus = statusOrder[nextIndex];
+
+    // Optimistic update
+    setCurrentStatus(newStatus);
+
+    try {
+      const response = await fetch(`/api/tasks/${task.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectSlug, status: newStatus }),
+      });
+
+      if (!response.ok) {
+        // Revert on error
+        setCurrentStatus(currentStatus);
+        console.error("Failed to update task status");
+      } else {
+        // Refresh the page data
+        startTransition(() => {
+          router.refresh();
+        });
+      }
+    } catch (error) {
+      // Revert on error
+      setCurrentStatus(currentStatus);
+      console.error("Error updating task status:", error);
+    }
+  };
 
   return (
     <div className="rounded-xl bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 overflow-hidden">
@@ -38,15 +79,24 @@ export function TaskItem({ task }: TaskItemProps) {
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-start gap-4">
-          {/* Status icon */}
-          <div
+          {/* Status icon - clickable to cycle */}
+          <button
+            onClick={cycleStatus}
+            disabled={isPending}
             className={cn(
-              "w-8 h-8 rounded-lg flex items-center justify-center text-lg font-bold shrink-0",
+              "w-8 h-8 rounded-lg flex items-center justify-center text-lg font-bold shrink-0 transition-all duration-200",
+              "hover:scale-110 hover:ring-2 hover:ring-violet-500/50",
+              isPending && "opacity-50 cursor-wait",
               status.color
             )}
+            title="Click to change status"
           >
-            {status.icon}
-          </div>
+            {isPending ? (
+              <span className="animate-spin">⟳</span>
+            ) : (
+              status.icon
+            )}
+          </button>
 
           {/* Content */}
           <div className="flex-1 min-w-0">
@@ -56,7 +106,7 @@ export function TaskItem({ task }: TaskItemProps) {
               </h4>
               <span
                 className={cn(
-                  "px-2 py-0.5 text-xs font-medium rounded border",
+                  "px-2 py-0.5 text-xs font-medium rounded border transition-colors",
                   status.color
                 )}
               >
