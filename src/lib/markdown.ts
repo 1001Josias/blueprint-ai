@@ -12,7 +12,7 @@ import {
   type Subtask,
 } from "./schemas";
 
-const projectsDirectory = path.join(process.cwd(), "content/projects");
+const projectsDirectory = path.join(process.cwd(), "projects");
 
 /**
  * Get all project slugs (directory names)

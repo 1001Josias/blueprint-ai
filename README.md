@@ -70,9 +70,9 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 
 ### Creating Your First Project
 
-1. Create a new directory in `content/projects/`:
+1. Create a new directory in `projects/`:
    ```bash
-   mkdir -p content/projects/my-project
+   mkdir -p projects/my-project
    ```
 
 2. Create `prd.md` with your PRD:

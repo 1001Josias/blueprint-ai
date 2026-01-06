@@ -34,7 +34,7 @@ pnpm lint
 
 ```
 blueprint-ai/
-├── content/projects/          # Markdown content (PRDs + Tasks)
+├── projects/                  # Markdown content (PRDs + Tasks)
 ├── src/
 │   ├── app/                   # Next.js App Router pages
 │   ├── components/            # React components
@@ -44,7 +44,7 @@ blueprint-ai/
 
 ## Creating Projects (PRD + Tasks)
 
-Create files in `content/projects/<project-slug>/`:
+Create files in `projects/<project-slug>/`:
 
 ### PRD (`prd.md`)
 

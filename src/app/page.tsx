@@ -74,7 +74,7 @@ export default async function Home() {
           <p className="text-slate-400 max-w-md mx-auto">
             Create a new project by adding a PRD and tasks markdown file in the{" "}
             <code className="px-1.5 py-0.5 bg-slate-700 rounded text-violet-300">
-              content/projects/
+              projects/
             </code>{" "}
             directory.
           </p>
