@@ -32,6 +32,14 @@ export function TaskItem({ task, workspace, projectSlug }: TaskItemProps) {
   const [currentStatus, setCurrentStatus] = useState<TaskStatus>(task.status);
   // Optimistic state for subtasks
   const [optimisticSubtasks, setOptimisticSubtasks] = useState(task.subtasks);
+  // Optimistic state for task comments
+  const [optimisticComments, setOptimisticComments] = useState(task.comments || []);
+  
+  // Comment form state
+  const [isAddingComment, setIsAddingComment] = useState(false);
+  const [newComment, setNewComment] = useState("");
+  const [addingCommentToSubtask, setAddingCommentToSubtask] = useState<number | null>(null);
+  const [subtaskComment, setSubtaskComment] = useState("");
   
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -40,6 +48,10 @@ export function TaskItem({ task, workspace, projectSlug }: TaskItemProps) {
   const isValuesEqual = JSON.stringify(task.subtasks) === JSON.stringify(optimisticSubtasks);
   if (!isValuesEqual && !isPending) {
      setOptimisticSubtasks(task.subtasks);
+  }
+  const isCommentsEqual = JSON.stringify(task.comments) === JSON.stringify(optimisticComments);
+  if (!isCommentsEqual && !isPending) {
+    setOptimisticComments(task.comments || []);
   }
 
   const status = statusConfig[currentStatus];
@@ -119,6 +131,60 @@ export function TaskItem({ task, workspace, projectSlug }: TaskItemProps) {
     }
   };
 
+  const addComment = async (e: React.FormEvent, target: "task" | "subtask" = "task", subtaskIndex?: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const commentText = target === "task" ? newComment : subtaskComment;
+    if (!commentText.trim()) return;
+
+    // Optimistic update
+    if (target === "task") {
+      setOptimisticComments([...optimisticComments, commentText.trim()]);
+      setNewComment("");
+      setIsAddingComment(false);
+    } else if (typeof subtaskIndex === "number") {
+      const newSubtasks = [...optimisticSubtasks];
+      newSubtasks[subtaskIndex] = {
+        ...newSubtasks[subtaskIndex],
+        comments: [...(newSubtasks[subtaskIndex].comments || []), commentText.trim()],
+      };
+      setOptimisticSubtasks(newSubtasks);
+      setSubtaskComment("");
+      setAddingCommentToSubtask(null);
+    }
+
+    try {
+      const response = await fetch(`/api/tasks/${task.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          workspace,
+          projectSlug,
+          comment: commentText.trim(),
+          commentTarget: target,
+          ...(typeof subtaskIndex === "number" && { subtaskIndex }),
+        }),
+      });
+
+      if (!response.ok) {
+        // Revert on error
+        setOptimisticComments(task.comments || []);
+        setOptimisticSubtasks(task.subtasks);
+        console.error("Failed to add comment");
+      } else {
+        startTransition(() => {
+          router.refresh();
+        });
+      }
+    } catch (error) {
+      // Revert on error
+      setOptimisticComments(task.comments || []);
+      setOptimisticSubtasks(task.subtasks);
+      console.error("Error adding comment:", error);
+    }
+  };
+
   return (
     <div className="rounded-xl bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 overflow-hidden">
       {/* Task header */}
@@ -167,9 +233,9 @@ export function TaskItem({ task, workspace, projectSlug }: TaskItemProps) {
             </p>
 
             {/* Comments for Task */}
-            {task.comments && task.comments.length > 0 && (
+            {optimisticComments.length > 0 && (
               <div className="mt-2 space-y-1">
-                {task.comments.map((comment, i) => (
+                {optimisticComments.map((comment, i) => (
                   <div key={i} className="flex items-start gap-2 text-xs text-slate-400 bg-slate-800/50 p-2 rounded border border-slate-700/50">
                     <span className="shrink-0 mt-0.5">💬</span>
                     <span>{comment}</span>
@@ -177,6 +243,43 @@ export function TaskItem({ task, workspace, projectSlug }: TaskItemProps) {
                 ))}
               </div>
             )}
+            
+            {/* Add Comment Form for Task */}
+            <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+              {isAddingComment ? (
+                <form onSubmit={(e) => addComment(e, "task")} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Add a comment..."
+                    className="flex-1 px-2 py-1 text-xs bg-slate-700 border border-slate-600 rounded focus:outline-none focus:ring-1 focus:ring-violet-500 text-white placeholder-slate-400"
+                    autoFocus
+                  />
+                  <button
+                    type="submit"
+                    disabled={!newComment.trim() || isPending}
+                    className="px-2 py-1 text-xs bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white transition-colors"
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setIsAddingComment(false); setNewComment(""); }}
+                    className="px-2 py-1 text-xs bg-slate-600 hover:bg-slate-500 rounded text-white transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </form>
+              ) : (
+                <button
+                  onClick={() => setIsAddingComment(true)}
+                  className="text-xs text-slate-500 hover:text-violet-400 transition-colors"
+                >
+                  💬 Add comment
+                </button>
+              )}
+            </div>
             
             <div className="flex items-center gap-4 text-xs mt-2">
               <span className={cn("font-medium", priority.color)}>
@@ -258,6 +361,43 @@ export function TaskItem({ task, workspace, projectSlug }: TaskItemProps) {
                       ))}
                     </div>
                   )}
+                  
+                  {/* Add Comment Form for Subtask */}
+                  <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+                    {addingCommentToSubtask === index ? (
+                      <form onSubmit={(e) => addComment(e, "subtask", index)} className="flex gap-2">
+                        <input
+                          type="text"
+                          value={subtaskComment}
+                          onChange={(e) => setSubtaskComment(e.target.value)}
+                          placeholder="Add a comment..."
+                          className="flex-1 px-2 py-1 text-xs bg-slate-700 border border-slate-600 rounded focus:outline-none focus:ring-1 focus:ring-violet-500 text-white placeholder-slate-400"
+                          autoFocus
+                        />
+                        <button
+                          type="submit"
+                          disabled={!subtaskComment.trim() || isPending}
+                          className="px-2 py-1 text-xs bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white transition-colors"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { setAddingCommentToSubtask(null); setSubtaskComment(""); }}
+                          className="px-2 py-1 text-xs bg-slate-600 hover:bg-slate-500 rounded text-white transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </form>
+                    ) : (
+                      <button
+                        onClick={() => setAddingCommentToSubtask(index)}
+                        className="text-xs text-slate-500 hover:text-violet-400 transition-colors"
+                      >
+                        💬 Add comment
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

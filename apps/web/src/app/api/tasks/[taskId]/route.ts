@@ -5,12 +5,15 @@ import matter from "gray-matter";
 
 const projectsDirectory = path.join(process.cwd(), "..", "..", "projects");
 
-interface UpdateTaskStatusRequest {
+interface UpdateTaskRequest {
   workspace: string;
   projectSlug: string;
   status?: "todo" | "in_progress" | "done" | "blocked";
   subtaskIndex?: number;
   completed?: boolean;
+  // Comment support
+  comment?: string;
+  commentTarget?: "task" | "subtask";
 }
 
 export async function PATCH(
@@ -19,8 +22,8 @@ export async function PATCH(
 ) {
   try {
     const { taskId } = await params;
-    const body: UpdateTaskStatusRequest = await request.json();
-    const { workspace, projectSlug, status, subtaskIndex, completed } = body;
+    const body: UpdateTaskRequest = await request.json();
+    const { workspace, projectSlug, status, subtaskIndex, completed, comment, commentTarget } = body;
 
     if (!workspace || !projectSlug || !taskId) {
       return NextResponse.json(
@@ -124,9 +127,99 @@ export async function PATCH(
           { status: 404 }
         );
       }
+    } 
+    // Handle Add Comment
+    else if (comment && comment.trim()) {
+      const commentLine = `- **comment:** ${comment.trim()}`;
+      
+      // Find the task block
+      const taskRegex = new RegExp(
+        `(## Task \\d+:[^\\n]*\\n)- \\*\\*id:\\*\\* ${taskId}[\\s\\S]*?(?=\\n---|\\n## |$)`,
+        "g"
+      );
+      
+      const taskMatch = taskRegex.exec(markdownContent);
+      
+      if (!taskMatch) {
+        return NextResponse.json(
+          { error: `Task ${taskId} not found` },
+          { status: 404 }
+        );
+      }
+
+      const taskBlock = taskMatch[0];
+      const taskBlockStart = taskMatch.index;
+
+      if (commentTarget === "subtask" && typeof subtaskIndex === "number") {
+        // Add comment to a specific subtask
+        // Find the subtask and insert comment after its description
+        const subtaskRegex = /(#### \[[ x]\][^\n]*)/g;
+        let match;
+        let currentIndex = 0;
+        let targetSubtaskEnd = -1;
+
+        while ((match = subtaskRegex.exec(taskBlock)) !== null) {
+          if (currentIndex === subtaskIndex) {
+            // Find the end of this subtask (next #### or ### or ## or --- or EOF of block)
+            const afterMatch = taskBlock.substring(match.index + match[0].length);
+            const nextSectionMatch = afterMatch.match(/\n(?=####|\n###|\n##|\n---)/);
+            
+            if (nextSectionMatch) {
+              targetSubtaskEnd = match.index + match[0].length + nextSectionMatch.index!;
+            } else {
+              targetSubtaskEnd = taskBlock.length;
+            }
+            break;
+          }
+          currentIndex++;
+        }
+
+        if (targetSubtaskEnd === -1) {
+          return NextResponse.json(
+            { error: `Subtask index ${subtaskIndex} not found in task ${taskId}` },
+            { status: 404 }
+          );
+        }
+
+        // Insert comment at the end of the subtask content
+        const beforeComment = taskBlock.substring(0, targetSubtaskEnd);
+        const afterComment = taskBlock.substring(targetSubtaskEnd);
+        const newTaskBlock = beforeComment.trimEnd() + "\n" + commentLine + afterComment;
+
+        const beforeTask = markdownContent.substring(0, taskBlockStart);
+        const afterTask = markdownContent.substring(taskBlockStart + taskBlock.length);
+        updatedMarkdown = beforeTask + newTaskBlock + afterTask;
+
+      } else {
+        // Add comment to the task itself
+        // Insert after the last metadata line (before ### Subtasks or end of metadata)
+        const subtasksHeaderMatch = taskBlock.match(/\n### Subtasks/);
+        
+        let insertPosition: number;
+        if (subtasksHeaderMatch && subtasksHeaderMatch.index !== undefined) {
+          // Insert before ### Subtasks
+          insertPosition = subtasksHeaderMatch.index;
+        } else {
+          // Find end of metadata lines (lines starting with "- **")
+          const metadataEndMatch = taskBlock.match(/(?:- \*\*\w+:\*\*[^\n]*\n)+/);
+          if (metadataEndMatch) {
+            insertPosition = metadataEndMatch.index! + metadataEndMatch[0].length;
+          } else {
+            insertPosition = taskBlock.length;
+          }
+        }
+
+        const beforeComment = taskBlock.substring(0, insertPosition).trimEnd();
+        const afterComment = taskBlock.substring(insertPosition);
+        const newTaskBlock = beforeComment + "\n" + commentLine + afterComment;
+
+        const beforeTask = markdownContent.substring(0, taskBlockStart);
+        const afterTask = markdownContent.substring(taskBlockStart + taskBlock.length);
+        updatedMarkdown = beforeTask + newTaskBlock + afterTask;
+      }
     } else {
       return NextResponse.json(
-        { error: "Either status or (subtaskIndex + completed) must be provided" },
+        { error: "Either status, (subtaskIndex + completed), or comment must be provided" },
         { status: 400 }
       );
     }

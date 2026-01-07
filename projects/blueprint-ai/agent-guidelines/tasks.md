@@ -1,8 +1,8 @@
 ---
-project_id: "agent-guidelines"
-prd_version: "1.0"
-created_at: "2026-01-07"
-updated_at: "2026-01-07"
+project_id: agent-guidelines
+prd_version: '1.0'
+created_at: '2026-01-07'
+updated_at: '2026-01-07'
 ---
 
 # Tasks: Agent Guidelines Improvements
@@ -30,20 +30,21 @@ Updated AGENTS.md with rule 12 (Concurrent Work Warning).
 
 ## Task 2: Implement Generic Task Comments
 - **id:** task-002
-- **status:** in_progress
+- **status:** done
 - **priority:** high
 - **description:** Implement support for generic comments in tasks and subtasks to replace specific blocker reasons.
-
+- **comment:** All components already implemented. Verified working on 2026-01-07.
+- **comment:** Test comment from UI
 ### Subtasks
 
-#### [ ] Update Shared Schema
-Modify `packages/schemas` to include `comments` array in Task and Subtask schemas.
+#### [x] Update Shared Schema
+`packages/schemas/src/index.ts` already has `comments: z.array(z.string()).default([])` in both `taskSchema` and `subtaskSchema`.
 
-#### [ ] Update Markdown Parser
-Modify `apps/web/src/lib/markdown.ts` to parse `- **comment:** ...` lines.
+#### [x] Update Markdown Parser
+`apps/web/src/lib/markdown.ts` already parses `- **comment:** ...` lines for both tasks and subtasks.
 
-#### [ ] Update UI Component
-Modify `apps/web/src/components/task-item.tsx` to display comments.
+#### [x] Update UI Component
+`apps/web/src/components/task-item.tsx` already displays comments with 💬 emoji for both tasks and subtasks.
 
-#### [ ] Update AGENTS.md Documentation
-Refine the "Handling Blockers" section to use the new generic comment format.
+#### [x] Update AGENTS.md Documentation
+Rule 13 in `AGENTS.md` documents the generic comment format (`- **comment:** <text>`).
