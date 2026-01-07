@@ -9,7 +9,7 @@ updated_at: '2026-01-06'
 
 ## Task 1: Core Refactoring
 - **id:** task-ws-101
-- **status:** in_progress
+- **status:** done
 - **priority:** critical
 - **description:** Refactor the codebase to support project nesting.
 
@@ -25,7 +25,7 @@ Update dynamic routes `[slug]` to handle the workspace prefix (e.g., `[workspace
 
 ## Task 2: Security Implementation
 - **id:** task-ws-102
-- **status:** in_progress
+- **status:** done
 - **priority:** high
 - **description:** Implement the "Key to the House" logic.
 
@@ -44,7 +44,7 @@ Ensure `getAllProjects` and specific project actions respect the injected Worksp
 
 ## Task 3: Migration Strategy
 - **id:** task-ws-103
-- **status:** in_progress
+- **status:** done
 - **priority:** medium
 - **description:** Handle existing "flat" projects.
 
