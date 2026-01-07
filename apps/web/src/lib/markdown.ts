@@ -270,6 +270,8 @@ export async function getAllProjects(workspaceFilter?: string): Promise<ProjectS
         workspace,
         title: project.prd.frontmatter.title,
         status: project.prd.frontmatter.status,
+        category: project.prd.frontmatter.category,
+        workflow: project.prd.frontmatter.workflow,
         taskStats,
       });
     }

@@ -9,20 +9,20 @@ updated_at: '2026-01-06'
 
 ## Task 1: Advanced Sidebar Navigation
 - **id:** nav-101
-- **status:** in_progress
+- **status:** done
 - **priority:** high
 - **description:** Enhance Sidebar with nested menus and filtering capabilities.
 
 ### Subtasks
 
-#### [ ] Implement Nested Menu Structure
-Support sub-menus or "Sidebar alongside Main Sidebar" for deep navigation within Workspaces.
+#### [x] Implement Nested Menu Structure
+Implemented groupBy toggle (workspace/workflow) and collapsible category grouping within workspaces.
 
 #### [x] Add Status Filters
 Allow filtering projects list by status (e.g., Active, Archived) directly in the sidebar.
 
-#### [ ] Workflow Grouping
-Allow grouping projects by their specific workflow types as requested.
+#### [x] Workflow Grouping
+Implemented workflow grouping mode with toggle UI in sidebar.
 
 ---
 

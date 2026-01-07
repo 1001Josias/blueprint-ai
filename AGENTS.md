@@ -162,6 +162,7 @@ This subtask is done.
 
 ## Git Conventions
 
+- **Always start from updated main**: Before starting any new task, checkout `main`, pull latest changes (`git checkout main && git pull`), then create a new feature branch.
 - Branch naming: `feat/<feature>`, `fix/<issue>`, `docs/<topic>`
 - Commit messages: conventional commits (`feat:`, `fix:`, `docs:`, `chore:`)
 - Always create PR for changes (don't push directly to main)

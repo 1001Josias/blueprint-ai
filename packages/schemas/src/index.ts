@@ -16,6 +16,8 @@ export const prdFrontmatterSchema = z.object({
   created_at: z.string(),
   updated_at: z.string(),
   author: z.string().optional(),
+  category: z.string().optional(), // For grouping within workspace
+  workflow: z.string().optional(), // For cross-workspace grouping
 });
 
 export type PRDFrontmatter = z.infer<typeof prdFrontmatterSchema>;
@@ -86,6 +88,8 @@ export interface ProjectSummary {
   workspace: string;
   title: string;
   status: PRDStatus;
+  category?: string;
+  workflow?: string;
   taskStats: {
     total: number;
     done: number;
