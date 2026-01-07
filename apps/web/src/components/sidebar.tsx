@@ -34,9 +34,17 @@ const getWorkspaceColor = (workspace: string) => {
 export function Sidebar({ projects }: SidebarProps) {
   const pathname = usePathname();
   const [collapsedWorkspaces, setCollapsedWorkspaces] = useState<Record<string, boolean>>({});
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "archived">("all");
+
+  // Filter projects by status (active = draft/in_review, archived = approved/rejected)
+  const filteredProjects = projects.filter((project) => {
+    if (statusFilter === "all") return true;
+    if (statusFilter === "active") return project.status === "draft" || project.status === "in_review";
+    return project.status === "approved" || project.status === "rejected";
+  });
 
   // Group projects by workspace
-  const projectsByWorkspace = projects.reduce((acc, project) => {
+  const projectsByWorkspace = filteredProjects.reduce((acc, project) => {
     if (!acc[project.workspace]) {
       acc[project.workspace] = [];
     }
@@ -70,6 +78,42 @@ export function Sidebar({ projects }: SidebarProps) {
             <p className="text-xs text-slate-400 font-medium">Task Manager</p>
           </div>
         </Link>
+      </div>
+
+      {/* Status Filters */}
+      <div className="px-4 py-3 border-b border-slate-800/50">
+        <div className="flex gap-2">
+          {(["all", "active", "archived"] as const).map((filter) => {
+            const count = filter === "all" 
+              ? projects.length 
+              : filter === "active"
+                ? projects.filter(p => p.status === "draft" || p.status === "in_review").length
+                : projects.filter(p => p.status === "approved" || p.status === "rejected").length;
+            
+            return (
+              <button
+                key={filter}
+                onClick={() => setStatusFilter(filter)}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200",
+                  statusFilter === filter
+                    ? "bg-violet-500/20 text-violet-300 ring-1 ring-violet-500/30"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+                )}
+              >
+                <span className="capitalize">{filter}</span>
+                <span className={cn(
+                  "px-1.5 py-0.5 text-[10px] rounded-md tabular-nums",
+                  statusFilter === filter 
+                    ? "bg-violet-500/30 text-violet-200" 
+                    : "bg-slate-800 text-slate-500"
+                )}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Projects List */}

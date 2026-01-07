@@ -139,6 +139,27 @@ This subtask is done.
     - Use comments (`- **comment:** <text>`) to add context, observations, or important details to any task or subtask.
     - This creates a centralized log of important information directly in the task definition.
 
+14. **Verify Existing Implementation**:
+    - Before starting a task marked as `in_progress`, **verify if the code already exists**.
+    - Compare the scope of subtasks with the current state of the codebase.
+    - If the implementation is already complete, update the task status to `done` and document what was found.
+
+15. **Read vs Read-Write Scope**:
+    - When defining UI-related tasks, explicitly specify the interaction level:
+      - **R (Read-only)**: Display/render data only
+      - **RW (Read-Write)**: Full CRUD operations (create, edit, delete)
+    - This avoids ambiguity about whether "support for X" means just displaying or also mutating.
+
+16. **UX Decision Mockups**:
+    - When facing UX decisions with multiple valid approaches, **generate visual mockups** to help the user decide.
+    - Use image generation tools to create quick wireframes or concepts.
+    - Present options with pros/cons for informed decision-making.
+
+17. **Scope Creep Threshold**:
+    - If new requirements exceed **3x the original scope** of a task, create a **new project** instead of expanding the existing task.
+    - Signs of scope creep: new components, new API endpoints, new integrations not in the original plan.
+    - This keeps tasks focused and deliverables manageable.
+
 ## Git Conventions
 
 - Branch naming: `feat/<feature>`, `fix/<issue>`, `docs/<topic>`
