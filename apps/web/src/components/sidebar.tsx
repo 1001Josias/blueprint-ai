@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { ProjectSummary } from "@/lib/schemas";
 
@@ -17,8 +18,22 @@ const statusColors = {
   rejected: "bg-red-500",
 };
 
+// Map typical workspaces to icons/colors (or generate based on name)
+const getWorkspaceColor = (workspace: string) => {
+  const hash = workspace.split("").reduce((acc, char) => char.charCodeAt(0) + acc, 0);
+  const colors = [
+    "from-violet-500 to-purple-500",
+    "from-blue-500 to-cyan-500",
+    "from-emerald-500 to-green-500",
+    "from-orange-500 to-red-500",
+    "from-pink-500 to-rose-500",
+  ];
+  return colors[hash % colors.length];
+};
+
 export function Sidebar({ projects }: SidebarProps) {
   const pathname = usePathname();
+  const [collapsedWorkspaces, setCollapsedWorkspaces] = useState<Record<string, boolean>>({});
 
   // Group projects by workspace
   const projectsByWorkspace = projects.reduce((acc, project) => {
@@ -29,94 +44,173 @@ export function Sidebar({ projects }: SidebarProps) {
     return acc;
   }, {} as Record<string, ProjectSummary[]>);
 
+  const toggleWorkspace = (workspace: string) => {
+    setCollapsedWorkspaces((prev) => ({
+      ...prev,
+      [workspace]: !prev[workspace],
+    }));
+  };
+
   return (
-    <aside className="w-72 h-screen bg-slate-900/50 backdrop-blur-xl border-r border-slate-700/50 flex flex-col">
+    <aside className="w-72 h-screen bg-slate-950 border-r border-slate-800 flex flex-col overflow-hidden">
       {/* Logo */}
-      <div className="p-6 border-b border-slate-700/50">
-        <Link href="/" className="flex items-center gap-3">
-          <Image 
-            src="/logo.svg" 
-            alt="BlueprintAI Logo" 
-            width={40}
-            height={40}
-            priority
-          />
+      <div className="p-6 border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl">
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="relative w-10 h-10 transition-transform duration-300 group-hover:scale-105">
+             <Image 
+              src="/logo.svg" 
+              alt="BlueprintAI Logo" 
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
           <div>
-            <h1 className="text-lg font-bold text-white">BlueprintAI</h1>
-            <p className="text-xs text-slate-400">Task Manager</p>
+            <h1 className="text-lg font-bold text-white tracking-tight">BlueprintAI</h1>
+            <p className="text-xs text-slate-400 font-medium">Task Manager</p>
           </div>
         </Link>
       </div>
 
       {/* Projects List */}
-      <div className="flex-1 overflow-y-auto p-4">
-        {Object.entries(projectsByWorkspace).map(([workspace, workspaceProjects]) => (
-          <div key={workspace} className="mb-6">
-            <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-2 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-600" />
-              {workspace}
-            </h2>
-            <nav className="space-y-1">
-              {workspaceProjects.map((project) => {
-                const isActive = pathname === `/projects/${project.workspace}/${project.slug}`;
-                const progress = project.taskStats.total > 0
-                  ? Math.round((project.taskStats.done / project.taskStats.total) * 100)
-                  : 0;
+      <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
+        {Object.entries(projectsByWorkspace).map(([workspace, workspaceProjects]) => {
+          const isCollapsed = collapsedWorkspaces[workspace];
+          const isActive = workspaceProjects.some(p => pathname === `/projects/${p.workspace}/${p.slug}`);
+          // Auto-expand if active project is inside (unless explicitly collapsed by user interaction logic could be added)
+          
+          return (
+            <div 
+              key={workspace} 
+              className={cn(
+                "rounded-xl border transition-all duration-300 overflow-hidden",
+                "bg-slate-900/30 border-slate-800/50",
+                isActive ? "ring-1 ring-slate-700 shadow-lg shadow-black/20" : "hover:border-slate-700"
+              )}
+            >
+              {/* Workspace Header */}
+              <button
+                onClick={() => toggleWorkspace(workspace)}
+                className="w-full flex items-center justify-between p-3 cursor-pointer hover:bg-slate-800/50 transition-colors group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={cn(
+                    "w-8 h-8 rounded-lg flex items-center justify-center bg-linear-to-br shadow-inner",
+                    getWorkspaceColor(workspace)
+                  )}>
+                    <span className="text-white text-xs font-bold uppercase">
+                      {workspace.substring(0, 2)}
+                    </span>
+                  </div>
+                  <h2 className="text-sm font-semibold text-slate-200 capitalize tracking-wide group-hover:text-white transition-colors">
+                    {workspace}
+                  </h2>
+                </div>
+                
+                <svg
+                  className={cn(
+                    "w-4 h-4 text-slate-500 transition-transform duration-300",
+                    isCollapsed ? "-rotate-90" : "rotate-0"
+                  )}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
 
-                return (
-                  <Link
-                    key={`${project.workspace}-${project.slug}`}
-                    href={`/projects/${project.workspace}/${project.slug}`}
-                    className={cn(
-                      "block p-3 rounded-lg transition-all duration-200",
-                      isActive
-                        ? "bg-violet-600/20 border border-violet-500/30"
-                        : "hover:bg-slate-800/50 border border-transparent"
-                    )}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-white truncate">
-                        {project.title}
-                      </span>
-                      <span
-                        className={cn(
-                          "w-2 h-2 rounded-full",
-                          statusColors[project.status]
-                        )}
-                      />
-                    </div>
-                    
-                    {/* Progress bar */}
-                    <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-violet-500 to-purple-500 rounded-full transition-all duration-300"
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
-                    
-                    <div className="flex items-center justify-between mt-2 text-xs text-slate-400">
-                      <span>{project.taskStats.done}/{project.taskStats.total} tasks</span>
-                      <span>{progress}%</span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-        ))}
+              {/* Workspace Projects (Collapsible) */}
+              <div 
+                className={cn(
+                  "grid transition-all duration-300 ease-in-out",
+                  isCollapsed ? "grid-rows-[0fr] opacity-0" : "grid-rows-[1fr] opacity-100"
+                )}
+              >
+                <div className="overflow-hidden">
+                  <nav className="p-2 pt-0 space-y-1">
+                    {workspaceProjects.map((project) => {
+                      const isProjectActive = pathname === `/projects/${project.workspace}/${project.slug}`;
+                      const progress = project.taskStats.total > 0
+                        ? Math.round((project.taskStats.done / project.taskStats.total) * 100)
+                        : 0;
+
+                      return (
+                        <Link
+                          key={`${project.workspace}-${project.slug}`}
+                          href={`/projects/${project.workspace}/${project.slug}`}
+                          className={cn(
+                            "group block p-2.5 rounded-lg transition-all duration-200 relative overflow-hidden",
+                            isProjectActive
+                              ? "bg-slate-800 text-white shadow-md shadow-black/10"
+                              : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
+                          )}
+                        >
+                          {isProjectActive && (
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-violet-500" />
+                          )}
+                          
+                          <div className="flex items-center justify-between gap-2 mb-1.5 pl-2">
+                            <span className="text-sm font-medium truncate">
+                              {project.title}
+                            </span>
+                            <span
+                              className={cn(
+                                "w-1.5 h-1.5 rounded-full shrink-0",
+                                statusColors[project.status]
+                              )}
+                            />
+                          </div>
+                          
+                          {/* Mini Progress bar */}
+                          <div className="pl-2 flex items-center gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                            <div className="flex-1 h-1 bg-slate-700/50 rounded-full overflow-hidden">
+                              <div
+                                className={cn(
+                                  "h-full rounded-full transition-all duration-500",
+                                  isProjectActive ? "bg-violet-500" : "bg-slate-500"
+                                )}
+                                style={{ width: `${progress}%` }}
+                              />
+                            </div>
+                            <span className="text-[10px] tabular-nums">
+                              {progress}%
+                            </span>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </nav>
+                </div>
+              </div>
+            </div>
+          );
+        })}
 
         {projects.length === 0 && (
-          <p className="text-sm text-slate-500 px-2 py-4 text-center">
-            No projects yet
-          </p>
+          <div className="flex flex-col items-center justify-center py-12 px-4 text-center border border-dashed border-slate-800 rounded-xl bg-slate-900/20">
+            <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mb-3">
+               <svg className="w-6 h-6 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+               </svg>
+            </div>
+            <p className="text-sm font-medium text-slate-400">No projects found</p>
+            <p className="text-xs text-slate-500 mt-1">Check your filters or create one.</p>
+          </div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-slate-700/50">
-        <p className="text-xs text-slate-500 text-center">
-          Powered by AI Agents
-        </p>
+      <div className="p-4 border-t border-slate-800 bg-slate-900/50 backdrop-blur-sm">
+        <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-linear-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-white text-xs font-bold">
+                AI
+            </div>
+            <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white truncate">AI Agent</p>
+                <p className="text-xs text-slate-500 truncate">Online</p>
+            </div>
+        </div>
       </div>
     </aside>
   );
