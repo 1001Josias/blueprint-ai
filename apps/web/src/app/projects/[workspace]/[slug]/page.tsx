@@ -1,19 +1,19 @@
 import { notFound } from "next/navigation";
-import { getProjectBySlug, getProjectSlugs } from "@/lib/markdown";
+import { getProject, getAllProjectPaths } from "@/lib/markdown";
 import { TaskList } from "@/components/task-list";
 
 interface ProjectPageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ workspace: string; slug: string }>;
 }
 
 export async function generateStaticParams() {
-  const slugs = getProjectSlugs();
-  return slugs.map((slug) => ({ slug }));
+  const paths = getAllProjectPaths();
+  return paths;
 }
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
-  const { slug } = await params;
-  const project = await getProjectBySlug(slug);
+  const { workspace, slug } = await params;
+  const project = await getProject(workspace, slug);
 
   if (!project) {
     notFound();
@@ -145,7 +145,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             </h2>
           </div>
 
-          <TaskList tasks={tasks.items} projectSlug={slug} />
+          <TaskList tasks={tasks.items} workspace={workspace} projectSlug={slug} />
         </div>
       </div>
     </div>

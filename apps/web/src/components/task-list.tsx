@@ -7,12 +7,13 @@ import { TaskItem } from "./task-item";
 
 interface TaskListProps {
   tasks: Task[];
+  workspace: string;
   projectSlug: string;
 }
 
 type FilterStatus = "all" | "todo" | "in_progress" | "done" | "blocked";
 
-export function TaskList({ tasks, projectSlug }: TaskListProps) {
+export function TaskList({ tasks, workspace, projectSlug }: TaskListProps) {
   const [filter, setFilter] = useState<FilterStatus>("all");
 
   const filteredTasks = filter === "all"
@@ -53,7 +54,7 @@ export function TaskList({ tasks, projectSlug }: TaskListProps) {
       {/* Task list */}
       <div className="space-y-4">
         {filteredTasks.map((task) => (
-          <TaskItem key={task.id} task={task} projectSlug={projectSlug} />
+          <TaskItem key={task.id} task={task} workspace={workspace} projectSlug={projectSlug} />
         ))}
 
         {filteredTasks.length === 0 && (

@@ -164,81 +164,24 @@ blueprint-ai/
 
 ## 🗺️ Roadmap
 
-### v1.0 (Current) - MVP ✅
-- [x] Dashboard with project overview
-- [x] PRD rendering with metadata
-- [x] Task list with status filters
-- [x] Expandable subtasks with descriptions
-- [x] Dark theme with premium UI
+## 🗺️ Roadmap & Projects
 
-### v1.1 - Edit via UI
-- [ ] Toggle task status with click
-- [ ] Edit task metadata (modal)
-- [ ] Create/delete tasks
-- [ ] Create new projects
-- [ ] i18n support (English/Portuguese)
+BlueprintAI is built by BlueprintAI. We use our own system to manage our roadmap.
+Check out the defined projects below:
 
-### v1.2 - Integrations
-- [ ] Export to GitHub Issues
-- [ ] Export to Jira
-- [ ] Export to Linear
-- [ ] Bulk export
+### Core Definitions (New!)
+- [**Workspaces & Access Control**](content/projects/workspaces/prd.md) - The "House" concept for isolation.
+- [**Task Dependencies**](content/projects/task-dependencies/prd.md) - Blockers and prerequisites.
+- [**External Agent API**](content/projects/agent-communication/prd.md) - allowing agents to work together.
+- [**Advanced Task Schema**](content/projects/task-definition/prd.md) - Types, sizing, acceptance criteria.
+- [**Task Drag & Drop**](content/projects/task-drag-and-drop/prd.md) - Reordering tasks visually.
 
-### v2.0 - Enterprise Features
-- [ ] Multi-user support
-- [ ] Database backend (PostgreSQL)
-- [ ] Real-time collaboration
-- [ ] API for automations
+### Upcoming Features
+- [**UI Editing & Interactivity (v1.1)**](content/projects/ui-editing/prd.md) - Edit tasks without Markdown.
+- [**Integrations (v1.2)**](content/projects/integrations/prd.md) - GitHub, Jira, Linear sync.
+- [**Enterprise Core (v2.0)**](content/projects/enterprise-core/prd.md) - Multi-user, DB, Real-time.
+- [**AI & Automation**](content/projects/ai-features/prd.md) - Smart estimates and generation.
 
-## � Future Features
-
-A comprehensive list of planned features for future releases:
-
-### UI/UX Enhancements
-| Feature | Description |
-|---------|-------------|
-| **PRD Enhanced Viewer** | Better PRD rendering with collapsible sections, table of contents, and syntax highlighting |
-| **PRD Editor** | Edit PRD content directly in the UI with live preview |
-| **Kanban View** | Drag-and-drop board view for tasks |
-| **Timeline/Gantt** | Visual timeline for project planning |
-| **Search & Filters** | Global search across all projects and tasks |
-| **Keyboard Shortcuts** | Power-user shortcuts for common actions |
-| **Customizable Themes** | Light mode and custom color schemes |
-| **Mobile Responsive** | Full mobile experience with touch gestures |
-
-### AI & Automation
-| Feature | Description |
-|---------|-------------|
-| **AI Task Suggestions** | Automatically suggest subtasks based on PRD |
-| **Smart Estimates** | AI-powered time estimation for tasks |
-| **Progress Insights** | AI analysis of project health and blockers |
-| **Auto-prioritization** | Intelligent task priority suggestions |
-
-### Collaboration
-| Feature | Description |
-|---------|-------------|
-| **Comments & Discussions** | Thread-based discussions on tasks |
-| **Mentions & Notifications** | @mention team members with alerts |
-| **Activity Feed** | Real-time feed of project changes |
-| **Role-based Access** | Admin, editor, and viewer roles |
-
-### Integrations
-| Feature | Description |
-|---------|-------------|
-| **GitHub Issues** | Two-way sync with GitHub Issues |
-| **Jira** | Export and sync with Jira projects |
-| **Linear** | Integration with Linear issues |
-| **Slack** | Notifications and commands in Slack |
-| **VS Code Extension** | Create/view tasks directly in IDE |
-| **Webhooks** | Custom webhooks for automation |
-
-### Data & Analytics
-| Feature | Description |
-|---------|-------------|
-| **Dashboard Analytics** | Charts and metrics for productivity |
-| **Export Formats** | PDF, CSV, and JSON exports |
-| **Backup & Restore** | Automated backups with restore points |
-| **Audit Log** | Complete history of all changes |
 ---
 
 <p align="center">

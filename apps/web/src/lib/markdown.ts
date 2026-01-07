@@ -14,18 +14,43 @@ import {
 
 const projectsDirectory = path.join(process.cwd(), "..", "..", "projects");
 
+export interface ProjectPath {
+  workspace: string;
+  slug: string;
+}
+
 /**
- * Get all project slugs (directory names)
+ * Get all project paths (workspace/project)
  */
-export function getProjectSlugs(): string[] {
+export function getAllProjectPaths(workspaceFilter?: string): ProjectPath[] {
   if (!fs.existsSync(projectsDirectory)) {
     return [];
   }
 
-  return fs.readdirSync(projectsDirectory).filter((name) => {
-    const projectPath = path.join(projectsDirectory, name);
-    return fs.statSync(projectPath).isDirectory();
+  const paths: ProjectPath[] = [];
+  const workspaces = fs.readdirSync(projectsDirectory).filter((name) => {
+    if (name.startsWith(".")) return false;
+    // If a filter is active, only include that workspace
+    if (workspaceFilter && name !== workspaceFilter) return false;
+    
+    const wsPath = path.join(projectsDirectory, name);
+    return fs.statSync(wsPath).isDirectory();
   });
+
+  for (const ws of workspaces) {
+    const wsPath = path.join(projectsDirectory, ws);
+    const projects = fs.readdirSync(wsPath).filter((name) => {
+      if (name.startsWith(".")) return false;
+      const projPath = path.join(wsPath, name);
+      return fs.statSync(projPath).isDirectory();
+    });
+
+    for (const proj of projects) {
+      paths.push({ workspace: ws, slug: proj });
+    }
+  }
+
+  return paths;
 }
 
 /**
@@ -49,6 +74,7 @@ function parseTasks(content: string): Task[] {
   let subtaskTitle = "";
   let subtaskDescription = "";
   let subtaskCompleted = false;
+  let subtaskComments: string[] = [];
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -69,6 +95,7 @@ function parseTasks(content: string): Task[] {
         priority: "medium",
         description: "",
         subtasks: [],
+        comments: [],
       };
       currentSubtasks = [];
       isInSubtasks = false;
@@ -113,6 +140,14 @@ function parseTasks(content: string): Task[] {
         continue;
       }
 
+      // Comments for Task
+      const commentMatch = line.match(/^- \*\*comment:\*\*\s*(.+)$/);
+      if (commentMatch && !isInSubtasks) {
+        if (!currentTask.comments) currentTask.comments = [];
+        currentTask.comments.push(commentMatch[1].trim());
+        continue;
+      }
+
       // Subtask title (#### [x] or #### [ ])
       if (isInSubtasks) {
         const subtaskTitleMatch = line.match(/^#### \[(x| )\]\s*(.+)$/);
@@ -123,12 +158,21 @@ function parseTasks(content: string): Task[] {
               title: subtaskTitle,
               description: subtaskDescription.trim() || undefined,
               completed: subtaskCompleted,
+              comments: subtaskComments,
             });
           }
 
           subtaskCompleted = subtaskTitleMatch[1] === "x";
           subtaskTitle = subtaskTitleMatch[2].trim();
           subtaskDescription = "";
+          subtaskComments = [];
+          continue;
+        }
+
+        // Comments for Subtask
+        const subtaskCommentMatch = line.match(/^- \*\*comment:\*\*\s*(.+)$/);
+        if (subtaskCommentMatch && subtaskTitle) {
+          subtaskComments.push(subtaskCommentMatch[1].trim());
           continue;
         }
 
@@ -146,6 +190,7 @@ function parseTasks(content: string): Task[] {
       title: subtaskTitle,
       description: subtaskDescription.trim() || undefined,
       completed: subtaskCompleted,
+      comments: subtaskComments,
     });
   }
 
@@ -159,10 +204,10 @@ function parseTasks(content: string): Task[] {
 }
 
 /**
- * Get a project by slug with PRD and Tasks
+ * Get a project by workspace and slug
  */
-export async function getProjectBySlug(slug: string): Promise<Project | null> {
-  const projectPath = path.join(projectsDirectory, slug);
+export async function getProject(workspace: string, slug: string): Promise<Project | null> {
+  const projectPath = path.join(projectsDirectory, workspace, slug);
 
   if (!fs.existsSync(projectPath)) {
     return null;
@@ -189,6 +234,7 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
 
   return {
     slug,
+    workspace,
     prd: {
       frontmatter: prdFrontmatter,
       content: prdMatter.content,
@@ -204,12 +250,12 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
 /**
  * Get all projects with summary info
  */
-export async function getAllProjects(): Promise<ProjectSummary[]> {
-  const slugs = getProjectSlugs();
+export async function getAllProjects(workspaceFilter?: string): Promise<ProjectSummary[]> {
+  const paths = getAllProjectPaths(workspaceFilter);
   const projects: ProjectSummary[] = [];
 
-  for (const slug of slugs) {
-    const project = await getProjectBySlug(slug);
+  for (const { workspace, slug } of paths) {
+    const project = await getProject(workspace, slug);
     if (project) {
       const taskStats = {
         total: project.tasks.items.length,
@@ -221,6 +267,7 @@ export async function getAllProjects(): Promise<ProjectSummary[]> {
 
       projects.push({
         slug,
+        workspace,
         title: project.prd.frontmatter.title,
         status: project.prd.frontmatter.status,
         taskStats,

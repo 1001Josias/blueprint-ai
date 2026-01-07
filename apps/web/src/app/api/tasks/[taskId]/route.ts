@@ -6,6 +6,7 @@ import matter from "gray-matter";
 const projectsDirectory = path.join(process.cwd(), "..", "..", "projects");
 
 interface UpdateTaskStatusRequest {
+  workspace: string;
   projectSlug: string;
   status?: "todo" | "in_progress" | "done" | "blocked";
   subtaskIndex?: number;
@@ -19,16 +20,16 @@ export async function PATCH(
   try {
     const { taskId } = await params;
     const body: UpdateTaskStatusRequest = await request.json();
-    const { projectSlug, status, subtaskIndex, completed } = body;
+    const { workspace, projectSlug, status, subtaskIndex, completed } = body;
 
-    if (!projectSlug || !taskId) {
+    if (!workspace || !projectSlug || !taskId) {
       return NextResponse.json(
-        { error: "Missing required fields: projectSlug, taskId" },
+        { error: "Missing required fields: workspace, projectSlug, taskId" },
         { status: 400 }
       );
     }
 
-    const tasksPath = path.join(projectsDirectory, projectSlug, "tasks.md");
+    const tasksPath = path.join(projectsDirectory, workspace, projectSlug, "tasks.md");
 
     if (!fs.existsSync(tasksPath)) {
       return NextResponse.json(
