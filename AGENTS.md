@@ -108,6 +108,11 @@ This subtask is done.
    - **Work on ONLY ONE task per session**. 
    - **STOP** after completing and verifying your SINGLE assigned task. Do NOT automatically proceed to the next task in the list. This avoids race conditions where multiple agents might accidentally duplicate work on the same future tasks.
 
+7. **Ambiguity Resolution - "Create Tasks"**: 
+   - If a user asks to "create tasks", "register tasks", or "add pending items", they almost always mean creating or updating a `tasks.md` file within the `projects/` structure (the System).
+   - Do NOT create a local/temporary todo list unless explicitly asked for a personal plan.
+   - If the specific workspace or project mentioned does not exist in `projects/`, you should CREATE the necessary directory structure and files (`prd.md` and `tasks.md`).
+
 ## Git Conventions
 
 - Branch naming: `feat/<feature>`, `fix/<issue>`, `docs/<topic>`
