@@ -28,7 +28,7 @@ Adjust Tailwind colors to use BlueprintAI's violet/dark theme.
 
 ## Task 2: Content Migration and Creation
 - **id:** task-102
-- **status:** todo
+- **status:** done
 - **priority:** high
 - **description:** Migrate existing content and create new documentation pages.
 
@@ -50,7 +50,7 @@ Document endpoints like `PATCH /api/tasks/[taskId]` using OpenAPI or manual MDX.
 
 ## Task 3: Integration and Deploy
 - **id:** task-103
-- **status:** todo
+- **status:** done
 - **priority:** medium
 - **description:** Final adjustments and deployment preparation.
 
@@ -59,8 +59,9 @@ Document endpoints like `PATCH /api/tasks/[taskId]` using OpenAPI or manual MDX.
 #### [x] Configure Search
 Verify indexing and functionality of Fumadocs search.
 
-#### [ ] SEO Review
+#### [x] SEO Review
 Add appropriate meta tags and descriptions.
 
-#### [ ] Validate cross-links
+#### [x] Validate cross-links
 Ensure all internal links work correctly.
+
