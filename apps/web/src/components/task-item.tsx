@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { Task, TaskStatus } from "@/lib/schemas";
@@ -9,6 +9,7 @@ interface TaskItemProps {
   task: Task;
   workspace: string;
   projectSlug: string;
+  onClick?: () => void;
 }
 
 const statusConfig = {
@@ -27,37 +28,24 @@ const priorityConfig = {
   critical: { label: "Critical", color: "text-red-400" },
 };
 
-export function TaskItem({ task, workspace, projectSlug }: TaskItemProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+export function TaskItem({ task, workspace, projectSlug, onClick }: TaskItemProps) {
   const [currentStatus, setCurrentStatus] = useState<TaskStatus>(task.status);
-  // Optimistic state for subtasks
-  const [optimisticSubtasks, setOptimisticSubtasks] = useState(task.subtasks);
-  // Optimistic state for task comments
-  const [optimisticComments, setOptimisticComments] = useState(task.comments || []);
-  
-  // Comment form state
-  const [isAddingComment, setIsAddingComment] = useState(false);
-  const [newComment, setNewComment] = useState("");
-  const [addingCommentToSubtask, setAddingCommentToSubtask] = useState<number | null>(null);
-  const [subtaskComment, setSubtaskComment] = useState("");
-  
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  // Sync optimistic state with props when they change (e.g. after refresh)
-  const isValuesEqual = JSON.stringify(task.subtasks) === JSON.stringify(optimisticSubtasks);
-  if (!isValuesEqual && !isPending) {
-     setOptimisticSubtasks(task.subtasks);
-  }
-  const isCommentsEqual = JSON.stringify(task.comments) === JSON.stringify(optimisticComments);
-  if (!isCommentsEqual && !isPending) {
-    setOptimisticComments(task.comments || []);
-  }
+  // Sync optimistic state with props when they change
+  useEffect(() => {
+    if (!isPending) {
+      setCurrentStatus(task.status);
+    }
+  }, [task.status, isPending]);
 
   const status = statusConfig[currentStatus];
   const priority = priorityConfig[task.priority];
-  const completedSubtasks = optimisticSubtasks.filter((s) => s.completed).length;
-  const totalSubtasks = optimisticSubtasks.length;
+  const completedSubtasks = task.subtasks.filter((s) => s.completed).length;
+  const totalSubtasks = task.subtasks.length;
+  const commentsCount = (task.comments?.length ?? 0) + 
+    task.subtasks.reduce((acc, s) => acc + (s.comments?.length ?? 0), 0);
 
   const cycleStatus = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -77,121 +65,23 @@ export function TaskItem({ task, workspace, projectSlug }: TaskItemProps) {
       });
 
       if (!response.ok) {
-        // Revert on error
         setCurrentStatus(task.status);
-        console.error("Failed to update task status");
       } else {
-        // Refresh the page data
         startTransition(() => {
           router.refresh();
         });
       }
-    } catch (error) {
-      // Revert on error
+    } catch {
       setCurrentStatus(task.status);
-      console.error("Error updating task status:", error);
-    }
-  };
-
-  const toggleSubtask = async (index: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    const newSubtasks = [...optimisticSubtasks];
-    const newCompleted = !newSubtasks[index].completed;
-    newSubtasks[index] = { ...newSubtasks[index], completed: newCompleted };
-
-    // Optimistic update
-    setOptimisticSubtasks(newSubtasks);
-
-    try {
-      const response = await fetch(`/api/tasks/${task.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          workspace,
-          projectSlug, 
-          subtaskIndex: index, 
-          completed: newCompleted 
-        }),
-      });
-
-      if (!response.ok) {
-        // Revert
-        setOptimisticSubtasks(task.subtasks);
-        console.error("Failed to update subtask");
-      } else {
-        startTransition(() => {
-          router.refresh();
-        });
-      }
-    } catch (error) {
-       // Revert
-       setOptimisticSubtasks(task.subtasks);
-       console.error("Error updating subtask:", error);
-    }
-  };
-
-  const addComment = async (e: React.FormEvent, target: "task" | "subtask" = "task", subtaskIndex?: number) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const commentText = target === "task" ? newComment : subtaskComment;
-    if (!commentText.trim()) return;
-
-    // Optimistic update
-    if (target === "task") {
-      setOptimisticComments([...optimisticComments, commentText.trim()]);
-      setNewComment("");
-      setIsAddingComment(false);
-    } else if (typeof subtaskIndex === "number") {
-      const newSubtasks = [...optimisticSubtasks];
-      newSubtasks[subtaskIndex] = {
-        ...newSubtasks[subtaskIndex],
-        comments: [...(newSubtasks[subtaskIndex].comments || []), commentText.trim()],
-      };
-      setOptimisticSubtasks(newSubtasks);
-      setSubtaskComment("");
-      setAddingCommentToSubtask(null);
-    }
-
-    try {
-      const response = await fetch(`/api/tasks/${task.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          workspace,
-          projectSlug,
-          comment: commentText.trim(),
-          commentTarget: target,
-          ...(typeof subtaskIndex === "number" && { subtaskIndex }),
-        }),
-      });
-
-      if (!response.ok) {
-        // Revert on error
-        setOptimisticComments(task.comments || []);
-        setOptimisticSubtasks(task.subtasks);
-        console.error("Failed to add comment");
-      } else {
-        startTransition(() => {
-          router.refresh();
-        });
-      }
-    } catch (error) {
-      // Revert on error
-      setOptimisticComments(task.comments || []);
-      setOptimisticSubtasks(task.subtasks);
-      console.error("Error adding comment:", error);
     }
   };
 
   return (
-    <div className="rounded-xl bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 overflow-hidden">
-      {/* Task header */}
-      <div
-        className="p-4 cursor-pointer hover:bg-slate-800/80 transition-colors"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
+    <div 
+      className="rounded-xl bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 overflow-hidden cursor-pointer hover:bg-slate-800/80 hover:border-slate-600/50 transition-all duration-200"
+      onClick={onClick}
+    >
+      <div className="p-4">
         <div className="flex items-start gap-4">
           {/* Status icon - clickable to cycle */}
           <button
@@ -232,56 +122,7 @@ export function TaskItem({ task, workspace, projectSlug }: TaskItemProps) {
               {task.description}
             </p>
 
-            {/* Comments for Task */}
-            {optimisticComments.length > 0 && (
-              <div className="mt-2 space-y-1">
-                {optimisticComments.map((comment, i) => (
-                  <div key={i} className="flex items-start gap-2 text-xs text-slate-400 bg-slate-800/50 p-2 rounded border border-slate-700/50">
-                    <span className="shrink-0 mt-0.5">💬</span>
-                    <span>{comment}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-            
-            {/* Add Comment Form for Task */}
-            <div className="mt-2" onClick={(e) => e.stopPropagation()}>
-              {isAddingComment ? (
-                <form onSubmit={(e) => addComment(e, "task")} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Add a comment..."
-                    className="flex-1 px-2 py-1 text-xs bg-slate-700 border border-slate-600 rounded focus:outline-none focus:ring-1 focus:ring-violet-500 text-white placeholder-slate-400"
-                    autoFocus
-                  />
-                  <button
-                    type="submit"
-                    disabled={!newComment.trim() || isPending}
-                    className="px-2 py-1 text-xs bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white transition-colors"
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setIsAddingComment(false); setNewComment(""); }}
-                    className="px-2 py-1 text-xs bg-slate-600 hover:bg-slate-500 rounded text-white transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </form>
-              ) : (
-                <button
-                  onClick={() => setIsAddingComment(true)}
-                  className="text-xs text-slate-500 hover:text-violet-400 transition-colors"
-                >
-                  💬 Add comment
-                </button>
-              )}
-            </div>
-            
-            <div className="flex items-center gap-4 text-xs mt-2">
+            <div className="flex items-center gap-4 text-xs">
               <span className={cn("font-medium", priority.color)}>
                 {priority.label} Priority
               </span>
@@ -290,120 +131,25 @@ export function TaskItem({ task, workspace, projectSlug }: TaskItemProps) {
                   {completedSubtasks}/{totalSubtasks} subtasks
                 </span>
               )}
+              {commentsCount > 0 && (
+                <span className="text-slate-500 flex items-center gap-1">
+                  <span>💬</span> {commentsCount}
+                </span>
+              )}
             </div>
           </div>
 
-          {/* Expand icon */}
-          {task.subtasks.length > 0 && (
-            <svg
-              className={cn(
-                "w-5 h-5 text-slate-400 transition-transform duration-200",
-                isExpanded && "rotate-180"
-              )}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          )}
+          {/* Arrow indicator */}
+          <svg
+            className="w-5 h-5 text-slate-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
         </div>
       </div>
-
-      {/* Subtasks (expandable) */}
-      {isExpanded && task.subtasks.length > 0 && (
-        <div className="border-t border-slate-700/50 bg-slate-900/30">
-          <div className="p-4 space-y-3">
-            {optimisticSubtasks.map((subtask, index) => (
-              <div
-                key={index}
-                className={cn(
-                  "flex items-start gap-3 p-3 rounded-lg border transition-all cursor-pointer",
-                  "hover:bg-slate-700/50",
-                  subtask.completed
-                     ? "bg-emerald-900/10 border-emerald-900/20" 
-                     : "bg-slate-800/50 border-transparent"
-                )}
-                onClick={(e) => toggleSubtask(index, e)}
-              >
-                <div
-                  className={cn(
-                    "w-5 h-5 rounded-md flex items-center justify-center text-xs shrink-0 mt-0.5 transition-colors",
-                    subtask.completed
-                      ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                      : "bg-slate-700 text-slate-500 border border-slate-600 group-hover:border-slate-500"
-                  )}
-                >
-                  {subtask.completed ? "✓" : ""}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p
-                    className={cn(
-                      "text-sm font-medium transition-colors",
-                      subtask.completed ? "text-slate-500 line-through" : "text-white"
-                    )}
-                  >
-                    {subtask.title}
-                  </p>
-                  {subtask.description && (
-                    <p className="text-xs text-slate-500 mt-1">
-                      {subtask.description}
-                    </p>
-                  )}
-                  {/* Comments for Subtask */}
-                  {subtask.comments && subtask.comments.length > 0 && (
-                    <div className="mt-2 space-y-1">
-                      {subtask.comments.map((comment, i) => (
-                        <div key={i} className="flex items-start gap-2 text-xs text-slate-400 bg-slate-800/30 p-1.5 rounded border border-slate-700/30">
-                          <span className="shrink-0 mt-0.5">💬</span>
-                          <span>{comment}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {/* Add Comment Form for Subtask */}
-                  <div className="mt-2" onClick={(e) => e.stopPropagation()}>
-                    {addingCommentToSubtask === index ? (
-                      <form onSubmit={(e) => addComment(e, "subtask", index)} className="flex gap-2">
-                        <input
-                          type="text"
-                          value={subtaskComment}
-                          onChange={(e) => setSubtaskComment(e.target.value)}
-                          placeholder="Add a comment..."
-                          className="flex-1 px-2 py-1 text-xs bg-slate-700 border border-slate-600 rounded focus:outline-none focus:ring-1 focus:ring-violet-500 text-white placeholder-slate-400"
-                          autoFocus
-                        />
-                        <button
-                          type="submit"
-                          disabled={!subtaskComment.trim() || isPending}
-                          className="px-2 py-1 text-xs bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white transition-colors"
-                        >
-                          Save
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => { setAddingCommentToSubtask(null); setSubtaskComment(""); }}
-                          className="px-2 py-1 text-xs bg-slate-600 hover:bg-slate-500 rounded text-white transition-colors"
-                        >
-                          Cancel
-                        </button>
-                      </form>
-                    ) : (
-                      <button
-                        onClick={() => setAddingCommentToSubtask(index)}
-                        className="text-xs text-slate-500 hover:text-violet-400 transition-colors"
-                      >
-                        💬 Add comment
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

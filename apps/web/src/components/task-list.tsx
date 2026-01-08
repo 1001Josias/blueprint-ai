@@ -4,17 +4,25 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { Task } from "@/lib/schemas";
 import { TaskItem } from "./task-item";
+import { TaskDetailModal } from "./task-detail-modal";
 
 interface TaskListProps {
   tasks: Task[];
   workspace: string;
   projectSlug: string;
+  initialTaskId?: string | null;
 }
 
 type FilterStatus = "all" | "todo" | "in_progress" | "done" | "blocked";
 
-export function TaskList({ tasks, workspace, projectSlug }: TaskListProps) {
+export function TaskList({ tasks, workspace, projectSlug, initialTaskId }: TaskListProps) {
   const [filter, setFilter] = useState<FilterStatus>("all");
+  const [selectedTask, setSelectedTask] = useState<Task | null>(() => {
+    if (initialTaskId) {
+      return tasks.find(t => t.id === initialTaskId) ?? null;
+    }
+    return null;
+  });
 
   const filteredTasks = filter === "all"
     ? tasks
@@ -27,6 +35,23 @@ export function TaskList({ tasks, workspace, projectSlug }: TaskListProps) {
     { value: "done", label: "Done", count: tasks.filter((t) => t.status === "done").length },
     { value: "blocked", label: "Blocked", count: tasks.filter((t) => t.status === "blocked").length },
   ];
+
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task);
+    // Update URL with task param using window.history to avoid re-render
+    const params = new URLSearchParams(window.location.search);
+    params.set("task", task.id);
+    window.history.replaceState({}, "", `?${params.toString()}`);
+  };
+
+  const handleModalClose = () => {
+    setSelectedTask(null);
+    // Remove task param from URL using window.history to avoid re-render
+    const params = new URLSearchParams(window.location.search);
+    params.delete("task");
+    const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
+    window.history.replaceState({}, "", newUrl);
+  };
 
   return (
     <div>
@@ -54,7 +79,13 @@ export function TaskList({ tasks, workspace, projectSlug }: TaskListProps) {
       {/* Task list */}
       <div className="space-y-4">
         {filteredTasks.map((task) => (
-          <TaskItem key={task.id} task={task} workspace={workspace} projectSlug={projectSlug} />
+          <TaskItem 
+            key={task.id} 
+            task={task} 
+            workspace={workspace} 
+            projectSlug={projectSlug}
+            onClick={() => handleTaskClick(task)}
+          />
         ))}
 
         {filteredTasks.length === 0 && (
@@ -76,6 +107,15 @@ export function TaskList({ tasks, workspace, projectSlug }: TaskListProps) {
           </div>
         )}
       </div>
+
+      {/* Task Detail Modal */}
+      <TaskDetailModal
+        task={selectedTask}
+        isOpen={selectedTask !== null}
+        onClose={handleModalClose}
+        workspace={workspace}
+        projectSlug={projectSlug}
+      />
     </div>
   );
 }
