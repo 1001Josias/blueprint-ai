@@ -160,6 +160,11 @@ This subtask is done.
     - Signs of scope creep: new components, new API endpoints, new integrations not in the original plan.
     - This keeps tasks focused and deliverables manageable.
 
+18. **Registering Future Improvements**:
+    - When the user discusses potential features, improvements, or ideas for the future, **ask if they want you to create a task/project** to track it.
+    - Do NOT create tasks automatically — always confirm first: "Would you like me to create a task/project in `projects/` to track this for later?"
+    - This ensures ideas are captured without cluttering the backlog with unwanted items.
+
 ## Git Conventions
 
 - **Always start from updated main**: Before starting any new task, checkout `main`, pull latest changes (`git checkout main && git pull`), then create a new feature branch.
@@ -173,3 +178,32 @@ This subtask is done.
 - Title format: `<type>: <description>` (e.g., `feat: add task filtering`)
 - Include description of changes
 - Reference related issues if applicable
+
+## Post-Task Learning
+
+After completing a task and creating the PR, the agent MUST perform a **learning reflection**:
+
+1. **Reflect on the session**: Consider what was discussed beyond the code itself:
+   - Did the user clarify expectations about how agents should behave?
+   - Were there misunderstandings about scope, priorities, or conventions?
+   - Did the user express preferences about workflow, communication, or decision-making?
+
+2. **Identify project-level guidelines**: Focus on insights that affect **how agents work on this project**, not specific technical implementations. Examples:
+   - "Always ask for clarification before starting tasks with ambiguous scope"
+   - "Create a new project in `projects/` for features that span multiple sessions"
+   - "Prefer creating tasks for future work instead of implementing immediately"
+   - "When debugging, investigate root causes before applying quick fixes"
+
+3. **Propose the guideline to the user**: If you identify something worth adding:
+   - **ASK the user**: "During this session, I noticed [X]. Would you like me to add a guideline to `AGENTS.md` to ensure future agents follow this pattern?"
+   - Only add the guideline after user approval.
+   - Be concise — propose a one-liner or short paragraph, not a full essay.
+
+4. **Where to add guidelines**:
+   - `AGENTS.md` (root) — for general agent behavior across the project
+   - App-specific `AGENTS.md` — for patterns specific to `apps/web`, `apps/docs`, etc.
+   - `.agent/workflows/` — for repeatable multi-step processes
+
+> **Goal**: Each session should leave behind wisdom for future agents. The guidelines file is a living document that evolves with practical experience.
+
+
