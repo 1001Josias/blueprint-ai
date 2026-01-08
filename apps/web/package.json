@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.15",
     "@repo/schemas": "workspace:^",
     "@repo/utils": "workspace:^",
     "clsx": "^2.1.1",
