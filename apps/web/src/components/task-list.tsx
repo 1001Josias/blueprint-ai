@@ -1,57 +1,33 @@
 "use client";
 
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { Task } from "@/lib/schemas";
 import { TaskItem } from "./task-item";
 import { TaskDetailModal } from "./task-detail-modal";
+import { useTaskSearchParams } from "@/lib/search-params";
 
 interface TaskListProps {
   tasks: Task[];
   workspace: string;
   projectSlug: string;
-  initialTaskId?: string | null;
 }
 
-type FilterStatus = "all" | "todo" | "in_progress" | "done" | "blocked";
-
-export function TaskList({ tasks, workspace, projectSlug, initialTaskId }: TaskListProps) {
-  const [filter, setFilter] = useState<FilterStatus>("all");
-  const [selectedTask, setSelectedTask] = useState<Task | null>(() => {
-    if (initialTaskId) {
-      return tasks.find(t => t.id === initialTaskId) ?? null;
-    }
-    return null;
-  });
+export function TaskList({ tasks, workspace, projectSlug }: TaskListProps) {
+  const { taskId, setTaskId, filter, setFilter } = useTaskSearchParams();
 
   const filteredTasks = filter === "all"
     ? tasks
     : tasks.filter((task) => task.status === filter);
 
-  const filters: { value: FilterStatus; label: string; count: number }[] = [
+  const selectedTask = taskId ? tasks.find(t => t.id === taskId) ?? null : null;
+
+  const filters: { value: typeof filter; label: string; count: number }[] = [
     { value: "all", label: "All", count: tasks.length },
     { value: "todo", label: "To Do", count: tasks.filter((t) => t.status === "todo").length },
     { value: "in_progress", label: "In Progress", count: tasks.filter((t) => t.status === "in_progress").length },
     { value: "done", label: "Done", count: tasks.filter((t) => t.status === "done").length },
     { value: "blocked", label: "Blocked", count: tasks.filter((t) => t.status === "blocked").length },
   ];
-
-  const handleTaskClick = (task: Task) => {
-    setSelectedTask(task);
-    // Update URL with task param using window.history to avoid re-render
-    const params = new URLSearchParams(window.location.search);
-    params.set("task", task.id);
-    window.history.replaceState({}, "", `?${params.toString()}`);
-  };
-
-  const handleModalClose = () => {
-    setSelectedTask(null);
-    // Remove task param from URL using window.history to avoid re-render
-    const params = new URLSearchParams(window.location.search);
-    params.delete("task");
-    const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
-    window.history.replaceState({}, "", newUrl);
-  };
 
   return (
     <div>
@@ -84,7 +60,7 @@ export function TaskList({ tasks, workspace, projectSlug, initialTaskId }: TaskL
             task={task} 
             workspace={workspace} 
             projectSlug={projectSlug}
-            onClick={() => handleTaskClick(task)}
+            onClick={() => setTaskId(task.id)}
           />
         ))}
 
@@ -112,7 +88,7 @@ export function TaskList({ tasks, workspace, projectSlug, initialTaskId }: TaskL
       <TaskDetailModal
         task={selectedTask}
         isOpen={selectedTask !== null}
-        onClose={handleModalClose}
+        onClose={() => setTaskId(null)}
         workspace={workspace}
         projectSlug={projectSlug}
       />

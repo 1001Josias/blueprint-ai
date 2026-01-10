@@ -35,10 +35,11 @@ export function TaskItem({ task, workspace, projectSlug, onClick }: TaskItemProp
 
   // Sync optimistic state with props when they change
   useEffect(() => {
-    if (!isPending) {
-      setCurrentStatus(task.status);
-    }
-  }, [task.status, isPending]);
+     if (task.status !== currentStatus && !isPending) {
+       setCurrentStatus(task.status);
+     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [task.status]);
 
   const status = statusConfig[currentStatus];
   const priority = priorityConfig[task.priority];

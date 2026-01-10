@@ -3,15 +3,15 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/sidebar";
 import { getAllProjects } from "@/lib/markdown";
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
+import { headers } from "next/headers";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "BlueprintAI - AI-Powered Task Management",
-  description: "Transform AI-generated PRDs into beautiful, trackable tasks",
+  title: "BlueprintAI",
+  description: "AI-Powered Task Management",
 };
-
-import { headers } from "next/headers";
 
 export default async function RootLayout({
   children,
@@ -25,12 +25,14 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="flex min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950">
-          <Sidebar projects={projects} />
-          <main className="flex-1 overflow-y-auto">
-            {children}
-          </main>
-        </div>
+        <NuqsAdapter>
+          <div className="flex min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950">
+            <Sidebar projects={projects} />
+            <main className="flex-1 overflow-y-auto">
+              {children}
+            </main>
+          </div>
+        </NuqsAdapter>
       </body>
     </html>
   );

@@ -42,7 +42,7 @@ export async function PATCH(
     }
 
     // Read the file
-    let content = fs.readFileSync(tasksPath, "utf8");
+    const content = fs.readFileSync(tasksPath, "utf8");
     const { data: frontmatter, content: markdownContent } = matter(content);
     let updatedMarkdown = markdownContent;
 

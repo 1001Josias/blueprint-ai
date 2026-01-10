@@ -1,10 +1,10 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getProject, getAllProjectPaths } from "@/lib/markdown";
 import { TaskList } from "@/components/task-list";
 
 interface ProjectPageProps {
   params: Promise<{ workspace: string; slug: string }>;
-  searchParams: Promise<{ task?: string }>;
 }
 
 export async function generateStaticParams() {
@@ -12,9 +12,8 @@ export async function generateStaticParams() {
   return paths;
 }
 
-export default async function ProjectPage({ params, searchParams }: ProjectPageProps) {
+export default async function ProjectPage({ params }: ProjectPageProps) {
   const { workspace, slug } = await params;
-  const { task: initialTaskId } = await searchParams;
   const project = await getProject(workspace, slug);
 
   if (!project) {
@@ -147,7 +146,9 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
             </h2>
           </div>
 
-          <TaskList tasks={tasks.items} workspace={workspace} projectSlug={slug} initialTaskId={initialTaskId} />
+          <Suspense fallback={<div className="text-slate-500">Loading tasks...</div>}>
+            <TaskList tasks={tasks.items} workspace={workspace} projectSlug={slug} />
+          </Suspense>
         </div>
       </div>
     </div>

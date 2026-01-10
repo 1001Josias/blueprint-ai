@@ -9,28 +9,28 @@ updated_at: "2026-01-07"
 
 ## Task 1: Modal Base Structure
 - **id:** tdm-001
-- **status:** todo
+- **status:** done
 - **priority:** high
 - **description:** Create the base modal component with task details display.
 
 ### Subtasks
 
-#### [ ] Create TaskDetailModal component
+#### [x] Create TaskDetailModal component
 New component using Radix Dialog or Sheet.
 
-#### [ ] Simplify TaskItem card
+#### [x] Simplify TaskItem card
 Remove inline comments/subtasks, add click handler to open modal.
 
-#### [ ] Display task info in modal
+#### [x] Display task info in modal
 Title, status badge, priority badge, description.
 
-#### [ ] Subtasks section in modal
+#### [x] Subtasks section in modal
 List subtasks with toggle functionality.
 
-#### [ ] Comments section in modal
+#### [x] Comments section in modal
 Display all comments with timestamps.
 
-#### [ ] Deep linking support
+#### [x] Deep linking support
 URL query param `?task=task-id` to open modal on page load.
 
 ---
