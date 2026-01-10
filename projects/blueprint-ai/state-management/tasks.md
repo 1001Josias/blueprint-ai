@@ -1,13 +1,20 @@
+---
+project_id: "state-management"
+prd_version: "1.0"
+created_at: "2026-01-07"
+updated_at: "2026-01-07"
+---
+
 # State Management Improvements - Tasks
 
 ## Task 1: Implement nuqs for URL Query Params
-- [ ] Install `nuqs` package
-- [ ] Create query param hooks for common patterns:
-  - [ ] `useTaskIdParam()` - selected task ID
-  - [ ] `useFilterParam()` - task list filter
+- [x] Install `nuqs` package
+- [x] Create query param hooks for common patterns:
+  - [x] `useTaskIdParam()` - selected task ID
+  - [x] `useFilterParam()` - task list filter
   - [ ] `useTabParam()` - active tab selection
-- [ ] Refactor `TaskList` to use nuqs instead of `window.history`
-- [ ] Refactor `TaskDetailModal` to read task ID from nuqs
+- [x] Refactor `TaskList` to use nuqs instead of `window.history`
+- [x] Refactor `TaskDetailModal` to read task ID from nuqs
 - [ ] Test URL sharing and bookmarking
 
 ## Task 2: Implement Zustand for Global State
