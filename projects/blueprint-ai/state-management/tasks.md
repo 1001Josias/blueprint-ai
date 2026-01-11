@@ -32,3 +32,5 @@ updated_at: "2026-01-07"
   - Memory state (Zustand): cache, loading states, UI state
 - [x] Create integration patterns/hooks
 - [x] Document state management conventions in AGENTS.md
+
+**PR:** [feat: state management guidelines and lint fixes](https://github.com/1001Josias/blueprint-ai/pull/28)
