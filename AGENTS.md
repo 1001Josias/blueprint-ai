@@ -175,9 +175,9 @@ This subtask is done.
 
 20. **Final Response Links**:
     - When confirming a task is completed in your final response to the user, **ALWAYS** include:
-      - The link/path to the finalized Task in `projects/.../tasks.md`
+      - The **Localhost UI Link** to the task (e.g., `http://localhost:3000/projects/<workspace>/<project-slug>?task=<task-id>`)
       - The Pull Request URL (if applicable)
-    - This ensures easy navigation and verification for the user.
+    - This allows the user to immediately verify the changes in the browser.
 
 
 
