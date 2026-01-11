@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { Task, TaskStatus } from "@/lib/schemas";
+import { useTaskStore } from "@/lib/stores";
 
 interface TaskItemProps {
   task: Task;
@@ -29,15 +30,17 @@ const priorityConfig = {
 };
 
 export function TaskItem({ task, workspace, projectSlug, onClick }: TaskItemProps) {
-  const [currentStatus, setCurrentStatus] = useState<TaskStatus>(task.status);
-  const [isPending, startTransition] = useTransition();
+  const { getStatus, setOptimisticStatus, clearOptimistic, isPending, setPending } = useTaskStore();
+  const currentStatus = getStatus(task.id, task.status);
+  const pending = isPending(task.id);
+  const [, startTransition] = useTransition();
   const router = useRouter();
 
-  // Sync optimistic state with props when they change
+  // Clear optimistic state when server state catches up
   useEffect(() => {
-     if (task.status !== currentStatus && !isPending) {
-       setCurrentStatus(task.status);
-     }
+    if (currentStatus === task.status && !pending) {
+      clearOptimistic(task.id);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task.status]);
 
@@ -55,8 +58,9 @@ export function TaskItem({ task, workspace, projectSlug, onClick }: TaskItemProp
     const nextIndex = (currentIndex + 1) % statusOrder.length;
     const newStatus = statusOrder[nextIndex];
 
-    // Optimistic update
-    setCurrentStatus(newStatus);
+    // Optimistic update via store
+    setOptimisticStatus(task.id, newStatus);
+    setPending(task.id, true);
 
     try {
       const response = await fetch(`/api/tasks/${task.id}`, {
@@ -66,14 +70,16 @@ export function TaskItem({ task, workspace, projectSlug, onClick }: TaskItemProp
       });
 
       if (!response.ok) {
-        setCurrentStatus(task.status);
+        clearOptimistic(task.id);
       } else {
         startTransition(() => {
           router.refresh();
         });
       }
     } catch {
-      setCurrentStatus(task.status);
+      clearOptimistic(task.id);
+    } finally {
+      setPending(task.id, false);
     }
   };
 
@@ -87,16 +93,16 @@ export function TaskItem({ task, workspace, projectSlug, onClick }: TaskItemProp
           {/* Status icon - clickable to cycle */}
           <button
             onClick={cycleStatus}
-            disabled={isPending}
+            disabled={pending}
             className={cn(
               "w-8 h-8 rounded-lg flex items-center justify-center text-lg font-bold shrink-0 transition-all duration-200",
               "hover:scale-110 hover:ring-2 hover:ring-violet-500/50",
-              isPending && "opacity-50 cursor-wait",
+              pending && "opacity-50 cursor-wait",
               status.color
             )}
             title="Click to change status"
           >
-            {isPending ? (
+            {pending ? (
               <span className="animate-spin">⟳</span>
             ) : (
               status.icon

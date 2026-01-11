@@ -1,10 +1,11 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { useState, useTransition, useEffect } from "react";
+import { useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { Task, TaskStatus } from "@/lib/schemas";
+import { useTaskStore } from "@/lib/stores";
 
 interface TaskDetailModalProps {
   task: Task | null;
@@ -37,18 +38,30 @@ export function TaskDetailModal({
   workspace,
   projectSlug,
 }: TaskDetailModalProps) {
-  const [currentStatus, setCurrentStatus] = useState<TaskStatus>(task?.status ?? "todo");
-  const [optimisticSubtasks, setOptimisticSubtasks] = useState(task?.subtasks ?? []);
-  const [isPending, startTransition] = useTransition();
+  const { 
+    getStatus, 
+    setOptimisticStatus, 
+    getSubtasks, 
+    setOptimisticSubtasks, 
+    clearOptimistic, 
+    isPending, 
+    setPending 
+  } = useTaskStore();
+  
+  const currentStatus = task ? getStatus(task.id, task.status) : "todo";
+  const optimisticSubtasks = task ? getSubtasks(task.id, task.subtasks) : [];
+  const pending = task ? isPending(task.id) : false;
+  
+  const [, startTransition] = useTransition();
   const router = useRouter();
 
-  // Sync state when task changes
+  // Clear optimistic state when server state catches up
   useEffect(() => {
-    if (task && !isPending) {
-      setCurrentStatus(task.status);
-      setOptimisticSubtasks(task.subtasks);
+    if (task && currentStatus === task.status && !pending) {
+      clearOptimistic(task.id);
     }
-  }, [task, isPending]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [task?.status, task?.subtasks]);
 
   if (!task) return null;
 
@@ -62,7 +75,8 @@ export function TaskDetailModal({
     const nextIndex = (currentIndex + 1) % statusOrder.length;
     const newStatus = statusOrder[nextIndex];
 
-    setCurrentStatus(newStatus);
+    setOptimisticStatus(task.id, newStatus);
+    setPending(task.id, true);
 
     try {
       const response = await fetch(`/api/tasks/${task.id}`, {
@@ -72,14 +86,16 @@ export function TaskDetailModal({
       });
 
       if (!response.ok) {
-        setCurrentStatus(task.status);
+        clearOptimistic(task.id);
       } else {
         startTransition(() => {
           router.refresh();
         });
       }
     } catch {
-      setCurrentStatus(task.status);
+      clearOptimistic(task.id);
+    } finally {
+      setPending(task.id, false);
     }
   };
 
@@ -88,7 +104,8 @@ export function TaskDetailModal({
     const newCompleted = !newSubtasks[index].completed;
     newSubtasks[index] = { ...newSubtasks[index], completed: newCompleted };
 
-    setOptimisticSubtasks(newSubtasks);
+    setOptimisticSubtasks(task.id, newSubtasks);
+    setPending(task.id, true);
 
     try {
       const response = await fetch(`/api/tasks/${task.id}`, {
@@ -103,14 +120,16 @@ export function TaskDetailModal({
       });
 
       if (!response.ok) {
-        setOptimisticSubtasks(task.subtasks);
+        clearOptimistic(task.id);
       } else {
         startTransition(() => {
           router.refresh();
         });
       }
     } catch {
-      setOptimisticSubtasks(task.subtasks);
+      clearOptimistic(task.id);
+    } finally {
+      setPending(task.id, false);
     }
   };
 
@@ -128,16 +147,16 @@ export function TaskDetailModal({
               {/* Status button */}
               <button
                 onClick={cycleStatus}
-                disabled={isPending}
+                disabled={pending}
                 className={cn(
                   "w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold shrink-0 transition-all duration-200",
                   "hover:scale-110 hover:ring-2 hover:ring-violet-500/50",
-                  isPending && "opacity-50 cursor-wait",
+                  pending && "opacity-50 cursor-wait",
                   status.color
                 )}
                 title="Click to change status"
               >
-                {isPending ? <span className="animate-spin">⟳</span> : status.icon}
+                {pending ? <span className="animate-spin">⟳</span> : status.icon}
               </button>
 
               <div className="flex-1 min-w-0">

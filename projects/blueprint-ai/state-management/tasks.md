@@ -18,13 +18,13 @@ updated_at: "2026-01-07"
 - [ ] Test URL sharing and bookmarking
 
 ## Task 2: Implement Zustand for Global State
-- [ ] Install `zustand` package
-- [ ] Create stores:
-  - [ ] `useTaskStore` - task cache and optimistic updates
-  - [ ] `useUIStore` - sidebar state, modal states
-- [ ] Migrate optimistic update logic from components to store
-- [ ] Remove prop drilling for shared state
-- [ ] Add devtools middleware for debugging
+- [x] Install `zustand` package
+- [x] Create stores:
+  - [x] `useTaskStore` - task cache and optimistic updates
+  - [x] `useUIStore` - sidebar state, modal states
+- [x] Migrate optimistic update logic from components to store
+- [x] Remove prop drilling for shared state
+- [x] Add devtools middleware for debugging
 
 ## Task 3: Combine nuqs + Zustand
 - [ ] Define clear boundaries:

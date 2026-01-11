@@ -3,9 +3,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { ProjectSummary } from "@/lib/schemas";
+import { useUIStore } from "@/lib/stores";
 
 interface SidebarProps {
   projects: ProjectSummary[];
@@ -33,13 +33,12 @@ const getWorkspaceColor = (workspace: string) => {
 
 export function Sidebar({ projects }: SidebarProps) {
   const pathname = usePathname();
-  const [collapsedWorkspaces, setCollapsedWorkspaces] = useState<Record<string, boolean>>({});
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "archived">("all");
+  const { collapsedWorkspaces, sidebarStatusFilter, toggleWorkspace, setSidebarFilter } = useUIStore();
 
   // Filter projects by status (active = draft/in_review, archived = approved/rejected)
   const filteredProjects = projects.filter((project) => {
-    if (statusFilter === "all") return true;
-    if (statusFilter === "active") return project.status === "draft" || project.status === "in_review";
+    if (sidebarStatusFilter === "all") return true;
+    if (sidebarStatusFilter === "active") return project.status === "draft" || project.status === "in_review";
     return project.status === "approved" || project.status === "rejected";
   });
 
@@ -51,13 +50,6 @@ export function Sidebar({ projects }: SidebarProps) {
     acc[project.workspace].push(project);
     return acc;
   }, {} as Record<string, ProjectSummary[]>);
-
-  const toggleWorkspace = (workspace: string) => {
-    setCollapsedWorkspaces((prev) => ({
-      ...prev,
-      [workspace]: !prev[workspace],
-    }));
-  };
 
   return (
     <aside className="w-72 h-screen bg-slate-950 border-r border-slate-800 flex flex-col overflow-hidden">
@@ -93,10 +85,10 @@ export function Sidebar({ projects }: SidebarProps) {
             return (
               <button
                 key={filter}
-                onClick={() => setStatusFilter(filter)}
+                onClick={() => setSidebarFilter(filter)}
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200",
-                  statusFilter === filter
+                  sidebarStatusFilter === filter
                     ? "bg-violet-500/20 text-violet-300 ring-1 ring-violet-500/30"
                     : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
                 )}
@@ -104,7 +96,7 @@ export function Sidebar({ projects }: SidebarProps) {
                 <span className="capitalize">{filter}</span>
                 <span className={cn(
                   "px-1.5 py-0.5 text-[10px] rounded-md tabular-nums",
-                  statusFilter === filter 
+                  sidebarStatusFilter === filter 
                     ? "bg-violet-500/30 text-violet-200" 
                     : "bg-slate-800 text-slate-500"
                 )}>
