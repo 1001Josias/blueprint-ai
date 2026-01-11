@@ -35,11 +35,24 @@ export function Sidebar({ projects }: SidebarProps) {
   const pathname = usePathname();
   const { collapsedWorkspaces, sidebarStatusFilter, toggleWorkspace, setSidebarFilter } = useUIStore();
 
-  // Filter projects by status (active = draft/in_review, archived = approved/rejected)
+  // Filter projects by status
   const filteredProjects = projects.filter((project) => {
     if (sidebarStatusFilter === "all") return true;
-    if (sidebarStatusFilter === "active") return project.status === "draft" || project.status === "in_review";
-    return project.status === "approved" || project.status === "rejected";
+    
+    if (sidebarStatusFilter === "planning") {
+      return project.status === "draft" || project.status === "in_review";
+    }
+
+    if (sidebarStatusFilter === "in_progress") {
+      // In Progress = Approved AND not all tasks done
+      // If logic requires Approved to be strictly In Progress only if it has todo/inprogress tasks, 
+      // we check taskStats. But "Approved" usually implies it's active project execution.
+      // We explicitly exclude "Completed" projects (where done == total and total > 0).
+      const isCompleted = project.taskStats.total > 0 && project.taskStats.done === project.taskStats.total;
+      return project.status === "approved" && !isCompleted;
+    }
+    
+    return false;
   });
 
   // Group projects by workspace
@@ -75,12 +88,16 @@ export function Sidebar({ projects }: SidebarProps) {
       {/* Status Filters */}
       <div className="px-4 py-3 border-b border-slate-800/50">
         <div className="flex gap-2">
-          {(["all", "active", "archived"] as const).map((filter) => {
-            const count = filter === "all" 
-              ? projects.length 
-              : filter === "active"
-                ? projects.filter(p => p.status === "draft" || p.status === "in_review").length
-                : projects.filter(p => p.status === "approved" || p.status === "rejected").length;
+          {(["all", "planning", "in_progress"] as const).map((filter) => {
+            const count = projects.filter(p => {
+               if (filter === "all") return true;
+               if (filter === "planning") return p.status === "draft" || p.status === "in_review";
+               if (filter === "in_progress") {
+                 const isCompleted = p.taskStats.total > 0 && p.taskStats.done === p.taskStats.total;
+                 return p.status === "approved" && !isCompleted;
+               }
+               return false;
+            }).length;
             
             return (
               <button
@@ -93,7 +110,7 @@ export function Sidebar({ projects }: SidebarProps) {
                     : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
                 )}
               >
-                <span className="capitalize">{filter}</span>
+                <span className="capitalize">{filter.replace("_", " ")}</span>
                 <span className={cn(
                   "px-1.5 py-0.5 text-[10px] rounded-md tabular-nums",
                   sidebarStatusFilter === filter 

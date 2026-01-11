@@ -50,21 +50,22 @@ High-level stats and reporting dashboard (as seen in the design concept).
 
 ## Task 3: Improved Sidebar Filters
 - **id:** nav-103
-- **status:** todo
+- **status:** done
 - **priority:** high
-- **description:** Replace generic "Active/Archived" filters with more meaningful workflow-based filters (Planning, In Progress, Completed).
+- **description:** Replace generic "Active/Archived" filters with more meaningful workflow-based filters (Planning, In Progress).
 
 ### Subtasks
 
-#### [ ] Implementation Plan
+#### [x] Implementation Plan
 Create implementation plan for new filter logic.
 
-#### [ ] Implement Smart Filters
+#### [x] Implement Smart Filters
 - **Planning**: Projects in `draft` or `in_review`.
 - **In Progress**: Projects `approved` with incomplete tasks.
-- **Completed**: Projects `approved` with 100% tasks completed.
-- **Archived**: Projects `rejected`.
+- **Completed/Archived**: Only visible in "All" view (as requested).
 
-#### [ ] Update Sidebar UI
-Replace existing filter buttons with new set.
+#### [x] Update Sidebar UI
+Replace existing filter buttons with new set: All, Planning, In Progress.
+
+**PR:** [feat: implement improved sidebar filters](https://github.com/1001Josias/blueprint-ai/pull/29)
 
