@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 
-type SidebarFilter = 'all' | 'active' | 'archived'
+type SidebarFilter = 'all' | 'planning' | 'in_progress'
 
 interface UIStore {
   // Sidebar state
