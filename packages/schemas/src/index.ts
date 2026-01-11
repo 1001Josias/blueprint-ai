@@ -52,6 +52,7 @@ export const taskSchema = z.object({
   priority: taskPrioritySchema,
   description: z.string(),
   dueDate: z.string().optional(),
+  dependencies: z.array(z.string()).default([]),
   subtasks: z.array(subtaskSchema).default([]),
   comments: z.array(z.string()).default([]),
 });

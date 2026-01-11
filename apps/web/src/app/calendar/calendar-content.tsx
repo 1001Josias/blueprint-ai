@@ -316,6 +316,7 @@ function CalendarContent({ tasks }: CalendarPageProps) {
       {/* Task Detail Modal */}
       {selectedTask && (
         <TaskDetailModal
+          isOpen={!!selectedTask}
           task={selectedTask}
           workspace={selectedTask.workspace}
           projectSlug={selectedTask.projectSlug}

@@ -9,16 +9,16 @@ updated_at: '2026-01-06'
 
 ## Task 1: Schema and Parser Update
 - **id:** task-dep-101
-- **status:** todo
+- **status:** done
 - **priority:** critical
 - **description:** Update the core data structures to support dependencies.
 
 ### Subtasks
 
-#### [ ] Update Zod Schema
+#### [x] Update Zod Schema
 Modify `@repo/schemas` (and `apps/web/src/lib/schemas.ts`) to include `dependencies: string[]` (optional) in `taskSchema`.
 
-#### [ ] Update Markdown Parser
+#### [x] Update Markdown Parser
 Modify `apps/web/src/lib/markdown.ts` logic to parse the line `- **dependencies:** task-id, task-id-2`.
 
 ---
