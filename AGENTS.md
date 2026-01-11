@@ -117,6 +117,9 @@ This subtask is done.
    - When starting a task, update its status to `in_progress`.
    - When completing a task or subtask, mark it as completed (update status to `done` or check the box `[x]`).
    - **Verification**: If you are unsure about the completion (e.g., logically uncertain or low confidence in implementation), ASK the user for confirmation BEFORE marking the task as `done`.
+   - **Traceability**:
+     - When a subtask is completed, append the commit link: `[x] Subtask Title ([commit-hash](url))`
+     - When the main task is completed, append the PR link: `**PR:** [PR Title](url)`
 
 9. **Scope Changes**:
    - If the user requests additional features or modifications to work that has already been **committed and marked as done**, do NOT reopen the old task.

@@ -47,3 +47,24 @@ Visual calendar representation of project milestones and task due dates.
 High-level stats and reporting dashboard (as seen in the design concept).
 
 ---
+
+## Task 3: Improved Sidebar Filters
+- **id:** nav-103
+- **status:** todo
+- **priority:** high
+- **description:** Replace generic "Active/Archived" filters with more meaningful workflow-based filters (Planning, In Progress, Completed).
+
+### Subtasks
+
+#### [ ] Implementation Plan
+Create implementation plan for new filter logic.
+
+#### [ ] Implement Smart Filters
+- **Planning**: Projects in `draft` or `in_review`.
+- **In Progress**: Projects `approved` with incomplete tasks.
+- **Completed**: Projects `approved` with 100% tasks completed.
+- **Archived**: Projects `rejected`.
+
+#### [ ] Update Sidebar UI
+Replace existing filter buttons with new set.
+
