@@ -94,6 +94,7 @@ function parseTasks(content: string): Task[] {
         status: "todo",
         priority: "medium",
         description: "",
+        dependencies: [],
         subtasks: [],
         comments: [],
       };
@@ -137,6 +138,15 @@ function parseTasks(content: string): Task[] {
       const dueDateMatch = line.match(/^- \*\*due_date:\*\*\s*(.+)$/);
       if (dueDateMatch) {
         currentTask.dueDate = dueDateMatch[1].trim();
+        continue;
+      }
+
+      const dependenciesMatch = line.match(/^- \*\*dependencies:\*\*\s*(.+)$/);
+      if (dependenciesMatch) {
+        currentTask.dependencies = dependenciesMatch[1]
+          .split(",")
+          .map((d) => d.trim())
+          .filter((d) => d.length > 0);
         continue;
       }
 
