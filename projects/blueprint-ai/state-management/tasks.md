@@ -27,8 +27,8 @@ updated_at: "2026-01-07"
 - [x] Add devtools middleware for debugging
 
 ## Task 3: Combine nuqs + Zustand
-- [ ] Define clear boundaries:
+- [x] Define clear boundaries:
   - URL state (nuqs): filters, selected items, pagination
   - Memory state (Zustand): cache, loading states, UI state
-- [ ] Create integration patterns/hooks
-- [ ] Document state management conventions in AGENTS.md
+- [x] Create integration patterns/hooks
+- [x] Document state management conventions in AGENTS.md

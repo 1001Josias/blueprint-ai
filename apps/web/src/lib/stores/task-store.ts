@@ -48,7 +48,9 @@ export const useTaskStore = create<TaskStore>()(
       clearOptimistic: (taskId) =>
         set(
           (state) => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { [taskId]: _status, ...restStatus } = state.optimisticStatus
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { [taskId]: _subtasks, ...restSubtasks } = state.optimisticSubtasks
             return {
               optimisticStatus: restStatus,

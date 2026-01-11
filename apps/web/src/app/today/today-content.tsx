@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+
 import { TaskWithProject } from "@/lib/markdown";
 import { TaskDetailModal } from "@/components/task-detail-modal";
 import { useTaskIdParam } from "@/lib/search-params";
@@ -167,7 +167,7 @@ function TodayContent({ tasks }: TodayPageProps) {
             <Link href="/upcoming" className="text-violet-400 hover:underline">
               Upcoming
             </Link>{" "}
-            view to see what's coming next.
+            view to see what&apos;s coming next.
           </p>
         </div>
       )}

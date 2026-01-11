@@ -3,11 +3,82 @@
 import { TaskWithProject } from "@/lib/markdown";
 import { TaskDetailModal } from "@/components/task-detail-modal";
 import { useTaskIdParam } from "@/lib/search-params";
-import Link from "next/link";
+
 
 interface UpcomingPageProps {
   tasks: TaskWithProject[];
 }
+
+const priorityColors = {
+  low: "bg-slate-500/20 text-slate-300 border-slate-500/30",
+  medium: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+  high: "bg-orange-500/20 text-orange-300 border-orange-500/30",
+  critical: "bg-red-500/20 text-red-300 border-red-500/30",
+};
+
+const statusColors = {
+  todo: "bg-slate-500",
+  in_progress: "bg-yellow-500",
+  done: "bg-green-500",
+  blocked: "bg-red-500",
+};
+
+interface TaskSectionProps {
+  title: string;
+  tasks: TaskWithProject[];
+  emptyMessage: string;
+  onSelectTask: (taskId: string) => void;
+}
+
+const TaskSection = ({
+  title,
+  tasks,
+  emptyMessage,
+  onSelectTask,
+}: TaskSectionProps) => (
+  <div className="space-y-3">
+    <div className="flex items-center gap-2">
+      <h2 className="text-lg font-semibold text-white">{title}</h2>
+      <span className="px-2 py-0.5 text-xs bg-slate-700 rounded-full text-slate-300">
+        {tasks.length}
+      </span>
+    </div>
+    {tasks.length > 0 ? (
+      <div className="space-y-2">
+        {tasks.map((task) => (
+          <button
+            key={task.id}
+            onClick={() => onSelectTask(task.id)}
+            className="w-full text-left p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-slate-600 transition-all group"
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <div
+                  className={`w-2 h-2 rounded-full shrink-0 ${statusColors[task.status]}`}
+                />
+                <span className="text-white font-medium truncate group-hover:text-violet-300 transition-colors">
+                  {task.title}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs text-slate-500">{task.projectTitle}</span>
+                <span
+                  className={`px-2 py-0.5 text-xs rounded-full border ${priorityColors[task.priority]}`}
+                >
+                  {task.priority}
+                </span>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    ) : (
+      <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/30 text-center">
+        <p className="text-sm text-slate-500">{emptyMessage}</p>
+      </div>
+    )}
+  </div>
+);
 
 function UpcomingContent({ tasks }: UpcomingPageProps) {
   const [selectedTaskId, setSelectedTaskId] = useTaskIdParam();
@@ -49,74 +120,7 @@ function UpcomingContent({ tasks }: UpcomingPageProps) {
 
   const selectedTask = tasks.find((t) => t.id === selectedTaskId);
 
-  const priorityColors = {
-    low: "bg-slate-500/20 text-slate-300 border-slate-500/30",
-    medium: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-    high: "bg-orange-500/20 text-orange-300 border-orange-500/30",
-    critical: "bg-red-500/20 text-red-300 border-red-500/30",
-  };
 
-  const statusColors = {
-    todo: "bg-slate-500",
-    in_progress: "bg-yellow-500",
-    done: "bg-green-500",
-    blocked: "bg-red-500",
-  };
-
-  const TaskSection = ({
-    title,
-    tasks,
-    emptyMessage,
-    accentColor = "violet",
-  }: {
-    title: string;
-    tasks: TaskWithProject[];
-    emptyMessage: string;
-    accentColor?: string;
-  }) => (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <h2 className="text-lg font-semibold text-white">{title}</h2>
-        <span className="px-2 py-0.5 text-xs bg-slate-700 rounded-full text-slate-300">
-          {tasks.length}
-        </span>
-      </div>
-      {tasks.length > 0 ? (
-        <div className="space-y-2">
-          {tasks.map((task) => (
-            <button
-              key={task.id}
-              onClick={() => setSelectedTaskId(task.id)}
-              className="w-full text-left p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-slate-600 transition-all group"
-            >
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div
-                    className={`w-2 h-2 rounded-full shrink-0 ${statusColors[task.status]}`}
-                  />
-                  <span className="text-white font-medium truncate group-hover:text-violet-300 transition-colors">
-                    {task.title}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-xs text-slate-500">{task.projectTitle}</span>
-                  <span
-                    className={`px-2 py-0.5 text-xs rounded-full border ${priorityColors[task.priority]}`}
-                  >
-                    {task.priority}
-                  </span>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      ) : (
-        <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/30 text-center">
-          <p className="text-sm text-slate-500">{emptyMessage}</p>
-        </div>
-      )}
-    </div>
-  );
 
   return (
     <div className="p-8">
@@ -181,6 +185,7 @@ function UpcomingContent({ tasks }: UpcomingPageProps) {
               title="Today"
               tasks={todayTasks}
               emptyMessage="No tasks due today"
+              onSelectTask={setSelectedTaskId}
             />
           )}
           {tomorrowTasks.length > 0 && (
@@ -188,6 +193,7 @@ function UpcomingContent({ tasks }: UpcomingPageProps) {
               title="Tomorrow"
               tasks={tomorrowTasks}
               emptyMessage="No tasks due tomorrow"
+              onSelectTask={setSelectedTaskId}
             />
           )}
           {laterTasks.length > 0 && (
@@ -195,6 +201,7 @@ function UpcomingContent({ tasks }: UpcomingPageProps) {
               title="This Week"
               tasks={laterTasks}
               emptyMessage="No tasks this week"
+              onSelectTask={setSelectedTaskId}
             />
           )}
         </div>
