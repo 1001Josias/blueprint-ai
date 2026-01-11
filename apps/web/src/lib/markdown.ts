@@ -134,6 +134,12 @@ function parseTasks(content: string): Task[] {
         continue;
       }
 
+      const dueDateMatch = line.match(/^- \*\*due_date:\*\*\s*(.+)$/);
+      if (dueDateMatch) {
+        currentTask.dueDate = dueDateMatch[1].trim();
+        continue;
+      }
+
       // Subtasks header
       if (line.match(/^### Subtasks/)) {
         isInSubtasks = true;
@@ -278,4 +284,37 @@ export async function getAllProjects(workspaceFilter?: string): Promise<ProjectS
   }
 
   return projects;
+}
+
+/**
+ * Task with project context for dashboard views
+ */
+export interface TaskWithProject extends Task {
+  workspace: string;
+  projectSlug: string;
+  projectTitle: string;
+}
+
+/**
+ * Get all tasks across all projects with project context
+ */
+export async function getAllTasksWithProject(workspaceFilter?: string): Promise<TaskWithProject[]> {
+  const paths = getAllProjectPaths(workspaceFilter);
+  const allTasks: TaskWithProject[] = [];
+
+  for (const { workspace, slug } of paths) {
+    const project = await getProject(workspace, slug);
+    if (project) {
+      for (const task of project.tasks.items) {
+        allTasks.push({
+          ...task,
+          workspace,
+          projectSlug: slug,
+          projectTitle: project.prd.frontmatter.title,
+        });
+      }
+    }
+  }
+
+  return allTasks;
 }

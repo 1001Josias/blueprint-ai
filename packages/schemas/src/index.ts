@@ -51,6 +51,7 @@ export const taskSchema = z.object({
   status: taskStatusSchema,
   priority: taskPrioritySchema,
   description: z.string(),
+  dueDate: z.string().optional(),
   subtasks: z.array(subtaskSchema).default([]),
   comments: z.array(z.string()).default([]),
 });

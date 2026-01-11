@@ -28,22 +28,22 @@ Implemented workflow grouping mode with toggle UI in sidebar.
 
 ## Task 2: New Dashboard Views
 - **id:** nav-102
-- **status:** todo
+- **status:** done
 - **priority:** medium
 - **description:** Implement new high-level views for task aggregation.
 
 ### Subtasks
 
-#### [ ] "Today" View
+#### [x] "Today" View
 Aggregate tasks due today or marked for today across all/filtered projects.
 
-#### [ ] "Upcoming" View
+#### [x] "Upcoming" View
 List tasks scheduled for the near future.
 
-#### [ ] "Calendar" View
+#### [x] "Calendar" View
 Visual calendar representation of project milestones and task due dates.
 
-#### [ ] "Reports" View
+#### [x] "Reports" View
 High-level stats and reporting dashboard (as seen in the design concept).
 
 ---
