@@ -12,10 +12,10 @@ updated_at: "2026-01-07"
 - [x] Create query param hooks for common patterns:
   - [x] `useTaskIdParam()` - selected task ID
   - [x] `useFilterParam()` - task list filter
-  - [ ] `useTabParam()` - active tab selection
+  - [x] `useTabParam()` - active tab selection
 - [x] Refactor `TaskList` to use nuqs instead of `window.history`
 - [x] Refactor `TaskDetailModal` to read task ID from nuqs
-- [ ] Test URL sharing and bookmarking
+- [x] Test URL sharing and bookmarking
 
 ## Task 2: Implement Zustand for Global State
 - [x] Install `zustand` package
