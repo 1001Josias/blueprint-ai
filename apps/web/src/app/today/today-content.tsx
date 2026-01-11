@@ -178,6 +178,7 @@ function TodayContent({ tasks }: TodayPageProps) {
           task={selectedTask}
           workspace={selectedTask.workspace}
           projectSlug={selectedTask.projectSlug}
+          isOpen={!!selectedTask}
           onClose={() => setSelectedTaskId(null)}
         />
       )}

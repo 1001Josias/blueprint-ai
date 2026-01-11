@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { Task, TaskStatus } from "@/lib/schemas";
 import { useTaskStore } from "@/lib/stores";
+import { MarkdownContent } from "./markdown-content";
+import { FormattingToolbar } from "./formatting-toolbar";
 
 interface TaskDetailModalProps {
   task: Task | null;
@@ -207,7 +209,7 @@ export function TaskDetailModal({
                 <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">
                   Description
                 </h3>
-                <p className="text-slate-300 leading-relaxed">{task.description}</p>
+                <MarkdownContent content={task.description} />
               </div>
             )}
 
@@ -273,10 +275,21 @@ export function TaskDetailModal({
                     >
                       <div className="flex items-start gap-2">
                         <span className="shrink-0 text-violet-400">💬</span>
-                        <p className="text-sm text-slate-300">{comment}</p>
+                        <MarkdownContent content={comment} className="text-sm" />
                       </div>
                     </div>
                   ))}
+                </div>
+                
+                {/* Formatting Toolbar (placeholder for future comment input) */}
+                <div className="mt-4 p-3 rounded-xl bg-slate-800/30 border border-slate-700/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-slate-500">Add a comment</span>
+                    <FormattingToolbar onInsert={() => {}} className="opacity-50" />
+                  </div>
+                  <div className="text-xs text-slate-600 italic">
+                    Comment editing coming soon...
+                  </div>
                 </div>
               </div>
             )}
