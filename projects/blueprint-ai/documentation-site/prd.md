@@ -2,9 +2,9 @@
 id: documentation-site
 title: Documentation Site
 status: draft
-version: '1.1'
-created_at: '2026-01-05'
-updated_at: '2026-01-05'
+version: "1.1"
+created_at: "2026-01-05"
+updated_at: "2026-01-05"
 author: ai-agent
 ---
 
@@ -12,7 +12,7 @@ author: ai-agent
 
 ## Objective
 
-Create a dedicated documentation site for BlueprintAI, separate from the main application. The goal is to provide a complete and professional guide for users and developers, facilitating project adoption and contribution.
+Create a dedicated documentation site for Transmute, separate from the main application. The goal is to provide a complete and professional guide for users and developers, facilitating project adoption and contribution.
 
 ## Context
 
@@ -21,14 +21,16 @@ Currently, documentation is scattered across Markdown files within the repositor
 ## Functional Requirements
 
 ### Documentation Platform
+
 1. **Framework**: Use **Fumadocs** (Next.js App Router).
 2. **Content Structure**:
    - **Getting Started**: Installation, local configuration, and "Hello World".
-   - **User Guide**: How to create PRDs, Tasks, and use BlueprintAI features.
+   - **User Guide**: How to create PRDs, Tasks, and use Transmute features.
    - **Agent Reference**: Technical documentation of schemas and standards. **Note:** The `AGENTS.md` file will be kept in the root for LLM consumption; the site will serve as a visualization for humans.
    - **API Reference**: Documentation of internal endpoints (e.g., task updates).
 
 ### Site Features
+
 1. **Full-text Search**: Indexing of all content using Fumadocs search.
 2. **Dark Mode**: Support for dark theme, aligned with the main app's visual identity.
 3. **MDX**: Support for React components and TypeTable for props/schema documentation.
@@ -37,7 +39,7 @@ Currently, documentation is scattered across Markdown files within the repositor
 ## Non-Functional Requirements
 
 - **Performance**: The site must load instantly (Next.js SSG/SSR).
-- **Design**: Maintain visual consistency with BlueprintAI (violet/dark color palette).
+- **Design**: Maintain visual consistency with Transmute (violet/dark color palette).
 - **Maintainability**: Content written in MDX.
 - **Visual Richness**: Prioritize inclusion of screenshots/GIFs whenever describing UI functionalities.
 

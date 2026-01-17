@@ -1,6 +1,6 @@
 ---
 title: API Reference
-description: API Endpoints for BlueprintAI
+description: API Endpoints for Transmute
 ---
 
 # API Reference
@@ -16,13 +16,13 @@ Updates the status of a specific task or its subtasks.
 
 #### Request Body
 
-| Field | Type | Required | Description |
-| :--- | :--- | :--- | :--- |
-| `projectSlug` | `string` | Yes | The slug of the project containing the task. |
-| `taskId` | `string` | Yes | The ID of the task to update (in URL and body). |
-| `status` | `string` | No | New status (`todo`, `in_progress`, `done`, `blocked`). |
-| `subtaskIndex` | `number` | No | Index of the subtask to update. |
-| `completed` | `boolean` | No | Completion status of the subtask. |
+| Field          | Type      | Required | Description                                            |
+| :------------- | :-------- | :------- | :----------------------------------------------------- |
+| `projectSlug`  | `string`  | Yes      | The slug of the project containing the task.           |
+| `taskId`       | `string`  | Yes      | The ID of the task to update (in URL and body).        |
+| `status`       | `string`  | No       | New status (`todo`, `in_progress`, `done`, `blocked`). |
+| `subtaskIndex` | `number`  | No       | Index of the subtask to update.                        |
+| `completed`    | `boolean` | No       | Completion status of the subtask.                      |
 
 #### Example: Update Main Task
 
@@ -56,4 +56,3 @@ curl -X PATCH http://localhost:3000/api/tasks/task-001 \
   "updatedAt": "2024-01-20"
 }
 ```
-

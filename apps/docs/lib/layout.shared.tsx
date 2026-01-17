@@ -1,6 +1,6 @@
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
 
-import { Logo } from '@repo/ui';
+import { Logo } from "@repo/ui";
 
 export function baseOptions(): BaseLayoutProps {
   return {
@@ -8,7 +8,7 @@ export function baseOptions(): BaseLayoutProps {
       title: (
         <>
           <Logo width={24} height={24} className="text-foreground" />
-          <span className="font-semibold ml-2">BlueprintAI</span>
+          <span className="font-semibold ml-2">Transmute</span>
         </>
       ),
     },

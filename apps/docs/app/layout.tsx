@@ -1,44 +1,44 @@
-import { RootProvider } from 'fumadocs-ui/provider/next';
-import './global.css';
-import { Inter } from 'next/font/google';
-import type { Metadata } from 'next';
+import { RootProvider } from "fumadocs-ui/provider/next";
+import "./global.css";
+import { Inter } from "next/font/google";
+import type { Metadata } from "next";
 
 const inter = Inter({
-  subsets: ['latin'],
+  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
   title: {
-    default: 'BlueprintAI Documentation',
-    template: '%s | BlueprintAI',
+    default: "Transmute Documentation",
+    template: "%s | Transmute",
   },
   description:
-    'Intelligent Task Management System designed for AI Agents and Humans. Bridge the gap between AI-generated workflows and enterprise execution.',
+    "Intelligent Task Management System designed for AI Agents and Humans. Bridge the gap between AI-generated workflows and enterprise execution.",
   keywords: [
-    'task management',
-    'ai agents',
-    'automation',
-    'project management',
-    'prd',
-    'blueprintai',
-    'jira integration',
-    'linear integration',
+    "task management",
+    "ai agents",
+    "automation",
+    "project management",
+    "prd",
+    "transmute",
+    "jira integration",
+    "linear integration",
   ],
-  authors: [{ name: 'BlueprintAI Team' }],
-  creator: 'BlueprintAI',
+  authors: [{ name: "Transmute Team" }],
+  creator: "Transmute",
   openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    siteName: 'BlueprintAI Documentation',
-    title: 'BlueprintAI Documentation',
+    type: "website",
+    locale: "en_US",
+    siteName: "Transmute Documentation",
+    title: "Transmute Documentation",
     description:
-      'Intelligent Task Management System designed for AI Agents and Humans.',
+      "Intelligent Task Management System designed for AI Agents and Humans.",
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'BlueprintAI Documentation',
+    card: "summary_large_image",
+    title: "Transmute Documentation",
     description:
-      'Intelligent Task Management System designed for AI Agents and Humans.',
+      "Intelligent Task Management System designed for AI Agents and Humans.",
   },
   robots: {
     index: true,
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Layout({ children }: LayoutProps<'/'>) {
+export default function Layout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
       <body className="flex flex-col min-h-screen">

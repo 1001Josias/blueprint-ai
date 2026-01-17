@@ -2,9 +2,9 @@
 id: integrations
 title: Third-Party Integrations
 status: draft
-version: '1.0'
-created_at: '2026-01-06'
-updated_at: '2026-01-06'
+version: "1.0"
+created_at: "2026-01-06"
+updated_at: "2026-01-06"
 author: ai-agent
 ---
 
@@ -12,7 +12,7 @@ author: ai-agent
 
 ## Objective
 
-Connect BlueprintAI with external tools to enable data synchronization and export capabilities.
+Connect Transmute with external tools to enable data synchronization and export capabilities.
 
 ## Context
 
@@ -21,11 +21,11 @@ Users often use specialized tools for issue tracking (Jira, Linear) or code mana
 ## Functional Requirements
 
 1.  **Exports**:
-    -   Export tasks to GitHub Issues.
-    -   Export tasks to Jira.
-    -   Export tasks to Linear.
-    -   Bulk export to CSV/JSON.
+    - Export tasks to GitHub Issues.
+    - Export tasks to Jira.
+    - Export tasks to Linear.
+    - Bulk export to CSV/JSON.
 
 ## Success Metrics
 
-1.  One-click export of a BlueprintAI project to a GitHub Repository (creating issues).
+1.  One-click export of a Transmute project to a GitHub Repository (creating issues).

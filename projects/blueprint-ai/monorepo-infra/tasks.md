@@ -1,13 +1,14 @@
 ---
 project_id: monorepo-infra
-prd_version: '1.0'
-created_at: '2026-01-05'
-updated_at: '2026-01-05'
+prd_version: "1.0"
+created_at: "2026-01-05"
+updated_at: "2026-01-05"
 ---
 
 # Tasks: Monorepo Infrastructure
 
 ## Task 1: Workspace Setup
+
 - **id:** task-201
 - **status:** done
 - **priority:** critical
@@ -16,17 +17,21 @@ updated_at: '2026-01-05'
 ### Subtasks
 
 #### [x] Configure pnpm workspaces
+
 Create `pnpm-workspace.yaml` defining `apps/*` and `packages/*`.
 
 #### [x] Initialize Turborepo
+
 Create `turbo.json` with `build`, `dev`, `lint` pipelines.
 
 #### [x] Adjust root package.json
+
 Define global scripts and remove dependencies that will be moved to apps.
 
 ---
 
 ## Task 2: Configuration Extraction
+
 - **id:** task-202
 - **status:** done
 - **priority:** high
@@ -35,17 +40,21 @@ Define global scripts and remove dependencies that will be moved to apps.
 ### Subtasks
 
 #### [x] Create packages/tsconfig
+
 Package with `tsconfig.base.json` and `tsconfig.next.json`.
 
 #### [x] Create packages/eslint-config
+
 Package with base ESLint/Prettier configuration.
 
 #### [x] Create packages/tailwind-config
-Package with Tailwind preset (BlueprintAI colors, fonts).
+
+Package with Tailwind preset (Transmute colors, fonts).
 
 ---
 
 ## Task 3: Web App Migration
+
 - **id:** task-203
 - **status:** done
 - **priority:** critical
@@ -54,17 +63,21 @@ Package with Tailwind preset (BlueprintAI colors, fonts).
 ### Subtasks
 
 #### [x] Move files
+
 Move `src/`, `public/`, and config files to `apps/web`.
 
 #### [x] Adjust internal imports
+
 Fix relative paths and aliases (`@/*`).
 
 #### [x] Validate isolated execution
+
 Ensure the app runs correctly within the new location.
 
 ---
 
 ## Task 4: Shared Code Extraction
+
 - **id:** task-204
 - **status:** done
 - **priority:** medium
@@ -73,10 +86,13 @@ Ensure the app runs correctly within the new location.
 ### Subtasks
 
 #### [x] Extract packages/schemas
+
 Move Zod definitions to shared package.
 
 #### [x] Extract packages/utils
+
 Move generic helpers.
 
 #### [x] Refactor Web App to use packages
+
 Replace local imports with `@blueprint/schemas` and `@blueprint/utils` imports.

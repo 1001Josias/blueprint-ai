@@ -3,13 +3,13 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/sidebar";
 import { getAllProjects } from "@/lib/markdown";
-import { NuqsAdapter } from 'nuqs/adapters/next/app'
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { headers } from "next/headers";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "BlueprintAI",
+  title: "Transmute",
   description: "AI-Powered Task Management",
 };
 
@@ -28,9 +28,7 @@ export default async function RootLayout({
         <NuqsAdapter>
           <div className="flex min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950">
             <Sidebar projects={projects} />
-            <main className="flex-1 overflow-y-auto">
-              {children}
-            </main>
+            <main className="flex-1 overflow-y-auto">{children}</main>
           </div>
         </NuqsAdapter>
       </body>
