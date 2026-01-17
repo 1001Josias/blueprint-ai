@@ -5,8 +5,9 @@
  * Creates isolated environments for each task with AI-generated branch names.
  */
 
-import type { Plugin } from "@opencode-ai/plugin";
+import type { Plugin, PluginInput } from "@opencode-ai/plugin";
 import { tool } from "@opencode-ai/plugin";
+import { generateBranchName, type OpenCodeClient } from "./core/naming";
 
 // Re-export types and functions for programmatic use
 export * from "./core/naming";
@@ -24,8 +25,10 @@ export * from "./adapters/terminal/types";
  * - Session persistence across restarts
  * - Terminal integration (WezTerm)
  */
-export const TransmutePlugin: Plugin = async (_ctx) => {
-  // const { $, directory } = ctx; // Available for future use
+export const TransmutePlugin: Plugin = async (ctx: PluginInput) => {
+  // Extract client for AI operations
+  // Cast to our simplified OpenCodeClient interface
+  const client = ctx.client as unknown as OpenCodeClient;
 
   return {
     // Custom tools available to the LLM
@@ -60,16 +63,37 @@ export const TransmutePlugin: Plugin = async (_ctx) => {
             .optional()
             .describe("Base branch to create worktree from (default: main)"),
         },
-        async execute(args, _context) {
-          // TODO: Implement in Task 7 (oc-trans-007)
-          // This is a placeholder that will be replaced with the full implementation
+        async execute(args, context) {
+          // Generate branch name using AI (or fallback)
+          const branchResult = await generateBranchName(
+            {
+              id: args.taskId,
+              title: args.title,
+              description: args.description,
+              priority: args.priority,
+              type: args.type,
+            },
+            client,
+            context.sessionID,
+          );
+
+          // TODO: Implement full flow in Task 7 (oc-trans-007)
+          // 1. Check if session exists for taskId
+          // 2. If exists, return existing worktree
+          // 3. Create worktree with generated branch name
+          // 4. Persist session
+          // 5. Open terminal in worktree
+          // 6. Execute afterCreate hooks
+          // 7. Return result
+
           return JSON.stringify({
             status: "placeholder",
-            message: `Would create worktree for task: ${args.taskId} - ${args.title}`,
+            message: `Would create worktree for task: ${args.taskId}`,
             taskId: args.taskId,
             title: args.title,
-            description: args.description,
-            type: args.type || "feat",
+            branch: branchResult.branch,
+            branchType: branchResult.type,
+            branchSlug: branchResult.slug,
             baseBranch: args.baseBranch || "main",
           });
         },
