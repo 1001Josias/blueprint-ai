@@ -14,6 +14,9 @@ interface UpdateTaskRequest {
   // Comment support
   comment?: string;
   commentTarget?: "task" | "subtask";
+  action?: "add_comment" | "edit_comment" | "delete_comment";
+  text?: string;
+  commentIndex?: number;
 }
 
 export async function PATCH(
@@ -46,30 +49,22 @@ export async function PATCH(
     const { data: frontmatter, content: markdownContent } = matter(content);
     let updatedMarkdown = markdownContent;
 
-    // Handle Subtask Update
+    // Handle Subtask Update (Completion Toggle)
     if (typeof subtaskIndex === "number" && typeof completed === "boolean") {
-      // We look for the header (## Task...) followed by the ID
-      // And capture until the next TASK header (## ), or horizontal rule (---), or EOF
-      // IMPORTANT: We must NOT stop at ### (Subtasks) or #### (Individual subtasks)
+      // ... existing logic for subtask toggle ...
       const taskRegex = new RegExp(
         `(#+ [^\\n]*\\n)- \\*\\*id:\\*\\* ${taskId}[\\s\\S]*?(?=\\n---|\\n## |$)`, 
         "g"
       );
       
       const taskMatch = taskRegex.exec(markdownContent);
-      
       if (!taskMatch) {
-         return NextResponse.json(
-          { error: `Task ${taskId} not found` },
-          { status: 404 }
-        );
+         return NextResponse.json({ error: `Task ${taskId} not found` }, { status: 404 });
       }
 
       const taskBlock = taskMatch[0];
       const taskBlockStart = taskMatch.index;
 
-      // 2. Find all subtasks in this block
-      // Subtasks start with #### [ ] or #### [x]
       const subtaskRegex = /(#### \[([ x])\])/g;
       let match;
       let currentIndex = 0;
@@ -86,19 +81,14 @@ export async function PATCH(
       }
 
       if (targetSubtaskStart === -1) {
-        return NextResponse.json(
-          { error: `Subtask index ${subtaskIndex} not found in task ${taskId}` },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: `Subtask index ${subtaskIndex} not found` }, { status: 404 });
       }
 
-      // 3. Replace the status character
       const newStatusMark = completed ? "x" : " ";
       const beforeSubtask = taskBlock.substring(0, targetSubtaskStart);
       const afterSubtask = taskBlock.substring(targetSubtaskStart + targetSubtaskLength);
       const newTaskBlock = beforeSubtask + `#### [${newStatusMark}]` + afterSubtask;
 
-      // 4. Replace the task block in the full content
       const beforeTask = markdownContent.substring(0, taskBlockStart);
       const afterTask = markdownContent.substring(taskBlockStart + taskBlock.length);
       updatedMarkdown = beforeTask + newTaskBlock + afterTask;
@@ -106,12 +96,10 @@ export async function PATCH(
     } 
     // Handle Main Task Status Update
     else if (status) {
+       // ... existing logic for status update ...
       const validStatuses = ["todo", "in_progress", "done", "blocked"];
       if (!validStatuses.includes(status)) {
-        return NextResponse.json(
-          { error: `Invalid status. Must be one of: ${validStatuses.join(", ")}` },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "Invalid status" }, { status: 400 });
       }
 
       const taskIdPattern = new RegExp(
@@ -120,106 +108,155 @@ export async function PATCH(
       );
 
       updatedMarkdown = markdownContent.replace(taskIdPattern, `$1${status}`);
-      
       if (updatedMarkdown === markdownContent) {
-        return NextResponse.json(
-          { error: `Task ${taskId} not found` },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: `Task ${taskId} not found` }, { status: 404 });
       }
     } 
-    // Handle Add Comment
-    else if (comment && comment.trim()) {
-      const commentLine = `- **comment:** ${comment.trim()}`;
+    // Handle Comment Actions (Add, Edit, Delete)
+    else if (comment || body.action) {
+      // Logic for comments
+      const action = body.action || "add_comment"; // default to add
+      const rawText = comment || body.text || "";
+      // Escape newlines for storage
+      const text = rawText.trim().replace(/\n/g, "\\n");
+
+      if ((action === "add_comment" || action === "edit_comment") && !text) {
+         return NextResponse.json({ error: "Comment text is required" }, { status: 400 });
+      }
       
-      // Find the task block
       const taskRegex = new RegExp(
         `(## Task \\d+:[^\\n]*\\n)- \\*\\*id:\\*\\* ${taskId}[\\s\\S]*?(?=\\n---|\\n## |$)`,
         "g"
       );
       
       const taskMatch = taskRegex.exec(markdownContent);
-      
       if (!taskMatch) {
-        return NextResponse.json(
-          { error: `Task ${taskId} not found` },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: `Task ${taskId} not found` }, { status: 404 });
       }
 
-      const taskBlock = taskMatch[0];
+      let taskBlock = taskMatch[0];
       const taskBlockStart = taskMatch.index;
 
-      if (commentTarget === "subtask" && typeof subtaskIndex === "number") {
-        // Add comment to a specific subtask
-        // Find the subtask and insert comment after its description
+      // Helper to find subtask range
+      const findSubtaskRange = (block: string, index: number) => {
         const subtaskRegex = /(#### \[[ x]\][^\n]*)/g;
         let match;
         let currentIndex = 0;
-        let targetSubtaskEnd = -1;
-
-        while ((match = subtaskRegex.exec(taskBlock)) !== null) {
-          if (currentIndex === subtaskIndex) {
-            // Find the end of this subtask (next #### or ### or ## or --- or EOF of block)
-            const afterMatch = taskBlock.substring(match.index + match[0].length);
+        
+        while ((match = subtaskRegex.exec(block)) !== null) {
+          if (currentIndex === index) {
+            const start = match.index;
+            const afterMatch = block.substring(start + match[0].length);
             const nextSectionMatch = afterMatch.match(/\n(?=####|\n###|\n##|\n---)/);
-            
-            if (nextSectionMatch) {
-              targetSubtaskEnd = match.index + match[0].length + nextSectionMatch.index!;
-            } else {
-              targetSubtaskEnd = taskBlock.length;
-            }
-            break;
+            const end = nextSectionMatch 
+              ? start + match[0].length + nextSectionMatch.index! 
+              : block.length;
+            return { start, end };
           }
           currentIndex++;
         }
+        return null;
+      };
 
-        if (targetSubtaskEnd === -1) {
-          return NextResponse.json(
-            { error: `Subtask index ${subtaskIndex} not found in task ${taskId}` },
-            { status: 404 }
-          );
-        }
+      if (commentTarget === "subtask" && typeof subtaskIndex === "number") {
+        // --- SUBTASK COMMENT LOGIC ---
+        const range = findSubtaskRange(taskBlock, subtaskIndex);
+        if (!range) return NextResponse.json({ error: "Subtask not found" }, { status: 404 });
 
-        // Insert comment at the end of the subtask content
-        const beforeComment = taskBlock.substring(0, targetSubtaskEnd);
-        const afterComment = taskBlock.substring(targetSubtaskEnd);
-        const newTaskBlock = beforeComment.trimEnd() + "\n" + commentLine + afterComment;
-
-        const beforeTask = markdownContent.substring(0, taskBlockStart);
-        const afterTask = markdownContent.substring(taskBlockStart + taskBlock.length);
-        updatedMarkdown = beforeTask + newTaskBlock + afterTask;
-
-      } else {
-        // Add comment to the task itself
-        // Insert after the last metadata line (before ### Subtasks or end of metadata)
-        const subtasksHeaderMatch = taskBlock.match(/\n### Subtasks/);
+        let subtaskContent = taskBlock.substring(range.start, range.end);
         
-        let insertPosition: number;
-        if (subtasksHeaderMatch && subtasksHeaderMatch.index !== undefined) {
-          // Insert before ### Subtasks
-          insertPosition = subtasksHeaderMatch.index;
-        } else {
-          // Find end of metadata lines (lines starting with "- **")
-          const metadataEndMatch = taskBlock.match(/(?:- \*\*\w+:\*\*[^\n]*\n)+/);
-          if (metadataEndMatch) {
-            insertPosition = metadataEndMatch.index! + metadataEndMatch[0].length;
-          } else {
-            insertPosition = taskBlock.length;
+        if (action === "add_comment") {
+          // Indent comment for subtask scope if desired, or just list it below
+          // Standard: - **comment:** text
+          // For subtask, we want it "inside" the subtask block.
+          // Since our parser reads comments *after* subtask title until next subtask, 
+          // appending to subtaskContent is correct.
+          subtaskContent = subtaskContent.trimEnd() + `\n- **comment:** ${text.trim()}\n`;
+        } else if (action === "delete_comment" || action === "edit_comment") {
+          // Find the Nth comment in this subtask
+          const commentRegex = /(- \*\*comment:\*\* (.*))/g;
+          let match;
+          let cIndex = 0;
+          let newSubtaskContent = subtaskContent;
+          const targetIndex = body.commentIndex ?? -1;
+
+          // We need to rebuild the string or replace specific match
+          // Easier to split, modify lines, rejoin? 
+          // Or define strict regex construction.
+          // Let's iterate matches and replace the target one.
+          
+          const matches = Array.from(subtaskContent.matchAll(commentRegex));
+          if (targetIndex >= 0 && targetIndex < matches.length) {
+            const targetMatch = matches[targetIndex];
+            const start = targetMatch.index!;
+            const end = start + targetMatch[0].length;
+            
+            if (action === "delete_comment") {
+              newSubtaskContent = subtaskContent.substring(0, start) + subtaskContent.substring(end);
+              // Clean up potential double newlines
+            } else { // edit
+               newSubtaskContent = subtaskContent.substring(0, start) + `- **comment:** ${text.trim()}` + subtaskContent.substring(end);
+            }
+            subtaskContent = newSubtaskContent;
           }
         }
 
-        const beforeComment = taskBlock.substring(0, insertPosition).trimEnd();
-        const afterComment = taskBlock.substring(insertPosition);
-        const newTaskBlock = beforeComment + "\n" + commentLine + afterComment;
+        taskBlock = taskBlock.substring(0, range.start) + subtaskContent + taskBlock.substring(range.end);
 
-        const beforeTask = markdownContent.substring(0, taskBlockStart);
-        const afterTask = markdownContent.substring(taskBlockStart + taskBlock.length);
-        updatedMarkdown = beforeTask + newTaskBlock + afterTask;
+      } else {
+        // --- MAIN TASK COMMENT LOGIC ---
+        
+        if (action === "add_comment") {
+             // Find insertion point (before ### Subtasks or end of metadata)
+            const subtasksHeaderMatch = taskBlock.match(/\n### Subtasks/);
+            let insertPosition;
+            if (subtasksHeaderMatch && subtasksHeaderMatch.index !== undefined) {
+              insertPosition = subtasksHeaderMatch.index;
+            } else {
+              const metadataEndMatch = taskBlock.match(/(?:- \*\*\w+:\*\*[^\n]*\n)+/);
+              insertPosition = metadataEndMatch ? metadataEndMatch.index! + metadataEndMatch[0].length : taskBlock.length;
+            }
+
+            const before = taskBlock.substring(0, insertPosition).trimEnd();
+            const after = taskBlock.substring(insertPosition);
+            taskBlock = before + `\n- **comment:** ${text.trim()}` + after;
+
+        } else if (action === "delete_comment" || action === "edit_comment") {
+             // Find comments that are NOT inside subtasks
+             // This is tricky with regex global on the whole block.
+             // Strategy: Extract the "Metadata Section" (before ### Subtasks)
+             const subtasksHeaderMatch = taskBlock.match(/\n### Subtasks/);
+             const metadataEnd = subtasksHeaderMatch?.index ?? taskBlock.length;
+             let metadataSection = taskBlock.substring(0, metadataEnd);
+             const rest = taskBlock.substring(metadataEnd);
+
+             const commentRegex = /(- \*\*comment:\*\* (.*))/g;
+             const matches = Array.from(metadataSection.matchAll(commentRegex));
+             const targetIndex = body.commentIndex ?? -1;
+
+             if (targetIndex >= 0 && targetIndex < matches.length) {
+                const targetMatch = matches[targetIndex];
+                const start = targetMatch.index!;
+                const end = start + targetMatch[0].length;
+
+                if (action === "delete_comment") {
+                  metadataSection = metadataSection.substring(0, start) + metadataSection.substring(end);
+                } else {
+                  metadataSection = metadataSection.substring(0, start) + `- **comment:** ${text.trim()}` + metadataSection.substring(end);
+                }
+                taskBlock = metadataSection + rest;
+             }
+        }
       }
+
+      // Reconstruct full file
+      const beforeTask = markdownContent.substring(0, taskBlockStart);
+      const afterTask = markdownContent.substring(taskBlockStart + taskMatch[0].length); // Use original length
+      updatedMarkdown = beforeTask + taskBlock + afterTask;
+
     } else {
       return NextResponse.json(
-        { error: "Either status, (subtaskIndex + completed), or comment must be provided" },
+        { error: "Invalid request" },
         { status: 400 }
       );
     }

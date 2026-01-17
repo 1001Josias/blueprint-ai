@@ -60,16 +60,29 @@ export function TaskList({ tasks, workspace, projectSlug }: TaskListProps) {
   // IDs for SortableContext
   const taskIds = useMemo(() => filteredTasks.map((t) => t.id), [filteredTasks]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     
     if (over && active.id !== over.id) {
       setOrderedTasks((items) => {
         const oldIndex = items.findIndex((t) => t.id === active.id);
         const newIndex = items.findIndex((t) => t.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
+        const newItems = arrayMove(items, oldIndex, newIndex);
+        
+        // Persist new order
+        const newOrderIds = newItems.map(t => t.id);
+        
+        fetch(`/api/projects/${workspace}/${projectSlug}/tasks/reorder`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ taskIds: newOrderIds }),
+        }).catch(err => {
+          console.error("Failed to persist order", err);
+          // Revert on error? For now just log.
+        });
+
+        return newItems;
       });
-      // TODO Task 2: Call API to persist new order
     }
   };
 

@@ -1,13 +1,14 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { useTransition, useEffect } from "react";
+import { useTransition, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { Task, TaskStatus } from "@/lib/schemas";
 import { useTaskStore } from "@/lib/stores";
 import { MarkdownContent } from "./markdown-content";
-import { FormattingToolbar } from "./formatting-toolbar";
+import { CommentInput } from "./comment-input";
+import { SubtaskDetailModal } from "./subtask-detail-modal";
 
 interface TaskDetailModalProps {
   task: Task | null;
@@ -57,7 +58,10 @@ export function TaskDetailModal({
   const [, startTransition] = useTransition();
   const router = useRouter();
 
-  // Clear optimistic state when server state catches up
+  // Local state for UI interactions
+  const [activeSubtaskComment, setActiveSubtaskComment] = useState<number | null>(null);
+  const [editingComment, setEditingComment] = useState<{ target: "task" | "subtask", index: number, subtaskIndex?: number } | null>(null);
+
   useEffect(() => {
     if (task && currentStatus === task.status && !pending) {
       clearOptimistic(task.id);
@@ -71,6 +75,12 @@ export function TaskDetailModal({
   const priority = priorityConfig[task.priority];
   const completedSubtasks = optimisticSubtasks.filter((s) => s.completed).length;
   const totalSubtasks = optimisticSubtasks.length;
+
+  const refreshData = () => {
+    startTransition(() => {
+      router.refresh();
+    });
+  };
 
   const cycleStatus = async () => {
     const currentIndex = statusOrder.indexOf(currentStatus);
@@ -87,13 +97,8 @@ export function TaskDetailModal({
         body: JSON.stringify({ workspace, projectSlug, status: newStatus }),
       });
 
-      if (!response.ok) {
-        clearOptimistic(task.id);
-      } else {
-        startTransition(() => {
-          router.refresh();
-        });
-      }
+      if (!response.ok) clearOptimistic(task.id);
+      else refreshData();
     } catch {
       clearOptimistic(task.id);
     } finally {
@@ -121,13 +126,8 @@ export function TaskDetailModal({
         }),
       });
 
-      if (!response.ok) {
-        clearOptimistic(task.id);
-      } else {
-        startTransition(() => {
-          router.refresh();
-        });
-      }
+      if (!response.ok) clearOptimistic(task.id);
+      else refreshData();
     } catch {
       clearOptimistic(task.id);
     } finally {
@@ -135,174 +135,231 @@ export function TaskDetailModal({
     }
   };
 
+  const handleCommentAction = async (
+    action: "add_comment" | "edit_comment" | "delete_comment",
+    text?: string,
+    targetType: "task" | "subtask" = "task",
+    subtaskIndex?: number,
+    commentIndex?: number
+  ) => {
+    try {
+      const response = await fetch(`/api/tasks/${task.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          workspace,
+          projectSlug,
+          action,
+          text,
+          commentTarget: targetType,
+          subtaskIndex,
+          commentIndex
+        }),
+      });
+
+      if (response.ok) {
+        refreshData();
+        setEditingComment(null);
+      }
+    } catch (error) {
+      console.error("Failed to update comment", error);
+    }
+  };
+
+  const handleSubtaskCommentAction = async (
+    subtaskIndex: number,
+    action: "add_comment" | "edit_comment" | "delete_comment",
+    text?: string,
+    commentIndex?: number
+  ) => {
+    return handleCommentAction(action, text, "subtask", subtaskIndex, commentIndex);
+  };
+
   return (
-    <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <Dialog.Portal>
-        {/* Overlay */}
-        <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 z-50" />
-
-        {/* Content */}
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 shadow-2xl shadow-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] duration-200">
-          {/* Header */}
-          <div className="p-6 border-b border-slate-700/50">
-            <div className="flex items-start gap-4">
-              {/* Status button */}
-              <button
-                onClick={cycleStatus}
-                disabled={pending}
-                className={cn(
-                  "w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold shrink-0 transition-all duration-200",
-                  "hover:scale-110 hover:ring-2 hover:ring-violet-500/50",
-                  pending && "opacity-50 cursor-wait",
-                  status.color
-                )}
-                title="Click to change status"
-              >
-                {pending ? <span className="animate-spin">⟳</span> : status.icon}
-              </button>
-
-              <div className="flex-1 min-w-0">
-                <Dialog.Title className="text-xl font-semibold text-white mb-2">
-                  {task.title}
-                </Dialog.Title>
-
-                {/* Badges */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span
-                    className={cn(
-                      "px-2.5 py-1 text-xs font-medium rounded-lg border transition-colors",
-                      status.color
-                    )}
-                  >
-                    {status.label}
-                  </span>
-                  <span
-                    className={cn(
-                      "px-2.5 py-1 text-xs font-medium rounded-lg border",
-                      priority.color
-                    )}
-                  >
-                    {priority.label} Priority
-                  </span>
-                  {totalSubtasks > 0 && (
-                    <span className="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-700/50 text-slate-300 border border-slate-600/50">
-                      {completedSubtasks}/{totalSubtasks} subtasks
-                    </span>
+    <>
+      <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" />
+          <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 shadow-2xl shadow-black/50 p-0 flex flex-col max-h-[85vh]">
+            
+            {/* Header */}
+            <div className="p-6 border-b border-slate-700/50 shrink-0">
+              <div className="flex items-start gap-4">
+                <button
+                  onClick={cycleStatus}
+                  disabled={pending}
+                  className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold shrink-0 transition-all duration-200",
+                    "hover:scale-110 hover:ring-2 hover:ring-violet-500/50",
+                    pending && "opacity-50 cursor-wait",
+                    status.color
                   )}
-                </div>
-              </div>
+                >
+                  {pending ? <span className="animate-spin">⟳</span> : status.icon}
+                </button>
 
-              {/* Close button */}
-              <Dialog.Close className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </Dialog.Close>
+                <div className="flex-1 min-w-0">
+                  <Dialog.Title className="text-xl font-semibold text-white mb-2 leading-tight">
+                    {task.title}
+                  </Dialog.Title>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={cn("px-2.5 py-1 text-xs font-medium rounded-lg border", status.color)}>
+                      {status.label}
+                    </span>
+                    <span className={cn("px-2.5 py-1 text-xs font-medium rounded-lg border", priority.color)}>
+                      {priority.label}
+                    </span>
+                    {totalSubtasks > 0 && (
+                      <span className="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-700/50 text-slate-300 border border-slate-600/50">
+                        {completedSubtasks}/{totalSubtasks} subtasks
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <Dialog.Close className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </Dialog.Close>
+              </div>
             </div>
-          </div>
 
-          {/* Body */}
-          <div className="p-6 max-h-[60vh] overflow-y-auto">
-            {/* Description */}
-            {task.description && (
-              <div className="mb-6">
-                <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                  Description
-                </h3>
-                <MarkdownContent content={task.description} />
-              </div>
-            )}
-
-            {/* Subtasks */}
-            {optimisticSubtasks.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
-                  Subtasks
-                </h3>
-                <div className="space-y-2">
-                  {optimisticSubtasks.map((subtask, index) => (
-                    <div
-                      key={index}
-                      className={cn(
-                        "flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all",
-                        "hover:bg-slate-800/50",
-                        subtask.completed
-                          ? "bg-emerald-900/10 border-emerald-900/30"
-                          : "bg-slate-800/30 border-slate-700/50"
-                      )}
-                      onClick={() => toggleSubtask(index)}
-                    >
-                      <div
-                        className={cn(
-                          "w-5 h-5 rounded-md flex items-center justify-center text-xs shrink-0 mt-0.5 transition-colors",
-                          subtask.completed
-                            ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                            : "bg-slate-700 text-slate-500 border border-slate-600"
-                        )}
-                      >
-                        {subtask.completed ? "✓" : ""}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p
-                          className={cn(
-                            "text-sm font-medium transition-colors",
-                            subtask.completed ? "text-slate-500 line-through" : "text-white"
-                          )}
-                        >
-                          {subtask.title}
-                        </p>
-                        {subtask.description && (
-                          <p className="text-xs text-slate-500 mt-1">{subtask.description}</p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+            {/* Body */}
+            <div className="p-6 overflow-y-auto">
+              {/* Description */}
+              {task.description && (
+                <div className="mb-8">
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Description</h3>
+                  <MarkdownContent content={task.description} />
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Comments */}
-            {task.comments && task.comments.length > 0 && (
+              {/* Subtasks */}
+              {optimisticSubtasks.length > 0 && (
+                <div className="mb-8">
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Subtasks</h3>
+                  <div className="space-y-3">
+                    {optimisticSubtasks.map((subtask, index) => (
+                      <div key={index} className="group">
+                        <div className={cn(
+                          "flex items-start gap-3 p-3 rounded-xl border transition-all relative group/item",
+                          subtask.completed ? "bg-emerald-900/10 border-emerald-900/30" : "bg-slate-800/30 border-slate-700/50"
+                        )}>
+                          <div
+                            className={cn(
+                              "w-5 h-5 rounded-md flex items-center justify-center text-xs shrink-0 mt-0.5 cursor-pointer transition-colors",
+                              subtask.completed ? "bg-green-500/20 text-green-400 border-green-500/30" : "bg-slate-700 text-slate-500 border-slate-600 hover:border-slate-500"
+                            )}
+                            onClick={() => toggleSubtask(index)}
+                          >
+                            {subtask.completed ? "✓" : ""}
+                          </div>
+                          
+                          <div className="flex-1 min-w-0 pointer-events-none">
+                            <p className={cn("text-sm font-medium transition-colors cursor-pointer pointer-events-auto", subtask.completed ? "text-slate-500 line-through" : "text-white")} onClick={() => toggleSubtask(index)}>
+                              {subtask.title}
+                            </p>
+                            {subtask.description && <p className="text-xs text-slate-500 mt-1">{subtask.description}</p>}
+                            
+                            {/* Metadata/Summary Row */}
+                            <div className="mt-2 flex items-center gap-3">
+                               {/* Comments indicator / Open Modal Button */}
+                               <button 
+                                 onClick={() => setActiveSubtaskComment(index)}
+                                 className={cn(
+                                   "pointer-events-auto text-xs font-medium flex items-center gap-1.5 transition-colors px-2 py-1 rounded bg-slate-900/50 border border-slate-700/50 hover:bg-slate-800",
+                                   subtask.comments?.length ? "text-violet-400 border-violet-500/30" : "text-slate-500"
+                                 )}
+                               >
+                                 <span className="text-[10px]">💬</span>
+                                 {subtask.comments?.length || "0"}
+                               </button>
+                            </div>
+                          </div>
+                          
+                          <button
+                             onClick={() => setActiveSubtaskComment(index)} 
+                             className="opacity-0 group-hover:opacity-100 absolute top-3 right-3 p-1.5 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-all"
+                             title="View details"
+                          >
+                            ↗
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Main Task Comments */}
               <div>
-                <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
-                  Comments ({task.comments.length})
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+                  Comments {task.comments?.length ? `(${task.comments.length})` : ""}
                 </h3>
-                <div className="space-y-3">
-                  {task.comments.map((comment, index) => (
-                    <div
-                      key={index}
-                      className="p-3 rounded-xl bg-slate-800/50 border border-slate-700/50"
-                    >
-                      <div className="flex items-start gap-2">
-                        <span className="shrink-0 text-violet-400">💬</span>
-                        <MarkdownContent content={comment} className="text-sm" />
-                      </div>
+                
+                <div className="space-y-4 mb-4">
+                  {task.comments?.map((comment, index) => (
+                    <div key={index} className="group relative p-3 rounded-xl bg-slate-800/30 border border-slate-700/30 hover:bg-slate-800/50 transition-colors">
+                       {editingComment?.target === "task" && editingComment.index === index ? (
+                          <CommentInput
+                            initialValue={comment}
+                            autoFocus
+                            onSave={async (text) => handleCommentAction("edit_comment", text, "task", undefined, index)}
+                            onCancel={() => setEditingComment(null)}
+                          />
+                       ) : (
+                         <div className="flex items-start gap-3">
+                           <div className="w-8 h-8 rounded-full bg-violet-500/10 flex items-center justify-center text-violet-400 text-xs shrink-0 font-bold border border-violet-500/20">
+                             AI
+                           </div>
+                           <div className="flex-1 min-w-0">
+                             <MarkdownContent content={comment} className="text-sm text-slate-300" />
+                           </div>
+                           <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity">
+                              <button 
+                                onClick={() => setEditingComment({ target: "task", index })}
+                                className="p-1.5 text-slate-500 hover:text-blue-400 hover:bg-slate-700/50 rounded-lg transition-colors"
+                                title="Edit"
+                              >
+                                <span className="text-sm">✎</span>
+                              </button>
+                              <button 
+                                onClick={() => handleCommentAction("delete_comment", undefined, "task", undefined, index)}
+                                className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-slate-700/50 rounded-lg transition-colors"
+                                title="Delete"
+                              >
+                                <span className="text-xl leading-none">×</span>
+                              </button>
+                           </div>
+                         </div>
+                       )}
                     </div>
                   ))}
                 </div>
-                
-                {/* Formatting Toolbar (placeholder for future comment input) */}
-                <div className="mt-4 p-3 rounded-xl bg-slate-800/30 border border-slate-700/30">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-slate-500">Add a comment</span>
-                    <FormattingToolbar onInsert={() => {}} className="opacity-50" />
-                  </div>
-                  <div className="text-xs text-slate-600 italic">
-                    Comment editing coming soon...
-                  </div>
-                </div>
-              </div>
-            )}
 
-            {/* Empty state */}
-            {!task.description && optimisticSubtasks.length === 0 && (!task.comments || task.comments.length === 0) && (
-              <div className="text-center py-8 text-slate-500">
-                <p>No additional details for this task.</p>
+                <CommentInput
+                  placeholder="Add a comment to this task..."
+                  onSave={async (text) => handleCommentAction("add_comment", text, "task")}
+                />
               </div>
-            )}
-          </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+
+      {/* Subtask Detail Modal */}
+      {activeSubtaskComment !== null && optimisticSubtasks[activeSubtaskComment] && (
+        <SubtaskDetailModal
+          subtask={optimisticSubtasks[activeSubtaskComment]}
+          isOpen={true}
+          onClose={() => setActiveSubtaskComment(null)}
+          onToggleComplete={() => toggleSubtask(activeSubtaskComment)}
+          onCommentAction={(action, text, commentIndex) => handleSubtaskCommentAction(activeSubtaskComment, action, text, commentIndex)}
+        />
+      )}
+    </>
   );
 }
+

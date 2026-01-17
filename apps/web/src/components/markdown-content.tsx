@@ -18,7 +18,9 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
 
   useEffect(() => {
     async function parseMarkdown() {
-      const result = await remark().use(html).process(content);
+      // Force hard breaks by replacing newlines with double spaces + newline
+      const processedContent = content.replace(/\n/g, "  \n");
+      const result = await remark().use(html).process(processedContent);
       setHtmlContent(result.toString());
     }
     parseMarkdown();

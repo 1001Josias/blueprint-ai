@@ -2,7 +2,7 @@
 project_id: task-dependencies
 prd_version: '1.0'
 created_at: '2026-01-06'
-updated_at: '2026-01-06'
+updated_at: '2026-01-11'
 ---
 
 # Tasks: Task Dependencies Strategies
@@ -12,11 +12,24 @@ updated_at: '2026-01-06'
 - **status:** done
 - **priority:** critical
 - **description:** Update the core data structures to support dependencies.
+- **comment:** ASDFASDF
+ASDFASDFADSFASD
 
+ASDFASDFASDF
 ### Subtasks
 
 #### [x] Update Zod Schema
 Modify `@repo/schemas` (and `apps/web/src/lib/schemas.ts`) to include `dependencies: string[]` (optional) in `taskSchema`.
+
+
+
+`asçdkj`
+
+ASDFASDF
+ASDFADFADFASD
+- **comment:** asdf\nasdfasdf
+- **comment:** asdf\nçlkjasdf\nçlkadfçasdklf
+
 
 #### [x] Update Markdown Parser
 Modify `apps/web/src/lib/markdown.ts` logic to parse the line `- **dependencies:** task-id, task-id-2`.

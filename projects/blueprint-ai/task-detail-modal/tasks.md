@@ -1,8 +1,8 @@
 ---
-project_id: "task-detail-modal"
-prd_version: "1.0"
-created_at: "2026-01-07"
-updated_at: "2026-01-07"
+project_id: task-detail-modal
+prd_version: '1.0'
+created_at: '2026-01-07'
+updated_at: '2026-01-11'
 ---
 
 # Tasks: Task Detail Modal
@@ -61,6 +61,11 @@ Update parser and schema if needed.
 - **description:** Full create, read, update, delete for comments.
 
 ### Subtasks
+
+#### [ ] Subtask Comments UI
+Allow adding comments directly to a specific subtask (isolated context).
+
+
 
 #### [ ] Edit comment functionality
 Inline edit mode with Save/Cancel.
