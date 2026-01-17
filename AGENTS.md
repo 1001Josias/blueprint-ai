@@ -240,62 +240,6 @@ export const useUIStore = create<UIStore>()(
 - **Read-Write separation:** Components should read from URL hooks for rendering and write to URL hooks for user actions.
 - **Syncing:** If an optimistic update needs to reflect immediately while the server processes, store the _pending_ state in Zustand, but the _source of truth_ for the initial view remains the server data + URL params. (See `useTaskStore.optimisticStatus`).
 
-## State Management Guidelines
-
-To ensure consistency and correct behavior across the application, follow these boundaries for state management:
-
-### 1. URL State (nuqs)
-
-**Use for:** Shareable, bookmarkable, or deep-linkable state.
-
-- **Filters/Sorts:** List filters (e.g., `?status=done`), sorting preferences.
-- **Selection:** Currently selected item (e.g., `?task=task-123`).
-- **Pagination:** Current page number (e.g., `?page=2`).
-- **View Modes:** Tabs or view toggles that affect the main content (e.g., `?view=calendar`).
-
-**Pattern:** Create a custom hook in `@/lib/search-params.ts` to wrap `useQueryState`.
-
-```typescript
-// @/lib/search-params.ts
-export function useTaskSearchParams() {
-  const [filter, setFilter] = useQueryState(
-    "filter",
-    parseAsString.withDefault("all"),
-  );
-  return { filter, setFilter };
-}
-```
-
-### 2. Application State (Zustand)
-
-**Use for:** Global app state, server cache, or user preferences that shouldn't be in the URL.
-
-- **Server Cache:** Optimistic updates, data cache (e.g., `optimisticStatus`).
-- **UI State (Ephemeral):** Loading states, pending flags, drag-and-drop intermediate state.
-- **UI Preferences (Persisted):** Sidebar collapse state, theme preference, "Show archived" sidebar toggle (if tailored to user).
-
-**Pattern:** Create feature-specific stores in `@/lib/stores/`.
-
-```typescript
-// @/lib/stores/ui-store.ts
-export const useUIStore = create<UIStore>()(
-  persist(
-    (set) => ({
-      sidebarOpen: true,
-      toggleSidebar: () =>
-        set((state) => ({ sidebarOpen: !state.sidebarOpen })),
-    }),
-    { name: "ui-store" },
-  ),
-);
-```
-
-### 3. Integration Logic
-
-- **Do NOT duplicate URL state in Zustand** unless absolutely necessary (e.g., complex derived state that needs to be accessed outside React tree - rare).
-- **Read-Write separation:** Components should read from URL hooks for rendering and write to URL hooks for user actions.
-- **Syncing:** If an optimistic update needs to reflect immediately while the server processes, store the _pending_ state in Zustand, but the _source of truth_ for the initial view remains the server data + URL params. (See `useTaskStore.optimisticStatus`).
-
 ## Git Conventions
 
 - **Always start from updated main**: Before starting any new task, checkout `main`, pull latest changes (`git checkout main && git pull`), then create a new feature branch.
@@ -337,21 +281,6 @@ After completing a task and creating the PR, the agent MUST perform a **learning
 
 > **Goal**: Each session should leave behind wisdom for future agents. The guidelines file is a living document that evolves with practical experience.
 
-## Monorepo Development
-
-### Build de Packages Internos
-
-Antes de testar o app (`apps/web`), certifique-se de que os packages internos (`@repo/schemas`, `@repo/utils`) estão buildados:
-
-```bash
-pnpm --filter @repo/schemas build
-pnpm --filter @repo/utils build
-# ou simplesmente
-pnpm build
-```
-
-Os packages apontam para `./dist/` no `package.json`. Se o `dist/` não existir, o Next.js falhará com erros de "Module not found".
-
 ## PRD Planning
 
 ### Confirmar Decisões de Design
@@ -364,3 +293,16 @@ Ao criar PRDs, não assuma decisões de design sem confirmar com o usuário. Exe
 - Localização de código no monorepo (apps/ vs packages/)
 
 Pergunte explicitamente antes de finalizar o documento.
+
+### Usar Modo Interativo para Decisões
+
+Quando houver decisões de design que precisam de definição explícita do usuário, **use o modo interativo do terminal** (tool `question`) para apresentar as opções.
+
+Exemplos de quando usar:
+
+- Escolher entre abordagens técnicas (IA vs determinístico)
+- Definir escopo (MVP vs pós-MVP)
+- Selecionar tecnologias/ferramentas
+- Decidir localização de código no monorepo
+
+Isso garante que o usuário tome decisões informadas antes de continuar.
