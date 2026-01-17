@@ -1,316 +1,140 @@
 # AGENTS.md
 
-Instructions for AI coding agents working on BlueprintAI.
+This file contains concise, actionable rules for autonomous coding agents working in the BlueprintAI repository. It focuses on build/lint/test commands and strict code-style / error-handling conventions so agents can operate consistently.
 
-## Project Overview
-
-BlueprintAI is a task management system where AI agents generate PRDs (Product Requirements Documents) and based on PRDs, generate tasks in markdown format, that are rendered in a Next.js web app with a premium UI.
-
-## Setup Commands
-
-```bash
-# Install dependencies
-pnpm install
-
-# Start development server
-pnpm dev
-
-# Build for production
-pnpm build
-
-# Run linting
-pnpm lint
-```
-
-## Code Style
-
-- TypeScript strict mode
-- Use functional React components
-- Tailwind CSS for styling (use `cn()` utility from `@/lib/utils` for class merging)
-- Zod for schema validation
-- File naming: kebab-case for files, PascalCase for components
-
-## Project Structure
-
-```
-blueprint-ai/
-├── projects/                  # Markdown content (PRDs + Tasks)
-├── src/
-│   ├── app/                   # Next.js App Router pages
-│   ├── components/            # React components
-│   └── lib/                   # Utilities (schemas, markdown parser)
-└── docs/                      # Documentation
-```
-
-## Creating Projects (PRD + Tasks)
-
-Create files in `projects/<project-slug>/`:
-
-### PRD (`prd.md`)
-
-```markdown
----
-id: "project-slug"
-title: "Project Title"
-status: "draft"           # draft | in_review | approved | rejected
-version: "1.0"
-created_at: "YYYY-MM-DD"
-updated_at: "YYYY-MM-DD"
-author: "ai-agent"
 ---
 
-# Project Title
+Build / Dev / Lint / Test
 
-## Objetivo
-Description of the goal...
+- Root workspace install: `pnpm install` (uses `pnpm@9.x`, node >= 18)
+- Start local dev (monorepo): `pnpm dev` (runs Turborepo `turbo dev`)
+- Build all packages: `pnpm build` (runs `turbo build`)
+- Lint everything: `pnpm lint` (runs `turbo lint`)
+- Format: `pnpm format` (runs Prettier over `*.{ts,tsx,md}`)
 
-## Requisitos Funcionais
-1. Requirement 1
-2. Requirement 2
-```
+Per-package commands (examples):
 
-### Tasks (`tasks.md`)
+- Run web dev server: `pnpm --filter web dev` or `cd apps/web && pnpm dev`
+- Lint web package: `pnpm --filter web lint` or `cd apps/web && pnpm run lint`
 
-```markdown
+Testing (current repo):
+
+- There is no global test script in the workspace packages by default. Before running tests, verify which test runner is installed (common choices: Vitest, Jest, Playwright).
+- Recommended test setup: add Vitest to packages that need tests (`pnpm add -D -w vitest @vitest/ui`), then add `test` scripts per package.
+
+Common single-test commands (add to package.json `scripts`):
+
+1. Vitest (recommended for Vite/Next + React):
+   - Run a single test file: `pnpm --filter <pkg> test -- <path/to/file.test.ts>`
+   - Run a single test name: `pnpm --filter <pkg> test -- -t "should do X"`
+2. Jest:
+   - Run a single file: `pnpm --filter <pkg> test -- <path/to/file.test.ts>` or `jest <path/to/file.test.ts>`
+   - Run a single test name: `jest -t "should do X"`
+
+Notes:
+
+- When no top-level `test` script exists, run the test runner directly from the package (e.g., `cd packages/ui && npx vitest`).
+- For workspace-scoped runs use `pnpm --filter <package>` to target a package without changing directories.
+
 ---
-project_id: "project-slug"
-prd_version: "1.0"
-created_at: "YYYY-MM-DD"
-updated_at: "YYYY-MM-DD"
+
+Coding Style & Conventions (for agents)
+
+Language & Tooling
+
+- TypeScript with `strict` mode is mandatory in all packages.
+- Prefer functional React components and hooks (no class components).
+- Use Prettier for formatting; run `pnpm format` before committing.
+- Use ESLint (repo-level `@repo/eslint-config`). Run `pnpm lint` before committing.
+
+File & Naming
+
+- Files: kebab-case (e.g., `task-list.tsx`).
+- React component files: PascalCase and match default export (e.g., `TaskCard.tsx` -> `export default function TaskCard(...)`).
+- Hooks: `useXxx` camelCase files (`use-task-store.ts` -> `useTaskStore`).
+- Types/Interfaces: PascalCase and suffix `Props` for component props (e.g., `TaskCardProps`).
+- Constants: UPPER_SNAKE for config-like constants (e.g., `DEFAULT_PAGE_SIZE`), otherwise camelCase.
+
+Imports
+
+- Order: builtin/node -> external packages -> workspace aliases (`@repo/*`) -> app absolute (`@/`) -> relative imports.
+- Group imports with a single blank line between these groups.
+- Avoid deep relative chains like `../../../../foo` — prefer workspace aliases or move code.
+- Prefer named exports; use default export only for React components and single-entry modules.
+
+Types & APIs
+
+- Prefer explicit return types on exported functions. For internal helpers, prefer type inference only when obvious.
+- Avoid `any`. If unavoidable, document reason with a `// TODO` and a short justification, and prefer `unknown` with validation.
+- Use Zod for runtime validation of external or user input. Parse once at the boundary (API handler), then pass validated types internally.
+- Use `readonly` for arrays/objects where mutation isn't intended.
+- Use discriminated unions for variants (e.g., `type Result = {status: 'ok', data: T} | {status: 'err', error: E}`)
+
+React / Next.js
+
+- Mark client components with `'use client'` only at the top level when needed.
+- Keep server components purely server-side; only opt into client when DOM or state is required.
+- Component props should be small and explicit; prefer composition over large prop objects.
+- Keep hooks pure and side-effect free (effects only inside `useEffect`/`useLayoutEffect`).
+
+State & Side Effects
+
+- URL state: use query params for shareable state (use `useQueryState` helpers).
+- App state: use Zustand stores for global UI state and optimistic caches.
+- Never duplicate URL state in global stores unless necessary; document the reason.
+
+Error Handling
+
+- Do not swallow errors silently. Always handle errors at the boundary and log context.
+- Server-side: throw rich errors with informative messages and optional `.cause` (or use a central `createError` helper).
+- API handlers: validate with Zod and return structured error responses (status + code + message).
+- On the client: present friendly messages and fallback UI; capture technical details in logs (Sentry/logging).
+- Use try/catch sparingly around operations that may fail; re-throw if you can't handle.
+
+Logging & Secrets
+
+- Use structured logs (JSON) for server-side processes where possible.
+- Never log secrets (env vars, tokens). If a secret leak is suspected, mark task as `blocked` and notify the user.
+
+Performance & Accessibility
+
+- Use lazy-loading for large components and `React.Suspense` for graceful loading.
+- Follow basic a11y rules: semantic HTML, labels for inputs, keyboard navigation, color contrast.
+
+Testing Guidance
+
+- Aim for unit tests on business logic (Zod schemas, util functions) and integration tests for critical flows.
+- Prefer Vitest for unit tests; add Playwright or Cypress for E2E where needed.
+- Keep tests deterministic and fast; avoid network calls by mocking fetch/clients.
+
+Docs & Project Files
+
+- Update `apps/docs` when modifying public APIs, schemas, or major UX flows.
+- When creating projects content (`projects/<slug>/prd.md` and `tasks.md`), follow the repo frontmatter patterns.
+
+Git / PR Conventions (brief)
+
+- Branches: `feat/<desc>`, `fix/<desc>`, `docs/<topic>`.
+- Commits: conventional commit prefixes (`feat:`, `fix:`, `docs:`).
+- Run `pnpm lint` and `pnpm build` before committing. Create PRs for all changes (don't push direct to `main`).
+
+Agent Workflow Rules (short)
+
+- Work on only one task per session and set its status to `in_progress` in `tasks.md`.
+- Before starting, `git checkout main && git pull`, then create a branch from main.
+- Verify code doesn't already implement the task. If implemented, mark task `done` and document findings.
+- If a task is blocked, set `status: blocked` with `- **comment:**` explaining the blocker.
+
+Where To Add Cursor / Copilot Rules
+
+- No `.cursor` or `.cursorrules` directories found — no additions required.
+- No `.github/copilot-instructions.md` found.
+
+If you want me to also:
+
+1. Add a recommended `vitest` setup + `test` script to `packages/*` (I can create the files), or
+2. Add a `scripts.test` example to `apps/web/package.json` — reply with `1` or `2`.
+
 ---
 
-# Tasks: Project Title
-
-## Task 1: Task Title
-- **id:** task-001
-- **status:** todo          # todo | in_progress | done | blocked
-- **priority:** high        # low | medium | high | critical
-- **description:** Clear description of the task.
-
-### Subtasks
-
-#### [ ] Subtask Title
-Description of the subtask.
-
-#### [x] Completed Subtask
-This subtask is done.
-```
-
-## Workflow
-
-1. Create `prd.md` with status `draft`
-2. User reviews and approves (status → `approved`)
-3. Generate `tasks.md` based on approved PRD
-4. Update `updated_at` when modifying files with current date
-5. **System Documentation**: When modifying the **BlueprintAI codebase** (e.g., adding features, updating APIs, changing schemas), you MUST check and update `apps/docs` to reflect these changes. This ensures the system documentation remains accurate.
-6. **Task Execution & Isolation**: 
-   - Treat each Task as a specific **deliverable** (analogous to a git branch). 
-   - **Work on ONLY ONE task per session**. 
-   - **STOP** after completing and verifying your SINGLE assigned task. Do NOT automatically proceed to the next task in the list. This avoids race conditions where multiple agents might accidentally duplicate work on the same future tasks.
-
-7. **Ambiguity Resolution - "Create Tasks"**: 
-   - If a user asks to "create tasks", "register tasks", or "add pending items", they almost always mean creating or updating a `tasks.md` file within the `projects/` structure (the System).
-   - Do NOT create a local/temporary todo list unless explicitly asked for a personal plan.
-   - If the specific workspace or project mentioned does not exist in `projects/`, you should CREATE the necessary directory structure and files (`prd.md` and `tasks.md`).
-
-8. **Task Status Tracking**:
-   - When starting a task, update its status to `in_progress`.
-   - When completing a task or subtask, mark it as completed (update status to `done` or check the box `[x]`).
-   - **Verification**: If you are unsure about the completion (e.g., logically uncertain or low confidence in implementation), ASK the user for confirmation BEFORE marking the task as `done`.
-   - **Traceability**:
-     - When a subtask is completed, append the commit link: `[x] Subtask Title ([commit-hash](url))`
-     - When the main task is completed, append the PR link: `**PR:** [PR Title](url)`
-
-9. **Scope Changes**:
-   - If the user requests additional features or modifications to work that has already been **committed and marked as done**, do NOT reopen the old task.
-   - Instead, **create a new task or subtask** to track this new request.
-
-10. **Handling Blockers**:
-    - If a task is blocked (e.g., missing credentials, external dependency bug), explicitly update its status to `blocked` (`status: blocked`).
-    - Add a clear note explaining the reason using a comment: `- **comment:** Blocked because...`.
-
-11. **Discovered Technical Work**:
-    - If you discover technical prerequisites (e.g., refactoring, extra configuration) that were not in the original plan:
-    - **Add them as new subtasks** in `tasks.md` BEFORE executing them.
-    - This ensures the plan remains a true reflection of the work being done.
-
-12. **Concurrent Work Warning**:
-    - If you notice that other tasks in `tasks.md` are marked as `in_progress` while you are starting a new one, **notify the user**.
-    - Ask if this is intentional or if the previous task should be marked as done/blocked. This avoids "zombie tasks" that remain in progress indefinitely.
-
-13. **General Comments**:
-    - Use comments (`- **comment:** <text>`) to add context, observations, or important details to any task or subtask.
-    - This creates a centralized log of important information directly in the task definition.
-
-14. **Verify Existing Implementation**:
-    - Before starting a task marked as `in_progress`, **verify if the code already exists**.
-    - Compare the scope of subtasks with the current state of the codebase.
-    - If the implementation is already complete, update the task status to `done` and document what was found.
-
-15. **Read vs Read-Write Scope**:
-    - When defining UI-related tasks, explicitly specify the interaction level:
-      - **R (Read-only)**: Display/render data only
-      - **RW (Read-Write)**: Full CRUD operations (create, edit, delete)
-    - This avoids ambiguity about whether "support for X" means just displaying or also mutating.
-
-16. **UX Decision Mockups**:
-    - When facing UX decisions with multiple valid approaches, **generate visual mockups** to help the user decide.
-    - Use image generation tools to create quick wireframes or concepts.
-    - Present options with pros/cons for informed decision-making.
-
-17. **Scope Creep Threshold**:
-    - If new requirements exceed **3x the original scope** of a task, create a **new project** instead of expanding the existing task.
-    - Signs of scope creep: new components, new API endpoints, new integrations not in the original plan.
-    - This keeps tasks focused and deliverables manageable.
-
-18. **Registering Future Improvements**:
-    - When the user discusses potential features, improvements, or ideas for the future, **ask if they want you to create a task/project** to track it.
-    - Do NOT create tasks automatically — always confirm first: "Would you like me to create a task/project in `projects/` to track this for later?"
-    - This ensures ideas are captured without cluttering the backlog with unwanted items.
-
-19. **Unit Testing Proposals**:
-    - After completing an implementation, **ASK the user** if the feature is fully complete and if they would like you to create unit tests.
-    - Do NOT assume the implementation is final without confirmation.
-    - Do NOT create tests automatically — always propose first: "Implementation seems complete. Shall I add unit tests for this feature now?"
-
-20. **Final Response Links**:
-    - When confirming a task is completed in your final response to the user, **ALWAYS** include:
-      - The **Localhost UI Link** to the task (e.g., `http://localhost:3000/projects/<workspace>/<project-slug>?task=<task-id>`)
-      - The Pull Request URL (if applicable)
-    - This allows the user to immediately verify the changes in the browser.
-
-
-
-## State Management Guidelines
-
-To ensure consistency and correct behavior across the application, follow these boundaries for state management:
-
-### 1. URL State (nuqs)
-**Use for:** Shareable, bookmarkable, or deep-linkable state.
-- **Filters/Sorts:** List filters (e.g., `?status=done`), sorting preferences.
-- **Selection:** Currently selected item (e.g., `?task=task-123`).
-- **Pagination:** Current page number (e.g., `?page=2`).
-- **View Modes:** Tabs or view toggles that affect the main content (e.g., `?view=calendar`).
-
-**Pattern:** Create a custom hook in `@/lib/search-params.ts` to wrap `useQueryState`.
-```typescript
-// @/lib/search-params.ts
-export function useTaskSearchParams() {
-  const [filter, setFilter] = useQueryState('filter', parseAsString.withDefault('all'))
-  return { filter, setFilter }
-}
-```
-
-### 2. Application State (Zustand)
-**Use for:** Global app state, server cache, or user preferences that shouldn't be in the URL.
-- **Server Cache:** Optimistic updates, data cache (e.g., `optimisticStatus`).
-- **UI State (Ephemeral):** Loading states, pending flags, drag-and-drop intermediate state.
-- **UI Preferences (Persisted):** Sidebar collapse state, theme preference, "Show archived" sidebar toggle (if tailored to user).
-
-**Pattern:** Create feature-specific stores in `@/lib/stores/`.
-```typescript
-// @/lib/stores/ui-store.ts
-export const useUIStore = create<UIStore>()(
-  persist(
-    (set) => ({
-      sidebarOpen: true,
-      toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
-    }),
-    { name: 'ui-store' }
-  )
-)
-```
-
-### 3. Integration Logic
-- **Do NOT duplicate URL state in Zustand** unless absolutely necessary (e.g., complex derived state that needs to be accessed outside React tree - rare).
-- **Read-Write separation:** Components should read from URL hooks for rendering and write to URL hooks for user actions.
-- **Syncing:** If an optimistic update needs to reflect immediately while the server processes, store the *pending* state in Zustand, but the *source of truth* for the initial view remains the server data + URL params. (See `useTaskStore.optimisticStatus`).
-
-
-## State Management Guidelines
-
-To ensure consistency and correct behavior across the application, follow these boundaries for state management:
-
-### 1. URL State (nuqs)
-**Use for:** Shareable, bookmarkable, or deep-linkable state.
-- **Filters/Sorts:** List filters (e.g., `?status=done`), sorting preferences.
-- **Selection:** Currently selected item (e.g., `?task=task-123`).
-- **Pagination:** Current page number (e.g., `?page=2`).
-- **View Modes:** Tabs or view toggles that affect the main content (e.g., `?view=calendar`).
-
-**Pattern:** Create a custom hook in `@/lib/search-params.ts` to wrap `useQueryState`.
-```typescript
-// @/lib/search-params.ts
-export function useTaskSearchParams() {
-  const [filter, setFilter] = useQueryState('filter', parseAsString.withDefault('all'))
-  return { filter, setFilter }
-}
-```
-
-### 2. Application State (Zustand)
-**Use for:** Global app state, server cache, or user preferences that shouldn't be in the URL.
-- **Server Cache:** Optimistic updates, data cache (e.g., `optimisticStatus`).
-- **UI State (Ephemeral):** Loading states, pending flags, drag-and-drop intermediate state.
-- **UI Preferences (Persisted):** Sidebar collapse state, theme preference, "Show archived" sidebar toggle (if tailored to user).
-
-**Pattern:** Create feature-specific stores in `@/lib/stores/`.
-```typescript
-// @/lib/stores/ui-store.ts
-export const useUIStore = create<UIStore>()(
-  persist(
-    (set) => ({
-      sidebarOpen: true,
-      toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
-    }),
-    { name: 'ui-store' }
-  )
-)
-```
-
-### 3. Integration Logic
-- **Do NOT duplicate URL state in Zustand** unless absolutely necessary (e.g., complex derived state that needs to be accessed outside React tree - rare).
-- **Read-Write separation:** Components should read from URL hooks for rendering and write to URL hooks for user actions.
-- **Syncing:** If an optimistic update needs to reflect immediately while the server processes, store the *pending* state in Zustand, but the *source of truth* for the initial view remains the server data + URL params. (See `useTaskStore.optimisticStatus`).
-
-## Git Conventions
-
-- **Always start from updated main**: Before starting any new task, checkout `main`, pull latest changes (`git checkout main && git pull`), then create a new feature branch.
-- Branch naming: `feat/<feature>`, `fix/<issue>`, `docs/<topic>`
-- Commit messages: conventional commits (`feat:`, `fix:`, `docs:`, `chore:`)
-- Always create PR for changes (don't push directly to main)
-- Run `pnpm lint` and `pnpm build` before committing
-
-## PR Instructions
-
-- Title format: `<type>: <description>` (e.g., `feat: add task filtering`)
-- Include description of changes
-- Reference related issues if applicable
-
-## Post-Task Learning
-
-After completing a task and creating the PR, the agent MUST perform a **learning reflection**:
-
-1. **Reflect on the session**: Consider what was discussed beyond the code itself:
-   - Did the user clarify expectations about how agents should behave?
-   - Were there misunderstandings about scope, priorities, or conventions?
-   - Did the user express preferences about workflow, communication, or decision-making?
-
-2. **Identify project-level guidelines**: Focus on insights that affect **how agents work on this project**, not specific technical implementations. Examples:
-   - "Always ask for clarification before starting tasks with ambiguous scope"
-   - "Create a new project in `projects/` for features that span multiple sessions"
-   - "Prefer creating tasks for future work instead of implementing immediately"
-   - "When debugging, investigate root causes before applying quick fixes"
-
-3. **Propose the guideline to the user**: If you identify something worth adding:
-   - **ASK the user**: "During this session, I noticed [X]. Would you like me to add a guideline to `AGENTS.md` to ensure future agents follow this pattern?"
-   - Only add the guideline after user approval.
-   - Be concise — propose a one-liner or short paragraph, not a full essay.
-
-4. **Where to add guidelines**:
-   - `AGENTS.md` (root) — for general agent behavior across the project
-   - App-specific `AGENTS.md` — for patterns specific to `apps/web`, `apps/docs`, etc.
-   - `.agent/workflows/` — for repeatable multi-step processes
-
-> **Goal**: Each session should leave behind wisdom for future agents. The guidelines file is a living document that evolves with practical experience.
-
-
+Guideline change log: agents should append a one-line note when they substantially change this file with date and short rationale.
