@@ -30,20 +30,23 @@ interface TaskListProps {
 
 export function TaskList({ tasks, workspace, projectSlug }: TaskListProps) {
   const { taskId, setTaskId, filter, setFilter } = useTaskSearchParams();
-  
+
   // Local state for task order - will be synced to backend in Task 2
   const [orderedTasks, setOrderedTasks] = useState<Task[]>(tasks);
-  
+
   // Sync with server data when it changes
   useEffect(() => {
     setOrderedTasks(tasks);
   }, [tasks]);
 
-  const filteredTasks = filter === "all"
-    ? orderedTasks
-    : orderedTasks.filter((task) => task.status === filter);
+  const filteredTasks =
+    filter === "all"
+      ? orderedTasks
+      : orderedTasks.filter((task) => task.status === filter);
 
-  const selectedTask = taskId ? orderedTasks.find(t => t.id === taskId) ?? null : null;
+  const selectedTask = taskId
+    ? (orderedTasks.find((t) => t.id === taskId) ?? null)
+    : null;
 
   // DnD sensors
   const sensors = useSensors(
@@ -54,15 +57,18 @@ export function TaskList({ tasks, workspace, projectSlug }: TaskListProps) {
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   // IDs for SortableContext
-  const taskIds = useMemo(() => filteredTasks.map((t) => t.id), [filteredTasks]);
+  const taskIds = useMemo(
+    () => filteredTasks.map((t) => t.id),
+    [filteredTasks],
+  );
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    
+
     if (over && active.id !== over.id) {
       setOrderedTasks((items) => {
         const oldIndex = items.findIndex((t) => t.id === active.id);
@@ -75,10 +81,26 @@ export function TaskList({ tasks, workspace, projectSlug }: TaskListProps) {
 
   const filters: { value: typeof filter; label: string; count: number }[] = [
     { value: "all", label: "All", count: orderedTasks.length },
-    { value: "todo", label: "To Do", count: orderedTasks.filter((t) => t.status === "todo").length },
-    { value: "in_progress", label: "In Progress", count: orderedTasks.filter((t) => t.status === "in_progress").length },
-    { value: "done", label: "Done", count: orderedTasks.filter((t) => t.status === "done").length },
-    { value: "blocked", label: "Blocked", count: orderedTasks.filter((t) => t.status === "blocked").length },
+    {
+      value: "todo",
+      label: "To Do",
+      count: orderedTasks.filter((t) => t.status === "todo").length,
+    },
+    {
+      value: "in_progress",
+      label: "In Progress",
+      count: orderedTasks.filter((t) => t.status === "in_progress").length,
+    },
+    {
+      value: "done",
+      label: "Done",
+      count: orderedTasks.filter((t) => t.status === "done").length,
+    },
+    {
+      value: "blocked",
+      label: "Blocked",
+      count: orderedTasks.filter((t) => t.status === "blocked").length,
+    },
   ];
 
   return (
@@ -93,7 +115,7 @@ export function TaskList({ tasks, workspace, projectSlug }: TaskListProps) {
               "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200",
               filter === f.value
                 ? "bg-violet-600 text-white"
-                : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white"
+                : "bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white",
             )}
           >
             {f.label}
@@ -106,6 +128,7 @@ export function TaskList({ tasks, workspace, projectSlug }: TaskListProps) {
 
       {/* Task list with DnD */}
       <DndContext
+        id="task-list-dnd"
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
