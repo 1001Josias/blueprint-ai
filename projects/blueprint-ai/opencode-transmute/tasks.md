@@ -12,43 +12,53 @@ updated_at: "2026-01-17"
 ## Task 1: Project Setup
 
 - **id:** oc-trans-001
-- **status:** todo
+- **status:** done
 - **priority:** critical
 - **description:** Inicializar estrutura do app opencode-transmute no monorepo Transmute.
+- **comment:** Package created at `packages/opencode-transmute/` (changed from `apps/` per architecture decision for npm-publishable package).
 
 ### Subtasks
 
-#### [ ] Criar estrutura de diretórios
+#### [x] Criar estrutura de diretórios
 
-Criar `apps/opencode-transmute` com estrutura:
+Criado `packages/opencode-transmute` com estrutura:
 
 ```
-apps/opencode-transmute/
+packages/opencode-transmute/
 ├── src/
 │   ├── core/
+│   │   ├── naming.ts
+│   │   ├── worktree.ts
+│   │   ├── session.ts
+│   │   └── hooks.ts
 │   ├── adapters/
+│   │   └── terminal/
+│   │       ├── types.ts
+│   │       ├── wezterm.ts
+│   │       └── index.ts
 │   ├── tools/
+│   │   └── start-task.ts
 │   └── index.ts
 ├── package.json
-└── tsconfig.json
+├── tsconfig.json
+└── eslint.config.mjs
 ```
 
-#### [ ] Configurar package.json
+#### [x] Configurar package.json
 
-Definir dependências mínimas:
+Dependências configuradas:
 
-- typescript
+- typescript (via tsup)
 - zod (validação)
-- `@repo/schemas` (schemas compartilhados)
-- `@repo/utils` (utilitários compartilhados)
+- `@opencode-ai/plugin` (peer dependency para SDK do OpenCode)
 
-#### [ ] Configurar TypeScript
+#### [x] Configurar TypeScript
 
-Criar `tsconfig.json` estendendo `@repo/tsconfig`.
+`tsconfig.json` estendendo `@repo/typescript-config/base.json`.
 
-#### [ ] Registrar no Turborepo
+#### [x] Registrar no Turborepo
 
-Atualizar `turbo.json` para incluir o novo app no pipeline de build.
+Package automaticamente detectado pelo pnpm workspace. Build e lint funcionando via turbo.
 
 ---
 
