@@ -2,7 +2,7 @@
 project_id: monorepo-infra
 prd_version: "1.0"
 created_at: "2026-01-05"
-updated_at: "2026-01-05"
+updated_at: "2026-01-17"
 ---
 
 # Tasks: Monorepo Infrastructure
@@ -96,3 +96,39 @@ Move generic helpers.
 #### [x] Refactor Web App to use packages
 
 Replace local imports with `@blueprint/schemas` and `@blueprint/utils` imports.
+
+---
+
+## Task 5: Migrate packages from tsup to unbuild
+
+- **id:** task-205
+- **status:** todo
+- **priority:** medium
+- **description:** Migrate shared packages from deprecated tsup to unbuild for library bundling.
+- **comment:** tsup is deprecated and recommends migration to tsdown, but tsdown (beta) has compatibility issues with pnpm + native bindings. unbuild is stable (v3.6.x) and used by Nuxt/unjs ecosystem.
+
+### Subtasks
+
+#### [ ] Migrate packages/schemas
+
+Replace tsup with unbuild:
+
+- Update `package.json`: replace `tsup` with `unbuild` in devDependencies
+- Update build script: `"build": "unbuild"`
+- Create `build.config.ts` with unbuild configuration
+- Update exports in `package.json` for `.mjs`/`.cjs` output
+- Verify build output and lint pass
+
+#### [ ] Migrate packages/utils
+
+Replace tsup with unbuild:
+
+- Update `package.json`: replace `tsup` with `unbuild` in devDependencies
+- Update build script: `"build": "unbuild"`
+- Create `build.config.ts` with unbuild configuration
+- Update exports in `package.json` for `.mjs`/`.cjs` output
+- Verify build output and lint pass
+
+#### [ ] Verify monorepo build
+
+Run `pnpm build` at root level to ensure all packages build correctly together.
