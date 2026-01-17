@@ -11,9 +11,11 @@ author: "antigravity"
 # Agent Guidelines Improvements
 
 ## Objetivo
-Refinar e expandir as diretrizes para os agentes de IA que trabalham no projeto BlueprintAI. O objetivo é garantir maior consistência, transparência e controle na execução das tarefas, além de permitir uma comunicação mais rica sobre o status e bloqueios.
+
+Refinar e expandir as diretrizes para os agentes de IA que trabalham no projeto Transmute. O objetivo é garantir maior consistência, transparência e controle na execução das tarefas, além de permitir uma comunicação mais rica sobre o status e bloqueios.
 
 ## Requisitos Funcionais
+
 1.  **Monitoramento de Status**: Agentes devem sinalizar início (`in_progress`) e fim (`done`) de tarefas explicitamente.
 2.  **Verificação de Conclusão**: Agentes devem pedir confirmação se tiverem incerteza antes de marcar como feito.
 3.  **Controle de Escopo**: Novas solicitações em itens já concluídos devem gerar novas tasks, não alterações nas antigas.

@@ -1,10 +1,10 @@
 # AGENTS.md
 
-Instructions for AI coding agents working on BlueprintAI.
+Instructions for AI coding agents working on Transmute.
 
 ## Project Overview
 
-BlueprintAI is a task management system where AI agents generate PRDs (Product Requirements Documents) and based on PRDs, generate tasks in markdown format, that are rendered in a Next.js web app with a premium UI.
+Transmute is a task management system where AI agents generate PRDs (Product Requirements Documents) and based on PRDs, generate tasks in markdown format, that are rendered in a Next.js web app with a premium UI.
 
 ## Setup Commands
 
@@ -33,7 +33,7 @@ pnpm lint
 ## Project Structure
 
 ```
-blueprint-ai/
+transmute/
 ├── projects/                  # Markdown content (PRDs + Tasks)
 ├── src/
 │   ├── app/                   # Next.js App Router pages
@@ -52,7 +52,7 @@ Create files in `projects/<project-slug>/`:
 ---
 id: "project-slug"
 title: "Project Title"
-status: "draft"           # draft | in_review | approved | rejected
+status: "draft" # draft | in_review | approved | rejected
 version: "1.0"
 created_at: "YYYY-MM-DD"
 updated_at: "YYYY-MM-DD"
@@ -62,9 +62,11 @@ author: "ai-agent"
 # Project Title
 
 ## Objetivo
+
 Description of the goal...
 
 ## Requisitos Funcionais
+
 1. Requirement 1
 2. Requirement 2
 ```
@@ -82,17 +84,20 @@ updated_at: "YYYY-MM-DD"
 # Tasks: Project Title
 
 ## Task 1: Task Title
+
 - **id:** task-001
-- **status:** todo          # todo | in_progress | done | blocked
-- **priority:** high        # low | medium | high | critical
+- **status:** todo # todo | in_progress | done | blocked
+- **priority:** high # low | medium | high | critical
 - **description:** Clear description of the task.
 
 ### Subtasks
 
 #### [ ] Subtask Title
+
 Description of the subtask.
 
 #### [x] Completed Subtask
+
 This subtask is done.
 ```
 
@@ -102,13 +107,13 @@ This subtask is done.
 2. User reviews and approves (status → `approved`)
 3. Generate `tasks.md` based on approved PRD
 4. Update `updated_at` when modifying files with current date
-5. **System Documentation**: When modifying the **BlueprintAI codebase** (e.g., adding features, updating APIs, changing schemas), you MUST check and update `apps/docs` to reflect these changes. This ensures the system documentation remains accurate.
-6. **Task Execution & Isolation**: 
-   - Treat each Task as a specific **deliverable** (analogous to a git branch). 
-   - **Work on ONLY ONE task per session**. 
+5. **System Documentation**: When modifying the **Transmute codebase** (e.g., adding features, updating APIs, changing schemas), you MUST check and update `apps/docs` to reflect these changes. This ensures the system documentation remains accurate.
+6. **Task Execution & Isolation**:
+   - Treat each Task as a specific **deliverable** (analogous to a git branch).
+   - **Work on ONLY ONE task per session**.
    - **STOP** after completing and verifying your SINGLE assigned task. Do NOT automatically proceed to the next task in the list. This avoids race conditions where multiple agents might accidentally duplicate work on the same future tasks.
 
-7. **Ambiguity Resolution - "Create Tasks"**: 
+7. **Ambiguity Resolution - "Create Tasks"**:
    - If a user asks to "create tasks", "register tasks", or "add pending items", they almost always mean creating or updating a `tasks.md` file within the `projects/` structure (the System).
    - Do NOT create a local/temporary todo list unless explicitly asked for a personal plan.
    - If the specific workspace or project mentioned does not exist in `projects/`, you should CREATE the necessary directory structure and files (`prd.md` and `tasks.md`).
@@ -179,98 +184,117 @@ This subtask is done.
       - The Pull Request URL (if applicable)
     - This allows the user to immediately verify the changes in the browser.
 
-
-
 ## State Management Guidelines
 
 To ensure consistency and correct behavior across the application, follow these boundaries for state management:
 
 ### 1. URL State (nuqs)
+
 **Use for:** Shareable, bookmarkable, or deep-linkable state.
+
 - **Filters/Sorts:** List filters (e.g., `?status=done`), sorting preferences.
 - **Selection:** Currently selected item (e.g., `?task=task-123`).
 - **Pagination:** Current page number (e.g., `?page=2`).
 - **View Modes:** Tabs or view toggles that affect the main content (e.g., `?view=calendar`).
 
 **Pattern:** Create a custom hook in `@/lib/search-params.ts` to wrap `useQueryState`.
+
 ```typescript
 // @/lib/search-params.ts
 export function useTaskSearchParams() {
-  const [filter, setFilter] = useQueryState('filter', parseAsString.withDefault('all'))
-  return { filter, setFilter }
+  const [filter, setFilter] = useQueryState(
+    "filter",
+    parseAsString.withDefault("all"),
+  );
+  return { filter, setFilter };
 }
 ```
 
 ### 2. Application State (Zustand)
+
 **Use for:** Global app state, server cache, or user preferences that shouldn't be in the URL.
+
 - **Server Cache:** Optimistic updates, data cache (e.g., `optimisticStatus`).
 - **UI State (Ephemeral):** Loading states, pending flags, drag-and-drop intermediate state.
 - **UI Preferences (Persisted):** Sidebar collapse state, theme preference, "Show archived" sidebar toggle (if tailored to user).
 
 **Pattern:** Create feature-specific stores in `@/lib/stores/`.
+
 ```typescript
 // @/lib/stores/ui-store.ts
 export const useUIStore = create<UIStore>()(
   persist(
     (set) => ({
       sidebarOpen: true,
-      toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+      toggleSidebar: () =>
+        set((state) => ({ sidebarOpen: !state.sidebarOpen })),
     }),
-    { name: 'ui-store' }
-  )
-)
+    { name: "ui-store" },
+  ),
+);
 ```
 
 ### 3. Integration Logic
+
 - **Do NOT duplicate URL state in Zustand** unless absolutely necessary (e.g., complex derived state that needs to be accessed outside React tree - rare).
 - **Read-Write separation:** Components should read from URL hooks for rendering and write to URL hooks for user actions.
-- **Syncing:** If an optimistic update needs to reflect immediately while the server processes, store the *pending* state in Zustand, but the *source of truth* for the initial view remains the server data + URL params. (See `useTaskStore.optimisticStatus`).
-
+- **Syncing:** If an optimistic update needs to reflect immediately while the server processes, store the _pending_ state in Zustand, but the _source of truth_ for the initial view remains the server data + URL params. (See `useTaskStore.optimisticStatus`).
 
 ## State Management Guidelines
 
 To ensure consistency and correct behavior across the application, follow these boundaries for state management:
 
 ### 1. URL State (nuqs)
+
 **Use for:** Shareable, bookmarkable, or deep-linkable state.
+
 - **Filters/Sorts:** List filters (e.g., `?status=done`), sorting preferences.
 - **Selection:** Currently selected item (e.g., `?task=task-123`).
 - **Pagination:** Current page number (e.g., `?page=2`).
 - **View Modes:** Tabs or view toggles that affect the main content (e.g., `?view=calendar`).
 
 **Pattern:** Create a custom hook in `@/lib/search-params.ts` to wrap `useQueryState`.
+
 ```typescript
 // @/lib/search-params.ts
 export function useTaskSearchParams() {
-  const [filter, setFilter] = useQueryState('filter', parseAsString.withDefault('all'))
-  return { filter, setFilter }
+  const [filter, setFilter] = useQueryState(
+    "filter",
+    parseAsString.withDefault("all"),
+  );
+  return { filter, setFilter };
 }
 ```
 
 ### 2. Application State (Zustand)
+
 **Use for:** Global app state, server cache, or user preferences that shouldn't be in the URL.
+
 - **Server Cache:** Optimistic updates, data cache (e.g., `optimisticStatus`).
 - **UI State (Ephemeral):** Loading states, pending flags, drag-and-drop intermediate state.
 - **UI Preferences (Persisted):** Sidebar collapse state, theme preference, "Show archived" sidebar toggle (if tailored to user).
 
 **Pattern:** Create feature-specific stores in `@/lib/stores/`.
+
 ```typescript
 // @/lib/stores/ui-store.ts
 export const useUIStore = create<UIStore>()(
   persist(
     (set) => ({
       sidebarOpen: true,
-      toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+      toggleSidebar: () =>
+        set((state) => ({ sidebarOpen: !state.sidebarOpen })),
     }),
-    { name: 'ui-store' }
-  )
-)
+    { name: "ui-store" },
+  ),
+);
 ```
 
 ### 3. Integration Logic
+
 - **Do NOT duplicate URL state in Zustand** unless absolutely necessary (e.g., complex derived state that needs to be accessed outside React tree - rare).
 - **Read-Write separation:** Components should read from URL hooks for rendering and write to URL hooks for user actions.
-- **Syncing:** If an optimistic update needs to reflect immediately while the server processes, store the *pending* state in Zustand, but the *source of truth* for the initial view remains the server data + URL params. (See `useTaskStore.optimisticStatus`).
+- **Syncing:** If an optimistic update needs to reflect immediately while the server processes, store the _pending_ state in Zustand, but the _source of truth_ for the initial view remains the server data + URL params. (See `useTaskStore.optimisticStatus`).
 
 ## Git Conventions
 
@@ -312,5 +336,3 @@ After completing a task and creating the PR, the agent MUST perform a **learning
    - `.agent/workflows/` — for repeatable multi-step processes
 
 > **Goal**: Each session should leave behind wisdom for future agents. The guidelines file is a living document that evolves with practical experience.
-
-

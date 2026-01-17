@@ -2,9 +2,9 @@
 id: monorepo-infra
 title: Monorepo Infrastructure
 status: draft
-version: '1.0'
-created_at: '2026-01-05'
-updated_at: '2026-01-05'
+version: "1.0"
+created_at: "2026-01-05"
+updated_at: "2026-01-05"
 author: ai-agent
 ---
 
@@ -12,7 +12,7 @@ author: ai-agent
 
 ## Objective
 
-Migrate the BlueprintAI project structure to a scalable monorepo using Turborepo, allowing the coexistence of the current Web App and the future Documentation Site, with efficient sharing of code and configurations.
+Migrate the Transmute project structure to a scalable monorepo using Turborepo, allowing the coexistence of the current Web App and the future Documentation Site, with efficient sharing of code and configurations.
 
 ## Context
 
@@ -21,6 +21,7 @@ Migration is a prerequisite for the development of the documentation site. We ne
 ## Functional Requirements
 
 ### Monorepo Structure
+
 1. **Turborepo**: Root configuration with `turbo.json` for script orchestration.
 2. **Package Manager**: Use `pnpm workspaces` for dependency management.
 3. **Workspace Organization**:
@@ -29,6 +30,7 @@ Migration is a prerequisite for the development of the documentation site. We ne
    - `packages/*`: Shared libraries.
 
 ### Shared Packages
+
 1. **`packages/ui`**: Shared base UI components (shadcn/ui).
 2. **`packages/schemas`**: Zod schemas (PRD, Tasks) to be used by both the app and documentation.
 3. **`packages/utils`**: Utility functions (formatters, parsers).

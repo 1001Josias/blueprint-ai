@@ -5,11 +5,11 @@ description: Configuration and Guidelines for AI Agents
 
 # Agents Configuration
 
-This section provides instructions for AI coding agents working on BlueprintAI, based on the `AGENTS.md` specification.
+This section provides instructions for AI coding agents working on Transmute, based on the `AGENTS.md` specification.
 
 ## Project Overview
 
-BlueprintAI is a task management system where AI agents generate PRDs (Product Requirements Documents) and tasks in markdown format.
+Transmute is a task management system where AI agents generate PRDs (Product Requirements Documents) and tasks in markdown format.
 
 ## Workflows
 
@@ -33,6 +33,7 @@ author: "ai-agent"
 # Project Title
 
 ## Objective
+
 ...
 ```
 
@@ -49,6 +50,7 @@ updated_at: "YYYY-MM-DD"
 # Tasks: Project Title
 
 ## Task 1: Task Title
+
 - **id:** task-001
 - **status:** todo
 - **priority:** high
@@ -57,7 +59,7 @@ updated_at: "YYYY-MM-DD"
 
 ### System Documentation Protocol
 
-**Critical:** When modifying the **BlueprintAI codebase** (e.g., adding features, updating APIs, changing schemas), the agent **must** verify if the documentation in `apps/docs` requires updates and perform those updates immediately. This ensures the system documentation remains accurate.
+**Critical:** When modifying the **Transmute codebase** (e.g., adding features, updating APIs, changing schemas), the agent **must** verify if the documentation in `apps/docs` requires updates and perform those updates immediately. This ensures the system documentation remains accurate.
 
 ## Code Style
 
@@ -65,4 +67,3 @@ updated_at: "YYYY-MM-DD"
 - **Styling**: Tailwind CSS (use `cn()` utility).
 - **Validation**: Zod schemas.
 - **Naming**: Kebab-case for files, PascalCase for components.
-
