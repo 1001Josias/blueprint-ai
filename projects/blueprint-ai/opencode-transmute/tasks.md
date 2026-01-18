@@ -151,14 +151,14 @@ Implementada com:
 ## Task 3: Core - Git Worktree Management
 
 - **id:** oc-trans-003
-- **status:** todo
+- **status:** done
 - **priority:** high
 - **description:** Implementar criação e gestão de git worktrees.
 - **dependencies:** oc-trans-001
 
 ### Subtasks
 
-#### [ ] Definir interface de worktree
+#### [x] Definir interface de worktree
 
 ```typescript
 interface Worktree {
@@ -174,29 +174,29 @@ interface CreateWorktreeOptions {
 }
 ```
 
-#### [ ] Implementar listWorktrees
+#### [x] Implementar listWorktrees
 
 Executar `git worktree list --porcelain` e parsear output.
 
-#### [ ] Implementar createWorktree
+#### [x] Implementar createWorktree
 
 Executar `git worktree add -b <branch> <path> <base>`.
 
 - Verificar se branch já existe
 - Criar diretório worktrees se necessário
 
-#### [ ] Implementar worktreeExists
+#### [x] Implementar worktreeExists
 
 Verificar se já existe worktree para uma branch específica.
 
-#### [ ] Tratamento de erros
+#### [x] Tratamento de erros
 
 - Branch já existe
 - Diretório já existe
 - Git não inicializado
 - Base branch não existe
 
-#### [ ] Adicionar testes unitários
+#### [x] Adicionar testes unitários
 
 Cobrir casos com vitest:
 
@@ -204,6 +204,8 @@ Cobrir casos com vitest:
 - `createWorktree`: chamada correta ao git, criação de diretório
 - `worktreeExists`: retorna true/false corretamente
 - Erros: branch já existe, diretório já existe, git não inicializado
+
+**PR:** [feat(opencode-transmute): implement git worktree management](https://github.com/1001Josias/transmute/pull/35)
 
 ---
 
