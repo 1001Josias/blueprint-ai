@@ -48,4 +48,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# worktrees (created by opencode-transmute)
+worktrees/
+
+# opencode state
+.opencode/
+
 projects/rpa
