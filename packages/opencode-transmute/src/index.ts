@@ -7,7 +7,10 @@
 
 import type { Plugin, PluginInput } from "@opencode-ai/plugin";
 import { tool } from "@opencode-ai/plugin";
-import { generateBranchName, type OpenCodeClient } from "./core/naming";
+import { type OpenCodeClient } from "./core/naming";
+import { startTask } from "./tools/start-task";
+import { createWezTermAdapter } from "./adapters/terminal/wezterm";
+import { getGitRoot } from "./core/exec";
 
 // Re-export types and functions for programmatic use
 export * from "./core/naming";
@@ -17,6 +20,7 @@ export * from "./core/hooks";
 export * from "./core/errors";
 export * from "./core/exec";
 export * from "./adapters/terminal/types";
+export * from "./tools/start-task";
 
 /**
  * Main Transmute Plugin
@@ -32,13 +36,17 @@ export const TransmutePlugin: Plugin = async (ctx: PluginInput) => {
   // Cast to our simplified OpenCodeClient interface
   const client = ctx.client as unknown as OpenCodeClient;
 
+  // Create terminal adapter
+  const terminal = createWezTermAdapter();
+
   return {
     // Custom tools available to the LLM
     tool: {
       "start-task": tool({
         description:
           "Create an isolated git worktree for a task with AI-generated branch name. " +
-          "Use this when starting work on a new task to ensure clean separation from other work.",
+          "Use this when starting work on a new task to ensure clean separation from other work. " +
+          "If a session already exists for the task, it will resume the existing worktree.",
         args: {
           taskId: tool.schema
             .string()
@@ -66,37 +74,46 @@ export const TransmutePlugin: Plugin = async (ctx: PluginInput) => {
             .describe("Base branch to create worktree from (default: main)"),
         },
         async execute(args, context) {
-          // Generate branch name using AI (or fallback)
-          const branchResult = await generateBranchName(
+          // Get repository root
+          const basePath = await getGitRoot();
+
+          // Execute the full start-task flow
+          const result = await startTask(
             {
-              id: args.taskId,
+              taskId: args.taskId,
               title: args.title,
               description: args.description,
               priority: args.priority,
               type: args.type,
+              baseBranch: args.baseBranch,
             },
-            client,
-            context.sessionID,
+            basePath,
+            {
+              client,
+              opencodeSessionId: context.sessionID,
+              terminal,
+              openTerminal: true,
+              runHooks: true,
+              hooks: {
+                afterCreate: [
+                  // Install dependencies if package.json exists
+                  "[ -f package.json ] && pnpm install || true",
+                ],
+              },
+            },
           );
 
-          // TODO: Implement full flow in Task 7 (oc-trans-007)
-          // 1. Check if session exists for taskId
-          // 2. If exists, return existing worktree
-          // 3. Create worktree with generated branch name
-          // 4. Persist session
-          // 5. Open terminal in worktree
-          // 6. Execute afterCreate hooks
-          // 7. Return result
-
           return JSON.stringify({
-            status: "placeholder",
-            message: `Would create worktree for task: ${args.taskId}`,
-            taskId: args.taskId,
-            title: args.title,
-            branch: branchResult.branch,
-            branchType: branchResult.type,
-            branchSlug: branchResult.slug,
-            baseBranch: args.baseBranch || "main",
+            status: result.status,
+            message:
+              result.status === "created"
+                ? `Created new worktree for task: ${result.taskId}`
+                : `Resumed existing worktree for task: ${result.taskId}`,
+            taskId: result.taskId,
+            taskName: result.taskName,
+            branch: result.branch,
+            worktreePath: result.worktreePath,
+            opencodeSessionId: result.opencodeSessionId,
           });
         },
       }),

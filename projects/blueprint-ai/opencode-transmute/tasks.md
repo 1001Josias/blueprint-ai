@@ -387,38 +387,42 @@ Resultado de cada comando inclui:
 ## Task 7: Tool - start-task
 
 - **id:** oc-trans-007
-- **status:** todo
+- **status:** done
 - **priority:** critical
 - **description:** Implementar a tool principal que orquestra criação de ambiente isolado.
 - **dependencies:** oc-trans-002, oc-trans-003, oc-trans-004, oc-trans-005, oc-trans-006
 
 ### Subtasks
 
-#### [ ] Definir schema de input da tool
+#### [x] Definir schema de input da tool
+
+Schema definido com Zod:
 
 ```typescript
 const startTaskInputSchema = z.object({
-  taskId: z.string(),
-  title: z.string(),
+  taskId: z.string().min(1),
+  title: z.string().min(1),
   description: z.string().optional(),
   priority: z.string().optional(),
-  type: z.string().optional(), // hint: feat, fix, refactor, etc.
+  type: z.string().optional(),
   baseBranch: z.string().optional(),
 });
 ```
 
-#### [ ] Implementar fluxo completo
+#### [x] Implementar fluxo completo
 
-1. Verificar se já existe sessão para taskId
-2. Se existe, retornar worktree existente
-3. Gerar nome de branch via IA (usando título, descrição, contexto)
-4. Criar worktree
-5. Persistir sessão
-6. Abrir terminal no worktree
-7. Executar hooks afterCreate
-8. Retornar resultado
+Fluxo implementado em `startTask()`:
 
-#### [ ] Definir schema de output
+1. Verifica se sessão existe para taskId (`findSessionByTask`)
+2. Se existe, retorna worktree existente e abre terminal
+3. Gera nome de branch via IA (`generateBranchName`)
+4. Cria worktree (`createWorktree`)
+5. Persiste sessão com `opencodeSessionId` (`addSession`)
+6. Executa hooks afterCreate (`executeAfterCreateHooks`)
+7. Abre terminal no worktree (`openSession`)
+8. Retorna resultado
+
+#### [x] Definir schema de output
 
 ```typescript
 const startTaskOutputSchema = z.object({
@@ -426,12 +430,32 @@ const startTaskOutputSchema = z.object({
   branch: z.string(),
   worktreePath: z.string(),
   taskId: z.string(),
+  taskName: z.string(),
+  opencodeSessionId: z.string().optional(),
 });
 ```
 
-#### [ ] Registrar como tool do OpenCode
+#### [x] Registrar como tool do OpenCode
 
-Expor tool com nome, descrição e schemas adequados.
+Tool registrada no plugin com:
+
+- Nome: `start-task`
+- Descrição clara do propósito
+- Schemas de input/output integrados
+- Execução do fluxo completo
+
+#### [x] Adicionar testes unitários
+
+19 testes criados em `start-task.test.ts` cobrindo:
+
+- Schema validation
+- Criação de nova task (worktree + session)
+- Uso de branch type hint
+- Execução de hooks
+- Abertura de terminal
+- Retomada de sessão existente
+- Tratamento de erros (terminal indisponível, hooks falhando)
+- Função `resumeTask` auxiliar
 
 ---
 
