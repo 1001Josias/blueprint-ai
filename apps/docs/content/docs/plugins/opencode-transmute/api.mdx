@@ -1,0 +1,264 @@
+---
+title: API Reference
+description: Tools, schemas, and functions exported by opencode-transmute
+---
+
+# API Reference
+
+This page documents the tools, schemas, and functions exported by the `opencode-transmute` package.
+
+## Tools
+
+### `start-task`
+
+Creates an isolated git worktree for a task. If a session already exists, it resumes the existing worktree.
+
+#### Input Schema
+
+| Parameter     | Type     | Required | Description                                               |
+| ------------- | -------- | -------- | --------------------------------------------------------- |
+| `taskId`      | `string` | Yes      | Unique task identifier                                    |
+| `title`       | `string` | Yes      | Task title for branch name generation                     |
+| `description` | `string` | No       | Task description for better AI inference                  |
+| `priority`    | `string` | No       | Task priority (low, medium, high, critical)               |
+| `type`        | `string` | No       | Branch type hint (feat, fix, refactor, docs, chore, test) |
+| `baseBranch`  | `string` | No       | Base branch to create from (default: main)                |
+
+#### Output Schema
+
+| Field               | Type                      | Description                        |
+| ------------------- | ------------------------- | ---------------------------------- |
+| `status`            | `"created" \| "existing"` | Whether a new worktree was created |
+| `branch`            | `string`                  | The git branch name                |
+| `worktreePath`      | `string`                  | Absolute path to the worktree      |
+| `taskId`            | `string`                  | The task ID                        |
+| `taskName`          | `string`                  | The task title                     |
+| `opencodeSessionId` | `string`                  | OpenCode session ID for resumption |
+
+#### Example
+
+```typescript
+// Agent calls the tool
+const result = await tools["start-task"]({
+  taskId: "task-123",
+  title: "Implement user authentication",
+  description: "Add OAuth2 login with Google",
+  type: "feat",
+});
+
+// Result
+{
+  status: "created",
+  branch: "feat/implement-user-authentication",
+  worktreePath: "/repo/worktrees/feat-implement-user-authentication",
+  taskId: "task-123",
+  taskName: "Implement user authentication",
+  opencodeSessionId: "ses_abc123"
+}
+```
+
+## Exported Functions
+
+### Branch Naming
+
+#### `generateBranchName(context, client?, sessionId?)`
+
+Generates an AI-powered branch name based on task context.
+
+```typescript
+import { generateBranchName } from "opencode-transmute";
+
+const result = await generateBranchName({
+  id: "task-123",
+  title: "Fix memory leak",
+  description: "Memory leak in the parser module",
+});
+
+// { branch: "fix/memory-leak-parser", type: "fix", slug: "memory-leak-parser" }
+```
+
+#### `sanitizeBranchName(name)`
+
+Sanitizes a string for use as a git branch name.
+
+```typescript
+import { sanitizeBranchName } from "opencode-transmute";
+
+sanitizeBranchName("Fix: Memory Leak!"); // "fix-memory-leak"
+```
+
+### Worktree Management
+
+#### `createWorktree(options)`
+
+Creates a new git worktree.
+
+```typescript
+import { createWorktree } from "opencode-transmute";
+
+const worktree = await createWorktree({
+  branch: "feat/new-feature",
+  baseBranch: "main",
+  cwd: "/path/to/repo",
+});
+
+// { path: "/repo/worktrees/feat-new-feature", branch: "feat/new-feature", isMain: false }
+```
+
+#### `listWorktrees(cwd?)`
+
+Lists all worktrees in the repository.
+
+```typescript
+import { listWorktrees } from "opencode-transmute";
+
+const worktrees = await listWorktrees();
+// [
+//   { path: "/repo", branch: "main", isMain: true },
+//   { path: "/repo/worktrees/feat-auth", branch: "feat/auth", isMain: false }
+// ]
+```
+
+#### `removeWorktree(path, force?, cwd?)`
+
+Removes a worktree.
+
+```typescript
+import { removeWorktree } from "opencode-transmute";
+
+await removeWorktree("/repo/worktrees/feat-auth");
+```
+
+### Session Management
+
+#### `findSessionByTask(basePath, taskId)`
+
+Finds an existing session by task ID.
+
+```typescript
+import { findSessionByTask } from "opencode-transmute";
+
+const session = await findSessionByTask("/repo", "task-123");
+// { taskId: "task-123", branch: "feat/...", worktreePath: "...", ... }
+```
+
+#### `addSession(basePath, session)`
+
+Persists a new session.
+
+```typescript
+import { addSession } from "opencode-transmute";
+
+await addSession("/repo", {
+  taskId: "task-123",
+  taskName: "My Task",
+  branch: "feat/my-task",
+  worktreePath: "/repo/worktrees/feat-my-task",
+  createdAt: new Date().toISOString(),
+  opencodeSessionId: "ses_abc",
+});
+```
+
+#### `removeSession(basePath, taskId)`
+
+Removes a session.
+
+```typescript
+import { removeSession } from "opencode-transmute";
+
+await removeSession("/repo", "task-123");
+```
+
+### Configuration
+
+#### `loadConfig(basePath)`
+
+Loads configuration from all sources with precedence.
+
+```typescript
+import { loadConfig } from "opencode-transmute";
+
+const { config, source, configPath } = await loadConfig("/repo");
+// config: { worktreesDir: "./worktrees", terminal: "wezterm", ... }
+// source: "json" | "opencode.config.ts" | "default"
+// configPath: "/repo/.opencode/transmute.config.json" (if loaded from file)
+```
+
+#### `validateConfig(config)`
+
+Validates a configuration object.
+
+```typescript
+import { validateConfig } from "opencode-transmute";
+
+const result = validateConfig({ terminal: "wezterm" });
+if (result.success) {
+  console.log(result.data); // Full config with defaults
+} else {
+  console.error(result.error); // Zod validation error
+}
+```
+
+### Hooks
+
+#### `executeHooks(commands, options)`
+
+Executes an array of shell commands.
+
+```typescript
+import { executeHooks } from "opencode-transmute";
+
+const results = await executeHooks(["pnpm install", "pnpm build"], {
+  cwd: "/path/to/worktree",
+  stopOnError: true,
+});
+
+// [
+//   { command: "pnpm install", success: true, duration: 5000, ... },
+//   { command: "pnpm build", success: true, duration: 3000, ... }
+// ]
+```
+
+## Zod Schemas
+
+All schemas are exported for validation and type inference:
+
+```typescript
+import {
+  configSchema,
+  sessionSchema,
+  stateSchema,
+  startTaskInputSchema,
+  startTaskOutputSchema,
+  taskContextSchema,
+  branchNameResultSchema,
+  hooksConfigSchema,
+} from "opencode-transmute";
+
+// Use for validation
+const config = configSchema.parse(userInput);
+
+// Use for type inference
+type Config = z.infer<typeof configSchema>;
+```
+
+## Error Classes
+
+```typescript
+import {
+  BranchAlreadyExistsError,
+  DirectoryAlreadyExistsError,
+  BaseBranchNotFoundError,
+  GitNotInitializedError,
+  TerminalNotAvailableError,
+  TerminalSpawnError,
+} from "opencode-transmute";
+
+try {
+  await createWorktree({ branch: "feat/existing" });
+} catch (error) {
+  if (error instanceof BranchAlreadyExistsError) {
+    console.log(`Branch ${error.branch} already has a worktree`);
+  }
+}
+```

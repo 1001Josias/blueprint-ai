@@ -46,7 +46,7 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
         "prose-em:text-slate-200",
         // Blockquote
         "prose-blockquote:border-violet-500 prose-blockquote:text-slate-400",
-        className
+        className,
       )}
       dangerouslySetInnerHTML={{ __html: htmlContent }}
     />

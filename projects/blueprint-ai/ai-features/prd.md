@@ -2,9 +2,9 @@
 id: ai-features
 title: AI & Automation Features
 status: draft
-version: '1.0'
-created_at: '2026-01-06'
-updated_at: '2026-01-06'
+version: "1.0"
+created_at: "2026-01-06"
+updated_at: "2026-01-06"
 author: ai-agent
 ---
 

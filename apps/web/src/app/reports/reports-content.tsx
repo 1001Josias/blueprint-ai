@@ -12,11 +12,14 @@ function ReportsContent({ tasks, projects }: ReportsPageProps) {
   // Calculate stats
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((t) => t.status === "done").length;
-  const inProgressTasks = tasks.filter((t) => t.status === "in_progress").length;
+  const inProgressTasks = tasks.filter(
+    (t) => t.status === "in_progress",
+  ).length;
   const todoTasks = tasks.filter((t) => t.status === "todo").length;
   const blockedTasks = tasks.filter((t) => t.status === "blocked").length;
 
-  const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  const completionRate =
+    totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   // Tasks by priority
   const priorityCounts = {
@@ -35,7 +38,7 @@ function ReportsContent({ tasks, projects }: ReportsPageProps) {
       acc[task.workspace]++;
       return acc;
     },
-    {} as Record<string, number>
+    {} as Record<string, number>,
   );
 
   // Top projects by incomplete tasks
@@ -50,7 +53,7 @@ function ReportsContent({ tasks, projects }: ReportsPageProps) {
       }
       return acc;
     },
-    {} as Record<string, { title: string; count: number }>
+    {} as Record<string, { title: string; count: number }>,
   );
 
   const topProjects = Object.entries(projectTaskCounts)
@@ -97,7 +100,9 @@ function ReportsContent({ tasks, projects }: ReportsPageProps) {
           </div>
           <div>
             <h1 className="text-3xl font-bold text-white">Reports</h1>
-            <p className="text-slate-400">Analytics and insights across all projects</p>
+            <p className="text-slate-400">
+              Analytics and insights across all projects
+            </p>
           </div>
         </div>
       </div>
@@ -109,11 +114,15 @@ function ReportsContent({ tasks, projects }: ReportsPageProps) {
           <div className="text-sm text-violet-300">Total Tasks</div>
         </div>
         <div className="p-5 rounded-xl bg-gradient-to-br from-green-600/20 to-emerald-600/20 border border-green-500/20">
-          <div className="text-3xl font-bold text-white mb-1">{completedTasks}</div>
+          <div className="text-3xl font-bold text-white mb-1">
+            {completedTasks}
+          </div>
           <div className="text-sm text-green-300">Completed</div>
         </div>
         <div className="p-5 rounded-xl bg-gradient-to-br from-yellow-600/20 to-orange-600/20 border border-yellow-500/20">
-          <div className="text-3xl font-bold text-white mb-1">{inProgressTasks}</div>
+          <div className="text-3xl font-bold text-white mb-1">
+            {inProgressTasks}
+          </div>
           <div className="text-sm text-yellow-300">In Progress</div>
         </div>
         <div className="p-5 rounded-xl bg-gradient-to-br from-slate-600/20 to-slate-700/20 border border-slate-500/20">
@@ -121,7 +130,9 @@ function ReportsContent({ tasks, projects }: ReportsPageProps) {
           <div className="text-sm text-slate-300">To Do</div>
         </div>
         <div className="p-5 rounded-xl bg-gradient-to-br from-red-600/20 to-rose-600/20 border border-red-500/20">
-          <div className="text-3xl font-bold text-white mb-1">{blockedTasks}</div>
+          <div className="text-3xl font-bold text-white mb-1">
+            {blockedTasks}
+          </div>
           <div className="text-sm text-red-300">Blocked</div>
         </div>
       </div>
@@ -130,7 +141,9 @@ function ReportsContent({ tasks, projects }: ReportsPageProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Completion Rate */}
         <div className="rounded-2xl bg-slate-800/50 border border-slate-700/50 p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Completion Rate</h3>
+          <h3 className="text-lg font-semibold text-white mb-4">
+            Completion Rate
+          </h3>
           <div className="flex items-center gap-6">
             <div className="relative w-32 h-32">
               <svg className="w-32 h-32 -rotate-90" viewBox="0 0 100 100">
@@ -154,66 +167,90 @@ function ReportsContent({ tasks, projects }: ReportsPageProps) {
                   strokeDasharray={`${completionRate * 2.51} 251`}
                 />
                 <defs>
-                  <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <linearGradient
+                    id="gradient"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="0%"
+                  >
                     <stop offset="0%" stopColor="#8b5cf6" />
                     <stop offset="100%" stopColor="#a855f7" />
                   </linearGradient>
                 </defs>
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-2xl font-bold text-white">{completionRate}%</span>
+                <span className="text-2xl font-bold text-white">
+                  {completionRate}%
+                </span>
               </div>
             </div>
             <div className="flex-1 space-y-3">
-              {(["done", "in_progress", "todo", "blocked"] as const).map((status) => {
-                const count =
-                  status === "done"
-                    ? completedTasks
-                    : status === "in_progress"
-                      ? inProgressTasks
-                      : status === "todo"
-                        ? todoTasks
-                        : blockedTasks;
-                const percentage = totalTasks > 0 ? Math.round((count / totalTasks) * 100) : 0;
-                return (
-                  <div key={status} className="flex items-center gap-2">
-                    <div
-                      className={`w-3 h-3 rounded-full bg-gradient-to-r ${statusColors[status]}`}
-                    />
-                    <span className="text-sm text-slate-400 capitalize flex-1">
-                      {status.replace("_", " ")}
-                    </span>
-                    <span className="text-sm text-white font-medium">{count}</span>
-                    <span className="text-xs text-slate-500 w-10 text-right">{percentage}%</span>
-                  </div>
-                );
-              })}
+              {(["done", "in_progress", "todo", "blocked"] as const).map(
+                (status) => {
+                  const count =
+                    status === "done"
+                      ? completedTasks
+                      : status === "in_progress"
+                        ? inProgressTasks
+                        : status === "todo"
+                          ? todoTasks
+                          : blockedTasks;
+                  const percentage =
+                    totalTasks > 0 ? Math.round((count / totalTasks) * 100) : 0;
+                  return (
+                    <div key={status} className="flex items-center gap-2">
+                      <div
+                        className={`w-3 h-3 rounded-full bg-gradient-to-r ${statusColors[status]}`}
+                      />
+                      <span className="text-sm text-slate-400 capitalize flex-1">
+                        {status.replace("_", " ")}
+                      </span>
+                      <span className="text-sm text-white font-medium">
+                        {count}
+                      </span>
+                      <span className="text-xs text-slate-500 w-10 text-right">
+                        {percentage}%
+                      </span>
+                    </div>
+                  );
+                },
+              )}
             </div>
           </div>
         </div>
 
         {/* Priority Distribution */}
         <div className="rounded-2xl bg-slate-800/50 border border-slate-700/50 p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Priority Distribution</h3>
+          <h3 className="text-lg font-semibold text-white mb-4">
+            Priority Distribution
+          </h3>
           <div className="space-y-4">
-            {(["critical", "high", "medium", "low"] as const).map((priority) => {
-              const count = priorityCounts[priority];
-              const percentage = maxPriority > 0 ? (count / maxPriority) * 100 : 0;
-              return (
-                <div key={priority}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm text-slate-300 capitalize">{priority}</span>
-                    <span className="text-sm text-white font-medium">{count}</span>
+            {(["critical", "high", "medium", "low"] as const).map(
+              (priority) => {
+                const count = priorityCounts[priority];
+                const percentage =
+                  maxPriority > 0 ? (count / maxPriority) * 100 : 0;
+                return (
+                  <div key={priority}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm text-slate-300 capitalize">
+                        {priority}
+                      </span>
+                      <span className="text-sm text-white font-medium">
+                        {count}
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${priorityColors[priority]}`}
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${priorityColors[priority]}`}
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+                );
+              },
+            )}
           </div>
         </div>
       </div>
@@ -222,18 +259,25 @@ function ReportsContent({ tasks, projects }: ReportsPageProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Tasks by Workspace */}
         <div className="rounded-2xl bg-slate-800/50 border border-slate-700/50 p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Tasks by Workspace</h3>
+          <h3 className="text-lg font-semibold text-white mb-4">
+            Tasks by Workspace
+          </h3>
           {Object.keys(tasksByWorkspace).length > 0 ? (
             <div className="space-y-4">
               {Object.entries(tasksByWorkspace)
                 .sort(([, a], [, b]) => b - a)
                 .map(([workspace, count]) => {
-                  const percentage = maxWorkspace > 0 ? (count / maxWorkspace) * 100 : 0;
+                  const percentage =
+                    maxWorkspace > 0 ? (count / maxWorkspace) * 100 : 0;
                   return (
                     <div key={workspace}>
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm text-slate-300 capitalize">{workspace}</span>
-                        <span className="text-sm text-white font-medium">{count}</span>
+                        <span className="text-sm text-slate-300 capitalize">
+                          {workspace}
+                        </span>
+                        <span className="text-sm text-white font-medium">
+                          {count}
+                        </span>
                       </div>
                       <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
                         <div
@@ -246,13 +290,17 @@ function ReportsContent({ tasks, projects }: ReportsPageProps) {
                 })}
             </div>
           ) : (
-            <p className="text-sm text-slate-500 text-center py-8">No workspace data available</p>
+            <p className="text-sm text-slate-500 text-center py-8">
+              No workspace data available
+            </p>
           )}
         </div>
 
         {/* Top Projects by Activity */}
         <div className="rounded-2xl bg-slate-800/50 border border-slate-700/50 p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Top Projects (Pending Tasks)</h3>
+          <h3 className="text-lg font-semibold text-white mb-4">
+            Top Projects (Pending Tasks)
+          </h3>
           {topProjects.length > 0 ? (
             <div className="space-y-3">
               {topProjects.map(([key, { title, count }], index) => (
@@ -263,28 +311,42 @@ function ReportsContent({ tasks, projects }: ReportsPageProps) {
                   <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs text-slate-400 font-medium">
                     {index + 1}
                   </div>
-                  <span className="flex-1 text-sm text-white truncate">{title}</span>
-                  <span className="text-sm text-violet-400 font-medium">{count} tasks</span>
+                  <span className="flex-1 text-sm text-white truncate">
+                    {title}
+                  </span>
+                  <span className="text-sm text-violet-400 font-medium">
+                    {count} tasks
+                  </span>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-slate-500 text-center py-8">All tasks are completed! 🎉</p>
+            <p className="text-sm text-slate-500 text-center py-8">
+              All tasks are completed! 🎉
+            </p>
           )}
         </div>
       </div>
 
       {/* Projects Summary */}
       <div className="mt-8 rounded-2xl bg-slate-800/50 border border-slate-700/50 p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">Projects Summary</h3>
+        <h3 className="text-lg font-semibold text-white mb-4">
+          Projects Summary
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-4 rounded-xl bg-slate-700/30">
-            <div className="text-2xl font-bold text-white mb-1">{projects.length}</div>
+            <div className="text-2xl font-bold text-white mb-1">
+              {projects.length}
+            </div>
             <div className="text-sm text-slate-400">Total Projects</div>
           </div>
           <div className="p-4 rounded-xl bg-slate-700/30">
             <div className="text-2xl font-bold text-white mb-1">
-              {projects.filter((p) => p.status === "in_review" || p.status === "draft").length}
+              {
+                projects.filter(
+                  (p) => p.status === "in_review" || p.status === "draft",
+                ).length
+              }
             </div>
             <div className="text-sm text-slate-400">Active Projects</div>
           </div>

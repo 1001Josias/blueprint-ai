@@ -2,9 +2,9 @@
 id: task-dependencies
 title: Task Dependencies Strategies
 status: draft
-version: '1.0'
-created_at: '2026-01-06'
-updated_at: '2026-01-06'
+version: "1.0"
+created_at: "2026-01-06"
+updated_at: "2026-01-06"
 author: ai-agent
 ---
 
@@ -21,25 +21,28 @@ Complex projects often have sequential requirements (e.g., "Deploy Database" mus
 ## Functional Requirements
 
 ### Data Structure
+
 1.  **Dependencies Field**: Add a `dependencies` field to the Task entity, containing a list of Task IDs.
 2.  **Validation**: Ensure no circular dependencies are created.
 
 ### Visualization
+
 1.  **Blocked State**: Visually distinguish tasks that are blocked by dependencies (e.g., grayed out, lock icon).
 2.  **Reference**: Show which specific tasks are blocking the current one.
 
 ### Enforcement
+
 1.  **Status Guard**: Prevent changing a task's status to `in_progress` or `done` if any dependency is not `done`.
 
 ## Non-Functional Requirements
 
--   **Performance**: Dependency checks should happen on the client-side for immediate feedback.
--   **Usability**: Error messages should clearly state *why* a task cannot be started (e.g., "Blocked by Task-101").
+- **Performance**: Dependency checks should happen on the client-side for immediate feedback.
+- **Usability**: Error messages should clearly state _why_ a task cannot be started (e.g., "Blocked by Task-101").
 
 ## Out of Scope
 
--   Gantt charts or complex timeline visualizations (future scope).
--   Cross-project dependencies (MVP restricted to same-project tasks).
+- Gantt charts or complex timeline visualizations (future scope).
+- Cross-project dependencies (MVP restricted to same-project tasks).
 
 ## Success Metrics
 

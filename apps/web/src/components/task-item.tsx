@@ -14,10 +14,26 @@ interface TaskItemProps {
 }
 
 const statusConfig = {
-  todo: { label: "To Do", color: "bg-slate-500/20 text-slate-400 border-slate-500/30", icon: "○" },
-  in_progress: { label: "In Progress", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30", icon: "◐" },
-  done: { label: "Done", color: "bg-green-500/20 text-green-400 border-green-500/30", icon: "✓" },
-  blocked: { label: "Blocked", color: "bg-red-500/20 text-red-400 border-red-500/30", icon: "✕" },
+  todo: {
+    label: "To Do",
+    color: "bg-slate-500/20 text-slate-400 border-slate-500/30",
+    icon: "○",
+  },
+  in_progress: {
+    label: "In Progress",
+    color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    icon: "◐",
+  },
+  done: {
+    label: "Done",
+    color: "bg-green-500/20 text-green-400 border-green-500/30",
+    icon: "✓",
+  },
+  blocked: {
+    label: "Blocked",
+    color: "bg-red-500/20 text-red-400 border-red-500/30",
+    icon: "✕",
+  },
 };
 
 const statusOrder: TaskStatus[] = ["todo", "in_progress", "done", "blocked"];
@@ -29,8 +45,19 @@ const priorityConfig = {
   critical: { label: "Critical", color: "text-red-400" },
 };
 
-export function TaskItem({ task, workspace, projectSlug, onClick }: TaskItemProps) {
-  const { getStatus, setOptimisticStatus, clearOptimistic, isPending, setPending } = useTaskStore();
+export function TaskItem({
+  task,
+  workspace,
+  projectSlug,
+  onClick,
+}: TaskItemProps) {
+  const {
+    getStatus,
+    setOptimisticStatus,
+    clearOptimistic,
+    isPending,
+    setPending,
+  } = useTaskStore();
   const currentStatus = getStatus(task.id, task.status);
   const pending = isPending(task.id);
   const [, startTransition] = useTransition();
@@ -41,19 +68,20 @@ export function TaskItem({ task, workspace, projectSlug, onClick }: TaskItemProp
     if (currentStatus === task.status && !pending) {
       clearOptimistic(task.id);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task.status]);
 
   const status = statusConfig[currentStatus];
   const priority = priorityConfig[task.priority];
   const completedSubtasks = task.subtasks.filter((s) => s.completed).length;
   const totalSubtasks = task.subtasks.length;
-  const commentsCount = (task.comments?.length ?? 0) + 
+  const commentsCount =
+    (task.comments?.length ?? 0) +
     task.subtasks.reduce((acc, s) => acc + (s.comments?.length ?? 0), 0);
 
   const cycleStatus = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     const currentIndex = statusOrder.indexOf(currentStatus);
     const nextIndex = (currentIndex + 1) % statusOrder.length;
     const newStatus = statusOrder[nextIndex];
@@ -84,7 +112,7 @@ export function TaskItem({ task, workspace, projectSlug, onClick }: TaskItemProp
   };
 
   return (
-    <div 
+    <div
       className="rounded-xl bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 overflow-hidden cursor-pointer hover:bg-slate-800/80 hover:border-slate-600/50 transition-all duration-200"
       onClick={onClick}
     >
@@ -98,15 +126,11 @@ export function TaskItem({ task, workspace, projectSlug, onClick }: TaskItemProp
               "w-8 h-8 rounded-lg flex items-center justify-center text-lg font-bold shrink-0 transition-all duration-200",
               "hover:scale-110 hover:ring-2 hover:ring-violet-500/50",
               pending && "opacity-50 cursor-wait",
-              status.color
+              status.color,
             )}
             title="Click to change status"
           >
-            {pending ? (
-              <span className="animate-spin">⟳</span>
-            ) : (
-              status.icon
-            )}
+            {pending ? <span className="animate-spin">⟳</span> : status.icon}
           </button>
 
           {/* Content */}
@@ -118,7 +142,7 @@ export function TaskItem({ task, workspace, projectSlug, onClick }: TaskItemProp
               <span
                 className={cn(
                   "px-2 py-0.5 text-xs font-medium rounded border transition-colors",
-                  status.color
+                  status.color,
                 )}
               >
                 {status.label}
@@ -153,7 +177,12 @@ export function TaskItem({ task, workspace, projectSlug, onClick }: TaskItemProp
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
           </svg>
         </div>
       </div>

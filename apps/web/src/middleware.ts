@@ -1,25 +1,25 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 // This function can be marked `async` if using `await` inside
 export function middleware(request: NextRequest) {
   // Get the token from the Authorization header
-  const authHeader = request.headers.get('authorization');
-  const token = authHeader?.startsWith('Bearer ') 
-    ? authHeader.substring(7) 
+  const authHeader = request.headers.get("authorization");
+  const token = authHeader?.startsWith("Bearer ")
+    ? authHeader.substring(7)
     : null;
 
   // Simple hardcoded mapping for MVP (as per PRD)
   // In production this would come from env vars or database
   // Example: Key_WorkspaceA=token123
   const workspaceMap: Record<string, string> = {
-    'token123': 'default', // Mapping token123 to default workspace for testing
+    token123: "default", // Mapping token123 to default workspace for testing
     // Add more mappings here or read from process.env
   };
 
   // If we have a token, try to find the workspace
   let workspace: string | undefined;
-  
+
   if (token && workspaceMap[token]) {
     workspace = workspaceMap[token];
   } else if (token) {
@@ -33,7 +33,7 @@ export function middleware(request: NextRequest) {
   // Clone the request headers and set the x-workspace header
   const requestHeaders = new Headers(request.headers);
   if (workspace) {
-    requestHeaders.set('x-workspace', workspace);
+    requestHeaders.set("x-workspace", workspace);
   }
 
   // Return the response with the new headers
@@ -46,8 +46,5 @@ export function middleware(request: NextRequest) {
 
 // Config to match API routes and potentially pages if we want to enforce on UI
 export const config = {
-  matcher: [
-    '/api/:path*',
-    '/projects/:path*',
-  ],
+  matcher: ["/api/:path*", "/projects/:path*"],
 };

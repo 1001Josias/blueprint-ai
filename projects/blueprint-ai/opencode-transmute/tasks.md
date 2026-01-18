@@ -462,35 +462,71 @@ Tool registrada no plugin com:
 ## Task 8: Configuration
 
 - **id:** oc-trans-008
-- **status:** todo
+- **status:** done
 - **priority:** medium
 - **description:** Implementar sistema de configuração do plugin.
 - **dependencies:** oc-trans-001
 
 ### Subtasks
 
-#### [ ] Definir schema de configuração
+#### [x] Definir schema de configuração
+
+Schema implementado em `config.ts`:
 
 ```typescript
 const configSchema = z.object({
   worktreesDir: z.string().default("./worktrees"),
-  branchPrefix: z.string().default("feat"),
-  hooks: hooksConfigSchema.optional(),
-  terminal: z.enum(["wezterm"]).default("wezterm"),
+  defaultBranchType: branchTypeSchema.default("feat"),
+  maxBranchSlugLength: z.number().int().positive().default(40),
+  hooks: hooksConfigSchema.default(defaultHooks),
+  terminal: terminalTypeSchema.default("wezterm"), // wezterm | tmux | kitty | none
+  autoOpenTerminal: z.boolean().default(true),
+  autoRunHooks: z.boolean().default(true),
+  defaultBaseBranch: z.string().default("main"),
+  useAiBranchNaming: z.boolean().default(true),
 });
 ```
 
-#### [ ] Implementar loadConfig
+#### [x] Implementar loadConfig
 
-Buscar configuração em:
+Buscar configuração em ordem de precedência:
 
-1. `opencode.config.ts` (seção transmute)
+1. `opencode.config.ts` (seção transmute) - via dynamic import
 2. `.opencode/transmute.config.json`
-3. Defaults
+3. `transmute.config.json`
+4. Defaults
 
-#### [ ] Validar configuração
+Funções implementadas:
 
-Usar Zod para validação e merge com defaults.
+- `loadConfig()` - carrega de todas as fontes com precedência
+- `loadConfigFromFile()` - carrega de arquivo JSON
+- `loadConfigFromOpencodeConfig()` - carrega de opencode.config.ts
+- `findConfigFile()` - encontra arquivo de config no repositório
+
+#### [x] Validar configuração
+
+- `validateConfig()` - valida com Zod e retorna resultado tipado
+- `mergeConfig()` - merge com defaults via Zod parse
+
+#### [x] Integração com plugin
+
+- Plugin agora carrega config na inicialização
+- Terminal adapter criado baseado em config
+- Hooks e flags respeitam configuração
+- Logs de fonte de configuração para debugging
+
+#### [x] Adicionar testes unitários
+
+30 testes criados em `config.test.ts` cobrindo:
+
+- Schema validation e defaults
+- `mergeConfig`: merge parcial com defaults
+- `validateConfig`: sucesso e erro
+- `findConfigFile`: encontra arquivos em ordem de precedência
+- `loadConfigFromFile`: parse JSON e erros
+- `loadConfig`: todas as fontes com fallback
+- `getHooksConfig`: resolve hooks com defaults
+- `resolveWorktreesDir`: resolve paths relativos e absolutos
 
 ---
 
@@ -528,31 +564,31 @@ Verificar que worktree pode ser removido corretamente.
 ## Task 10: Documentation
 
 - **id:** oc-trans-010
-- **status:** todo
+- **status:** done
 - **priority:** low
 - **description:** Documentar uso e configuração do plugin.
 - **dependencies:** oc-trans-007, oc-trans-008
 
 ### Subtasks
 
-#### [ ] README do app
+#### [x] Criar seção Plugins no docs
 
-- Overview do plugin
-- Como funciona no contexto do monorepo Transmute
-- Configuração básica
-- Exemplo de uso
+Nova seção `apps/docs/content/docs/plugins/` criada com:
 
-#### [ ] Documentação de API
+- `index.mdx` - Overview da seção de plugins
 
-- Tools disponíveis
-- Schemas de input/output
-- Configurações suportadas
+#### [x] Documentação do Plugin
 
-#### [ ] Troubleshooting
+Documentação completa em `apps/docs/content/docs/plugins/opencode-transmute/`:
 
-- WezTerm não encontrado
-- Erros comuns de Git
-- Como limpar worktrees manualmente
+- `index.mdx` - Overview, quick start, como funciona
+- `configuration.mdx` - Todas as opções de configuração com exemplos
+- `api.mdx` - Referência de API (tools, funções, schemas, erros)
+- `troubleshooting.mdx` - Guia de solução de problemas
+
+#### [x] Build do docs funcionando
+
+Verificado que `pnpm build` no apps/docs compila as novas páginas corretamente.
 
 ---
 

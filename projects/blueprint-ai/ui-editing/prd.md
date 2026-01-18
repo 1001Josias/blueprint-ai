@@ -2,9 +2,9 @@
 id: ui-editing
 title: UI Editing & Interactivity
 status: draft
-version: '1.0'
-created_at: '2026-01-06'
-updated_at: '2026-01-06'
+version: "1.0"
+created_at: "2026-01-06"
+updated_at: "2026-01-06"
 author: ai-agent
 ---
 
@@ -21,14 +21,14 @@ Current version (v1.0) is read-only. Updates require manual file editing or AI a
 ## Functional Requirements
 
 1.  **Task Management**:
-    -   Toggle task status (Todo <-> Done) with a click.
-    -   Create new tasks and subtasks via modal/inline.
-    -   Delete tasks.
-    -   Edit task metadata (priority, description).
+    - Toggle task status (Todo <-> Done) with a click.
+    - Create new tasks and subtasks via modal/inline.
+    - Delete tasks.
+    - Edit task metadata (priority, description).
 2.  **Project Management**:
-    -   Create new projects (wizard to generate folder + markdown).
+    - Create new projects (wizard to generate folder + markdown).
 3.  **Internationalization**:
-    -   Support switching between English and Portuguese.
+    - Support switching between English and Portuguese.
 
 ## Success Metrics
 

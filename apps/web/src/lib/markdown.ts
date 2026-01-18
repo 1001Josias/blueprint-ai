@@ -32,7 +32,7 @@ export function getAllProjectPaths(workspaceFilter?: string): ProjectPath[] {
     if (name.startsWith(".")) return false;
     // If a filter is active, only include that workspace
     if (workspaceFilter && name !== workspaceFilter) return false;
-    
+
     const wsPath = path.join(projectsDirectory, name);
     return fs.statSync(wsPath).isDirectory();
   });
@@ -193,7 +193,12 @@ function parseTasks(content: string): Task[] {
         }
 
         // Subtask description (any text after the title)
-        if (subtaskTitle && line.trim() && !line.startsWith("#") && !line.startsWith("---")) {
+        if (
+          subtaskTitle &&
+          line.trim() &&
+          !line.startsWith("#") &&
+          !line.startsWith("---")
+        ) {
           subtaskDescription += line.trim() + " ";
         }
       }
@@ -222,7 +227,10 @@ function parseTasks(content: string): Task[] {
 /**
  * Get a project by workspace and slug
  */
-export async function getProject(workspace: string, slug: string): Promise<Project | null> {
+export async function getProject(
+  workspace: string,
+  slug: string,
+): Promise<Project | null> {
   const projectPath = path.join(projectsDirectory, workspace, slug);
 
   if (!fs.existsSync(projectPath)) {
@@ -266,7 +274,9 @@ export async function getProject(workspace: string, slug: string): Promise<Proje
 /**
  * Get all projects with summary info
  */
-export async function getAllProjects(workspaceFilter?: string): Promise<ProjectSummary[]> {
+export async function getAllProjects(
+  workspaceFilter?: string,
+): Promise<ProjectSummary[]> {
   const paths = getAllProjectPaths(workspaceFilter);
   const projects: ProjectSummary[] = [];
 
@@ -276,9 +286,12 @@ export async function getAllProjects(workspaceFilter?: string): Promise<ProjectS
       const taskStats = {
         total: project.tasks.items.length,
         done: project.tasks.items.filter((t) => t.status === "done").length,
-        inProgress: project.tasks.items.filter((t) => t.status === "in_progress").length,
+        inProgress: project.tasks.items.filter(
+          (t) => t.status === "in_progress",
+        ).length,
         todo: project.tasks.items.filter((t) => t.status === "todo").length,
-        blocked: project.tasks.items.filter((t) => t.status === "blocked").length,
+        blocked: project.tasks.items.filter((t) => t.status === "blocked")
+          .length,
       };
 
       projects.push({
@@ -308,7 +321,9 @@ export interface TaskWithProject extends Task {
 /**
  * Get all tasks across all projects with project context
  */
-export async function getAllTasksWithProject(workspaceFilter?: string): Promise<TaskWithProject[]> {
+export async function getAllTasksWithProject(
+  workspaceFilter?: string,
+): Promise<TaskWithProject[]> {
   const paths = getAllProjectPaths(workspaceFilter);
   const allTasks: TaskWithProject[] = [];
 

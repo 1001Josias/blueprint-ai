@@ -44,7 +44,7 @@ function CalendarContent({ tasks }: CalendarPageProps) {
       }
       return acc;
     },
-    {} as Record<string, TaskWithProject[]>
+    {} as Record<string, TaskWithProject[]>,
   );
 
   const getDateString = (day: number) => {
@@ -83,8 +83,18 @@ function CalendarContent({ tasks }: CalendarPageProps) {
   };
 
   const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -197,14 +207,15 @@ function CalendarContent({ tasks }: CalendarPageProps) {
                     onClick={() => setSelectedDate(dateStr)}
                     className={cn(
                       "p-3 min-h-[80px] border-b border-r border-slate-700/30 text-left transition-all hover:bg-slate-700/30",
-                      isSelected && "bg-violet-500/20 ring-1 ring-violet-500/50",
-                      isToday(day) && !isSelected && "bg-slate-700/30"
+                      isSelected &&
+                        "bg-violet-500/20 ring-1 ring-violet-500/50",
+                      isToday(day) && !isSelected && "bg-slate-700/30",
                     )}
                   >
                     <div
                       className={cn(
                         "text-sm font-medium mb-1",
-                        isToday(day) ? "text-violet-400" : "text-slate-300"
+                        isToday(day) ? "text-violet-400" : "text-slate-300",
                       )}
                     >
                       {day}
@@ -216,7 +227,7 @@ function CalendarContent({ tasks }: CalendarPageProps) {
                             key={task.id}
                             className={cn(
                               "w-2 h-2 rounded-full",
-                              priorityColors[task.priority]
+                              priorityColors[task.priority],
                             )}
                           />
                         ))}
@@ -266,7 +277,7 @@ function CalendarContent({ tasks }: CalendarPageProps) {
                         weekday: "long",
                         month: "short",
                         day: "numeric",
-                      }
+                      },
                     )
                   : "Select a date"}
               </h3>
@@ -285,7 +296,7 @@ function CalendarContent({ tasks }: CalendarPageProps) {
                           <div
                             className={cn(
                               "w-2 h-2 rounded-full",
-                              statusColors[task.status]
+                              statusColors[task.status],
                             )}
                           />
                           <span className="text-sm font-medium text-white truncate group-hover:text-violet-300">

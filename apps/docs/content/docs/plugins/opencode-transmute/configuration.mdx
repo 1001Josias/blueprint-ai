@@ -1,0 +1,151 @@
+---
+title: Configuration
+description: Customize opencode-transmute behavior
+---
+
+# Configuration
+
+The plugin supports configuration through multiple sources, loaded in order of precedence.
+
+## Configuration Sources
+
+1. **`opencode.config.ts`** (highest priority)
+2. **`.opencode/transmute.config.json`**
+3. **`transmute.config.json`**
+4. **Default values** (fallback)
+
+## Configuration Options
+
+| Option                | Type      | Default         | Description                           |
+| --------------------- | --------- | --------------- | ------------------------------------- |
+| `worktreesDir`        | `string`  | `"./worktrees"` | Directory for git worktrees           |
+| `defaultBranchType`   | `string`  | `"feat"`        | Default branch type prefix            |
+| `maxBranchSlugLength` | `number`  | `40`            | Maximum length for branch slug        |
+| `terminal`            | `string`  | `"wezterm"`     | Terminal adapter to use               |
+| `autoOpenTerminal`    | `boolean` | `true`          | Open terminal after creating worktree |
+| `autoRunHooks`        | `boolean` | `true`          | Run hooks after creating worktree     |
+| `defaultBaseBranch`   | `string`  | `"main"`        | Base branch for new worktrees         |
+| `useAiBranchNaming`   | `boolean` | `true`          | Use AI for branch name generation     |
+| `hooks`               | `object`  | See below       | Lifecycle hooks                       |
+
+## Configuration Examples
+
+### Using `opencode.config.ts`
+
+```typescript
+export default {
+  transmute: {
+    worktreesDir: "./wt",
+    terminal: "wezterm",
+    defaultBaseBranch: "develop",
+    hooks: {
+      afterCreate: ["pnpm install", "pnpm build"],
+    },
+  },
+};
+```
+
+### Using `.opencode/transmute.config.json`
+
+```json
+{
+  "worktreesDir": "./worktrees",
+  "terminal": "tmux",
+  "autoOpenTerminal": false,
+  "defaultBaseBranch": "main",
+  "useAiBranchNaming": true,
+  "hooks": {
+    "afterCreate": ["npm ci"],
+    "beforeDestroy": ["npm run clean"]
+  }
+}
+```
+
+## Terminal Options
+
+| Value       | Description                    |
+| ----------- | ------------------------------ |
+| `"wezterm"` | WezTerm terminal (default)     |
+| `"tmux"`    | tmux multiplexer (coming soon) |
+| `"kitty"`   | Kitty terminal (coming soon)   |
+| `"none"`    | Disable terminal integration   |
+
+## Branch Type Options
+
+The `defaultBranchType` option accepts:
+
+| Value        | Use Case              |
+| ------------ | --------------------- |
+| `"feat"`     | New features          |
+| `"fix"`      | Bug fixes             |
+| `"refactor"` | Code refactoring      |
+| `"docs"`     | Documentation changes |
+| `"chore"`    | Maintenance tasks     |
+| `"test"`     | Test additions        |
+
+## Hooks Configuration
+
+Hooks are shell commands executed at specific lifecycle points.
+
+### `afterCreate`
+
+Commands run after a worktree is created:
+
+```json
+{
+  "hooks": {
+    "afterCreate": ["pnpm install", "pnpm run setup", "cp .env.example .env"]
+  }
+}
+```
+
+### `beforeDestroy`
+
+Commands run before a worktree is removed:
+
+```json
+{
+  "hooks": {
+    "beforeDestroy": ["pnpm run cleanup"]
+  }
+}
+```
+
+### Default Hooks
+
+If no hooks are configured, the default is:
+
+```json
+{
+  "afterCreate": ["[ -f package.json ] && pnpm install || true"],
+  "beforeDestroy": []
+}
+```
+
+## Environment Variables
+
+Hooks have access to these environment variables:
+
+| Variable             | Description          |
+| -------------------- | -------------------- |
+| `TRANSMUTE_TASK_ID`  | The task ID          |
+| `TRANSMUTE_BRANCH`   | The branch name      |
+| `TRANSMUTE_WORKTREE` | Path to the worktree |
+
+## Programmatic Configuration
+
+You can also configure the plugin programmatically:
+
+```typescript
+import { TransmutePlugin } from "opencode-transmute";
+import { loadConfig, mergeConfig } from "opencode-transmute";
+
+// Load and modify config
+const { config } = await loadConfig("/path/to/repo");
+
+const customConfig = mergeConfig({
+  ...config,
+  terminal: "none",
+  autoOpenTerminal: false,
+});
+```
