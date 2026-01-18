@@ -564,31 +564,31 @@ Verificar que worktree pode ser removido corretamente.
 ## Task 10: Documentation
 
 - **id:** oc-trans-010
-- **status:** todo
+- **status:** done
 - **priority:** low
 - **description:** Documentar uso e configuração do plugin.
 - **dependencies:** oc-trans-007, oc-trans-008
 
 ### Subtasks
 
-#### [ ] README do app
+#### [x] Criar seção Plugins no docs
 
-- Overview do plugin
-- Como funciona no contexto do monorepo Transmute
-- Configuração básica
-- Exemplo de uso
+Nova seção `apps/docs/content/docs/plugins/` criada com:
 
-#### [ ] Documentação de API
+- `index.mdx` - Overview da seção de plugins
 
-- Tools disponíveis
-- Schemas de input/output
-- Configurações suportadas
+#### [x] Documentação do Plugin
 
-#### [ ] Troubleshooting
+Documentação completa em `apps/docs/content/docs/plugins/opencode-transmute/`:
 
-- WezTerm não encontrado
-- Erros comuns de Git
-- Como limpar worktrees manualmente
+- `index.mdx` - Overview, quick start, como funciona
+- `configuration.mdx` - Todas as opções de configuração com exemplos
+- `api.mdx` - Referência de API (tools, funções, schemas, erros)
+- `troubleshooting.mdx` - Guia de solução de problemas
+
+#### [x] Build do docs funcionando
+
+Verificado que `pnpm build` no apps/docs compila as novas páginas corretamente.
 
 ---
 
