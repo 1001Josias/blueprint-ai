@@ -2,10 +2,13 @@
  * Session Persistence
  *
  * Manages state persistence for transmute sessions.
- * Sessions track the mapping between tasks and their worktrees.
+ * Sessions track the mapping between tasks and their worktrees,
+ * with a mandatory link to OpenCode sessions for conversation continuity.
  */
 
 import { z } from "zod";
+import * as fs from "node:fs/promises";
+import * as path from "node:path";
 
 /**
  * Schema for a single session
@@ -21,6 +24,8 @@ export const sessionSchema = z.object({
   worktreePath: z.string(),
   /** ISO timestamp of session creation */
   createdAt: z.string().datetime(),
+  /** OpenCode session ID for conversation continuity */
+  opencodeSessionId: z.string(),
 });
 
 /**
@@ -46,10 +51,25 @@ export type State = z.infer<typeof stateSchema>;
 export const STATE_FILE_PATH = ".opencode/transmute.sessions.json";
 
 /**
+ * Get the full path to the state file
+ */
+export function getStateFilePath(basePath: string): string {
+  return path.join(basePath, STATE_FILE_PATH);
+}
+
+/**
+ * Get the directory containing the state file
+ */
+export function getStateDir(basePath: string): string {
+  return path.join(basePath, ".opencode");
+}
+
+/**
  * Load the current state from disk
  *
  * @param basePath - Repository root path
  * @returns Current state with sessions
+ * @throws ZodError if file exists but contains invalid data
  *
  * @example
  * ```ts
@@ -57,12 +77,27 @@ export const STATE_FILE_PATH = ".opencode/transmute.sessions.json";
  * console.log(state.sessions)
  * ```
  */
-export async function loadState(_basePath: string): Promise<State> {
-  // TODO: Implement in Task 4 (oc-trans-004)
-  // 1. Read file from basePath/.opencode/transmute.sessions.json
-  // 2. Return empty state if file doesn't exist
-  // 3. Validate with Zod
-  throw new Error("Not implemented - see Task oc-trans-004");
+export async function loadState(basePath: string): Promise<State> {
+  const filePath = getStateFilePath(basePath);
+
+  try {
+    const content = await fs.readFile(filePath, "utf-8");
+    const data = JSON.parse(content);
+    return stateSchema.parse(data);
+  } catch (error) {
+    // Return empty state if file doesn't exist
+    if (isNodeError(error) && error.code === "ENOENT") {
+      return createEmptyState();
+    }
+
+    // Re-throw JSON parse errors with more context
+    if (error instanceof SyntaxError) {
+      throw new Error(`Invalid JSON in state file: ${filePath}`);
+    }
+
+    // Re-throw other errors (including Zod validation errors)
+    throw error;
+  }
 }
 
 /**
@@ -76,43 +111,72 @@ export async function loadState(_basePath: string): Promise<State> {
  * await saveState("/path/to/repo", { sessions: [...] })
  * ```
  */
-export async function saveState(
-  _basePath: string,
-  _state: State,
-): Promise<void> {
-  // TODO: Implement in Task 4 (oc-trans-004)
-  // 1. Validate state with Zod
-  // 2. Create .opencode directory if needed
-  // 3. Write JSON file
-  throw new Error("Not implemented - see Task oc-trans-004");
+export async function saveState(basePath: string, state: State): Promise<void> {
+  // Validate state before saving
+  const validatedState = stateSchema.parse(state);
+
+  const stateDir = getStateDir(basePath);
+  const filePath = getStateFilePath(basePath);
+
+  // Create .opencode directory if it doesn't exist
+  await fs.mkdir(stateDir, { recursive: true });
+
+  // Write formatted JSON
+  const content = JSON.stringify(validatedState, null, 2);
+  await fs.writeFile(filePath, content, "utf-8");
 }
 
 /**
  * Add a new session to state
  *
+ * If a session with the same taskId already exists, it will be replaced.
+ *
  * @param basePath - Repository root path
  * @param session - Session to add
  */
 export async function addSession(
-  _basePath: string,
-  _session: Session,
+  basePath: string,
+  session: Session,
 ): Promise<void> {
-  // TODO: Implement in Task 4 (oc-trans-004)
-  throw new Error("Not implemented - see Task oc-trans-004");
+  // Validate the session
+  const validatedSession = sessionSchema.parse(session);
+
+  const state = await loadState(basePath);
+
+  // Check if session with same taskId already exists
+  const existingIndex = state.sessions.findIndex(
+    (s) => s.taskId === validatedSession.taskId,
+  );
+
+  if (existingIndex >= 0) {
+    // Replace existing session
+    state.sessions[existingIndex] = validatedSession;
+  } else {
+    // Add new session
+    state.sessions.push(validatedSession);
+  }
+
+  await saveState(basePath, state);
 }
 
 /**
  * Remove a session from state
  *
+ * If the session doesn't exist, this is a no-op.
+ *
  * @param basePath - Repository root path
  * @param taskId - Task ID to remove
  */
 export async function removeSession(
-  _basePath: string,
-  _taskId: string,
+  basePath: string,
+  taskId: string,
 ): Promise<void> {
-  // TODO: Implement in Task 4 (oc-trans-004)
-  throw new Error("Not implemented - see Task oc-trans-004");
+  const state = await loadState(basePath);
+
+  // Filter out the session with matching taskId
+  state.sessions = state.sessions.filter((s) => s.taskId !== taskId);
+
+  await saveState(basePath, state);
 }
 
 /**
@@ -123,11 +187,11 @@ export async function removeSession(
  * @returns Session if found, undefined otherwise
  */
 export async function findSessionByTask(
-  _basePath: string,
-  _taskId: string,
+  basePath: string,
+  taskId: string,
 ): Promise<Session | undefined> {
-  // TODO: Implement in Task 4 (oc-trans-004)
-  throw new Error("Not implemented - see Task oc-trans-004");
+  const state = await loadState(basePath);
+  return state.sessions.find((s) => s.taskId === taskId);
 }
 
 /**
@@ -135,4 +199,11 @@ export async function findSessionByTask(
  */
 export function createEmptyState(): State {
   return { sessions: [] };
+}
+
+/**
+ * Type guard for Node.js errors with code property
+ */
+function isNodeError(error: unknown): error is NodeJS.ErrnoException {
+  return error instanceof Error && "code" in error;
 }
