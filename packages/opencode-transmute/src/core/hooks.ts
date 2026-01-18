@@ -6,6 +6,7 @@
  */
 
 import { z } from "zod";
+import { spawn } from "node:child_process";
 
 /**
  * Schema for hooks configuration
@@ -53,6 +54,75 @@ export interface ExecuteHooksOptions {
 }
 
 /**
+ * Internal options for spawning a command
+ */
+interface SpawnCommandOptions {
+  cwd: string;
+  env?: Record<string, string>;
+}
+
+/**
+ * Execute a single shell command
+ *
+ * @param command - Shell command to execute
+ * @param options - Spawn options
+ * @returns Hook result with stdout, stderr, exitCode, and duration
+ */
+async function executeCommand(
+  command: string,
+  options: SpawnCommandOptions,
+): Promise<HookResult> {
+  const startTime = Date.now();
+
+  return new Promise((resolve) => {
+    const proc = spawn("sh", ["-c", command], {
+      cwd: options.cwd,
+      env: {
+        ...process.env,
+        ...options.env,
+      },
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+
+    let stdout = "";
+    let stderr = "";
+
+    proc.stdout.on("data", (data: Buffer) => {
+      stdout += data.toString();
+    });
+
+    proc.stderr.on("data", (data: Buffer) => {
+      stderr += data.toString();
+    });
+
+    proc.on("error", (err) => {
+      const duration = Date.now() - startTime;
+      resolve({
+        command,
+        success: false,
+        stdout,
+        stderr: err.message,
+        exitCode: -1,
+        duration,
+      });
+    });
+
+    proc.on("close", (code) => {
+      const exitCode = code ?? 0;
+      const duration = Date.now() - startTime;
+      resolve({
+        command,
+        success: exitCode === 0,
+        stdout,
+        stderr,
+        exitCode,
+        duration,
+      });
+    });
+  });
+}
+
+/**
  * Execute a list of hooks sequentially
  *
  * @param commands - Array of shell commands to execute
@@ -61,22 +131,37 @@ export interface ExecuteHooksOptions {
  *
  * @example
  * ```ts
+ * // Strict mode (default) - stops on first error
  * const results = await executeHooks(
  *   ["pnpm install", "pnpm build"],
  *   { cwd: "/path/to/worktree" }
  * )
+ *
+ * // Lenient mode - continues after errors
+ * const results = await executeHooks(
+ *   ["pnpm install", "pnpm build"],
+ *   { cwd: "/path/to/worktree", stopOnError: false }
+ * )
  * ```
  */
 export async function executeHooks(
-  _commands: string[],
-  _options: ExecuteHooksOptions,
+  commands: string[],
+  options: ExecuteHooksOptions,
 ): Promise<HookResult[]> {
-  // TODO: Implement in Task 6 (oc-trans-006)
-  // 1. Execute each command sequentially
-  // 2. Capture stdout/stderr
-  // 3. Stop on error if configured
-  // 4. Return results array
-  throw new Error("Not implemented - see Task oc-trans-006");
+  const { cwd, stopOnError = true, env } = options;
+  const results: HookResult[] = [];
+
+  for (const command of commands) {
+    const result = await executeCommand(command, { cwd, env });
+    results.push(result);
+
+    // Stop on first error if stopOnError is true
+    if (!result.success && stopOnError) {
+      break;
+    }
+  }
+
+  return results;
 }
 
 /**

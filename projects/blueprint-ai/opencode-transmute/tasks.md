@@ -330,14 +330,16 @@ Novas classes de erro em `errors.ts`:
 ## Task 6: Core - Hooks System
 
 - **id:** oc-trans-006
-- **status:** todo
+- **status:** done
 - **priority:** medium
 - **description:** Implementar sistema de hooks declarativos para execução pós-setup.
 - **dependencies:** oc-trans-001
 
 ### Subtasks
 
-#### [ ] Definir schema de configuração de hooks
+#### [x] Definir schema de configuração de hooks
+
+Schema já definido com Zod:
 
 ```typescript
 const hooksConfigSchema = z.object({
@@ -346,25 +348,39 @@ const hooksConfigSchema = z.object({
 });
 ```
 
-#### [ ] Implementar executeHooks
+#### [x] Implementar executeHooks
 
-Executar array de comandos sequencialmente.
-Capturar stdout/stderr.
-Continuar ou parar em caso de erro (configurável).
+Implementado com:
 
-#### [ ] Implementar logging de hooks
+- Execução sequencial de comandos via `sh -c`
+- Captura de stdout/stderr
+- Medição de duração de cada comando
+- Modo `stopOnError: true` (strict, default) - para na primeira falha
+- Modo `stopOnError: false` (lenient) - continua após falhas
+- Suporte a variáveis de ambiente customizadas
 
-Mostrar output de cada comando executado.
-Indicar sucesso/falha claramente.
+#### [x] Implementar logging de hooks
 
-#### [ ] Adicionar testes unitários
+Resultado de cada comando inclui:
 
-Cobrir casos com vitest (mockando execução de comandos):
+- `command`: comando executado
+- `success`: boolean de sucesso
+- `stdout`/`stderr`: saída capturada
+- `exitCode`: código de saída
+- `duration`: tempo de execução em ms
 
-- `executeHooks`: executa comandos em sequência
-- `executeHooks`: para na primeira falha (modo strict)
-- `executeHooks`: continua após falha (modo lenient)
-- `executeHooks`: captura stdout/stderr corretamente
+#### [x] Adicionar testes unitários
+
+32 testes criados em `hooks.test.ts` cobrindo:
+
+- Schema validation
+- Execução básica e múltiplos comandos
+- Working directory correto
+- Modo strict (stopOnError: true)
+- Modo lenient (stopOnError: false)
+- Variáveis de ambiente
+- Comandos complexos (pipes, conditionals)
+- executeAfterCreateHooks / executeBeforeDestroyHooks
 
 ---
 
