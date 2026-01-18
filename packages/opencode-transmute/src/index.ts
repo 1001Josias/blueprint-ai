@@ -118,47 +118,59 @@ const TransmutePlugin: Plugin = async (ctx: PluginInput) => {
             ),
         },
         async execute(args, context) {
-          // Execute the full start-task flow
-          const result = await startTask(
-            {
-              taskId: args.taskId,
-              title: args.title,
-              description: args.description,
-              priority: args.priority,
-              type: args.type,
-              baseBranch: args.baseBranch || config.defaultBaseBranch,
-            },
-            basePath,
-            {
-              client: config.useAiBranchNaming ? client : undefined,
-              opencodeSessionId: context.sessionID,
-              terminal,
-              openTerminal: config.autoOpenTerminal,
-              runHooks: config.autoRunHooks,
-              hooks,
-            },
-          );
+          try {
+            // Execute the full start-task flow
+            const result = await startTask(
+              {
+                taskId: args.taskId,
+                title: args.title,
+                description: args.description,
+                priority: args.priority,
+                type: args.type,
+                baseBranch: args.baseBranch || config.defaultBaseBranch,
+              },
+              basePath,
+              {
+                client: config.useAiBranchNaming ? client : undefined,
+                opencodeSessionId: context.sessionID,
+                terminal,
+                openTerminal: config.autoOpenTerminal,
+                runHooks: config.autoRunHooks,
+                hooks,
+              },
+            );
 
-          // Build appropriate message based on status
-          let message: string;
-          if (result.status === "created") {
-            message = `Created new worktree for task: ${result.taskId}`;
-          } else if (result.status === "existing") {
-            message = `Resumed existing worktree for task: ${result.taskId}`;
-          } else {
-            message = result.message || `Failed to start task: ${result.taskId}`;
+            // Build appropriate message based on status
+            let message: string;
+            if (result.status === "created") {
+              message = `Created new worktree for task: ${result.taskId}`;
+            } else if (result.status === "existing") {
+              message = `Resumed existing worktree for task: ${result.taskId}`;
+            } else {
+              message = result.message || `Failed to start task: ${result.taskId}`;
+            }
+
+            return JSON.stringify({
+              status: result.status,
+              message,
+              taskId: result.taskId,
+              taskName: result.taskName,
+              branch: result.branch,
+              worktreePath: result.worktreePath,
+              opencodeSessionId: result.opencodeSessionId,
+              configSource: source,
+            });
+          } catch (error) {
+            // Catch any unhandled errors and log to console instead of crashing
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.error(`[opencode-transmute] Unhandled error in start-task:`, error);
+            
+            return JSON.stringify({
+              status: "failed",
+              message: `Error: ${errorMessage}`,
+              taskId: args.taskId || "unknown",
+            });
           }
-
-          return JSON.stringify({
-            status: result.status,
-            message,
-            taskId: result.taskId,
-            taskName: result.taskName,
-            branch: result.branch,
-            worktreePath: result.worktreePath,
-            opencodeSessionId: result.opencodeSessionId,
-            configSource: source,
-          });
         },
       }),
     },
@@ -169,6 +181,9 @@ const TransmutePlugin: Plugin = async (ctx: PluginInput) => {
     // },
   };
 };
+
+// Named export for consumers that import { TransmutePlugin }
+export { TransmutePlugin };
 
 // Default export for OpenCode plugin loading
 export default TransmutePlugin;
