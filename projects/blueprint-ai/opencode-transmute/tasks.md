@@ -67,14 +67,14 @@ Package automaticamente detectado pelo pnpm workspace. Build e lint funcionando 
 ## Task 2: Core - AI Branch Naming
 
 - **id:** oc-trans-002
-- **status:** todo
+- **status:** done
 - **priority:** high
 - **description:** Implementar geração inteligente de nomes de branch via IA, baseada no contexto da tarefa.
 - **dependencies:** oc-trans-001
 
 ### Subtasks
 
-#### [ ] Definir schema de entrada (TaskContext)
+#### [x] Definir schema de entrada (TaskContext)
 
 ```typescript
 interface TaskContext {
@@ -92,49 +92,57 @@ interface BranchNameResult {
 }
 ```
 
-#### [ ] Implementar prompt para geração de branch name
+#### [x] Implementar prompt para geração de branch name
 
-Criar prompt que instrui a IA a:
+Prompt estruturado criado em `naming.ts` que instrui a IA a:
 
 - Analisar título e descrição da tarefa
 - Inferir o tipo de mudança (feat, fix, refactor, docs, chore, test)
 - Extrair palavras-chave relevantes
-- Gerar slug conciso e descritivo (máx. 50 chars)
+- Gerar slug conciso e descritivo (máx. 40 chars)
 - Seguir convenções de git branch naming
+- Responder em formato JSON
 
-#### [ ] Implementar função generateBranchName
+#### [x] Implementar função generateBranchName
 
 ```typescript
-// apps/opencode-transmute/src/core/naming.ts
+// packages/opencode-transmute/src/core/naming.ts
 async function generateBranchName(
   context: TaskContext,
+  client?: OpenCodeClient,
+  sessionId?: string,
 ): Promise<BranchNameResult>;
 // Ex output: { branch: "feat/implement-oauth-google-login", type: "feat", slug: "implement-oauth-google-login" }
 ```
 
-#### [ ] Implementar sanitização e validação
+Implementada com:
 
-Garantir que o nome gerado:
+- `generateBranchName()` - função principal que tenta IA e faz fallback
+- `generateBranchNameWithAI()` - usa OpenCode client para chamar LLM
+
+#### [x] Implementar sanitização e validação
+
+`sanitizeBranchName()` garante que o nome gerado:
 
 - É lowercase
 - Não contém caracteres inválidos para git
 - Não excede limite de tamanho
 - Tem formato `<type>/<slug>`
 
-#### [ ] Implementar fallback determinístico
+#### [x] Implementar fallback determinístico
 
-Caso a IA falhe, gerar nome baseado em:
+`generateFallbackBranchName()` gera nome baseado em:
 
 - Task ID + primeiras palavras do título
 - Ex: `feat/task-123-implement-auth`
 
-#### [ ] Adicionar testes unitários
+#### [x] Adicionar testes unitários
 
-Cobrir casos com vitest:
+30 testes criados em `naming.test.ts` cobrindo:
 
 - `sanitizeBranchName`: lowercase, remove caracteres inválidos, limite de tamanho
 - `generateFallbackBranchName`: gera nome correto a partir de task ID e título
-- `generateBranchName`: retorna resultado válido (mock da IA)
+- `generateBranchNameWithAI`: retorna resultado válido (mock da IA)
 - `generateBranchName`: usa fallback quando IA falha
 - Diferentes tipos inferidos (feat, fix, refactor, docs, chore, test)
 
