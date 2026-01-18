@@ -11,6 +11,7 @@ import { type OpenCodeClient } from "./core/naming";
 import { startTask } from "./tools/start-task";
 import { createWezTermAdapter } from "./adapters/terminal/wezterm";
 import { getGitRoot } from "./core/exec";
+import { loadConfig, getHooksConfig, type Config } from "./core/config";
 
 // Re-export types and functions for programmatic use
 export * from "./core/naming";
@@ -19,8 +20,24 @@ export * from "./core/session";
 export * from "./core/hooks";
 export * from "./core/errors";
 export * from "./core/exec";
+export * from "./core/config";
 export * from "./adapters/terminal/types";
 export * from "./tools/start-task";
+
+/**
+ * Create terminal adapter based on configuration
+ */
+function createTerminalAdapter(config: Config) {
+  switch (config.terminal) {
+    case "wezterm":
+      return createWezTermAdapter();
+    case "none":
+      return undefined;
+    // TODO: Add support for tmux and kitty
+    default:
+      return createWezTermAdapter();
+  }
+}
 
 /**
  * Main Transmute Plugin
@@ -36,8 +53,24 @@ export const TransmutePlugin: Plugin = async (ctx: PluginInput) => {
   // Cast to our simplified OpenCodeClient interface
   const client = ctx.client as unknown as OpenCodeClient;
 
-  // Create terminal adapter
-  const terminal = createWezTermAdapter();
+  // Get repository root
+  const basePath = await getGitRoot();
+
+  // Load configuration
+  const { config, source, configPath } = await loadConfig(basePath);
+
+  // Log configuration source (for debugging)
+  if (configPath) {
+    console.log(`[transmute] Loaded config from: ${configPath}`);
+  } else {
+    console.log(`[transmute] Using default configuration`);
+  }
+
+  // Create terminal adapter based on config
+  const terminal = createTerminalAdapter(config);
+
+  // Get hooks configuration
+  const hooks = getHooksConfig(config);
 
   return {
     // Custom tools available to the LLM
@@ -71,12 +104,11 @@ export const TransmutePlugin: Plugin = async (ctx: PluginInput) => {
           baseBranch: tool.schema
             .string()
             .optional()
-            .describe("Base branch to create worktree from (default: main)"),
+            .describe(
+              `Base branch to create worktree from (default: ${config.defaultBaseBranch})`,
+            ),
         },
         async execute(args, context) {
-          // Get repository root
-          const basePath = await getGitRoot();
-
           // Execute the full start-task flow
           const result = await startTask(
             {
@@ -85,21 +117,16 @@ export const TransmutePlugin: Plugin = async (ctx: PluginInput) => {
               description: args.description,
               priority: args.priority,
               type: args.type,
-              baseBranch: args.baseBranch,
+              baseBranch: args.baseBranch || config.defaultBaseBranch,
             },
             basePath,
             {
-              client,
+              client: config.useAiBranchNaming ? client : undefined,
               opencodeSessionId: context.sessionID,
               terminal,
-              openTerminal: true,
-              runHooks: true,
-              hooks: {
-                afterCreate: [
-                  // Install dependencies if package.json exists
-                  "[ -f package.json ] && pnpm install || true",
-                ],
-              },
+              openTerminal: config.autoOpenTerminal,
+              runHooks: config.autoRunHooks,
+              hooks,
             },
           );
 
@@ -114,6 +141,7 @@ export const TransmutePlugin: Plugin = async (ctx: PluginInput) => {
             branch: result.branch,
             worktreePath: result.worktreePath,
             opencodeSessionId: result.opencodeSessionId,
+            configSource: source,
           });
         },
       }),
