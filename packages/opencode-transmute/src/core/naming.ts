@@ -235,28 +235,30 @@ export async function generateBranchNameWithAI(
   client: OpenCodeClient,
   _sessionId: string,
 ): Promise<BranchNameResult> {
-  // Create an ephemeral session for AI branch naming
-  // This avoids blocking the user's main conversation queue
-  await client.app.log({
-    body: {
-      service: "opencode-transmute",
-      level: "debug",
-      message: "Creating ephemeral session for AI branch naming...",
-    },
-  });
-
-  const ephemeralSession = await client.session.create({});
-  const ephemeralSessionId = ephemeralSession.id;
-
-  await client.app.log({
-    body: {
-      service: "opencode-transmute",
-      level: "debug",
-      message: `Ephemeral session created: ${ephemeralSessionId}`,
-    },
-  });
+  let ephemeralSessionId: string | undefined;
 
   try {
+    // Create an ephemeral session for AI branch naming
+    // This avoids blocking the user's main conversation queue
+    await client.app.log({
+      body: {
+        service: "opencode-transmute",
+        level: "debug",
+        message: "Creating ephemeral session for AI branch naming...",
+      },
+    });
+
+    const ephemeralSession = await client.session.create({});
+    ephemeralSessionId = ephemeralSession.id;
+
+    await client.app.log({
+      body: {
+        service: "opencode-transmute",
+        level: "debug",
+        message: `Ephemeral session created: ${ephemeralSessionId}`,
+      },
+    });
+
     // Build the prompt with task context
     const prompt = BRANCH_NAME_PROMPT.replace("{id}", context.id)
       .replace("{title}", context.title)
@@ -282,11 +284,6 @@ export async function generateBranchNameWithAI(
     }
 
     // Try to extract JSON from the response
-    // The response might be:
-    // 1. A complete JSON object: {"type": "feat", "slug": "..."}
-    // 2. A continuation after prefill: feat", "slug": "..."} (when prefill is '{"type":"')
-    // 3. Wrapped in markdown: ```json\n{...}\n```
-
     let jsonStr = textPart.text.trim();
 
     // First, try to find a complete JSON object
@@ -295,9 +292,7 @@ export async function generateBranchNameWithAI(
       jsonStr = jsonMatch[0];
     } else {
       // No complete JSON found - might be a prefill continuation
-      // Try to reconstruct by prepending the prefill
       jsonStr = '{"type":"' + jsonStr;
-      // Clean up potential double quotes or malformed JSON
       jsonStr = jsonStr.replace(/""+/g, '"');
     }
 
@@ -313,12 +308,18 @@ export async function generateBranchNameWithAI(
       type: validated.type,
       slug: sanitizedSlug,
     };
+  } catch (error) {
+    // Log and re-throw - caller (generateBranchName) will catch and use fallback
+    console.error(`[opencode-transmute] AI branch naming error:`, error);
+    throw error;
   } finally {
-    // Always clean up the ephemeral session
-    try {
-      await client.session.delete({ path: { id: ephemeralSessionId } });
-    } catch {
-      // Ignore cleanup errors - session might already be expired
+    // Always clean up the ephemeral session if it was created
+    if (ephemeralSessionId) {
+      try {
+        await client.session.delete({ path: { id: ephemeralSessionId } });
+      } catch {
+        // Ignore cleanup errors - session might already be expired
+      }
     }
   }
 }

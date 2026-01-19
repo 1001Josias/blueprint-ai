@@ -219,6 +219,34 @@ export async function createWorktree(
     throw createBaseBranchNotFoundError(baseBranch);
   }
 
+  // Try to update base branch from remote to ensure we start from latest
+  try {
+    // Only try to update if it's not the current checked out branch
+    // (git won't let us update current branch with fetch dst:src)
+    const currentBranchResult = await gitExec(
+      ["rev-parse", "--abbrev-ref", "HEAD"],
+      { cwd, throwOnError: false },
+    );
+    const currentBranch = currentBranchResult.stdout.trim();
+
+    if (currentBranch !== baseBranch) {
+      // Try to fetch and update local ref: git fetch origin base:base
+      // We use throwOnError: false because this might fail if:
+      // 1. Remote 'origin' doesn't exist
+      // 2. Remote branch doesn't exist
+      // 3. Not a fast-forward update
+      await gitExec(["fetch", "origin", `${baseBranch}:${baseBranch}`], {
+        cwd,
+        throwOnError: false,
+      });
+    } else {
+      // If we are on the base branch, try a simple pull
+      await gitExec(["pull"], { cwd, throwOnError: false });
+    }
+  } catch {
+    // Ignore update errors - fallback to using local version of base branch
+  }
+
   // Create parent directory if it doesn't exist
   const parentDir = join(targetDir, "..");
   await mkdir(parentDir, { recursive: true });

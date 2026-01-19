@@ -339,6 +339,40 @@ branch refs/heads/feat/existing
       recursive: true,
     });
   });
+
+  it("attempts to update base branch before creating worktree", async () => {
+    vi.mocked(execModule.branchExists).mockResolvedValue(true);
+    vi.mocked(fs.access).mockRejectedValue({ code: "ENOENT" });
+    vi.mocked(fs.mkdir).mockResolvedValue(undefined);
+
+    // Mock current branch check to return 'other-branch' (not main)
+    vi.mocked(execModule.gitExec).mockImplementation(async (args) => {
+      if (args[0] === "rev-parse" && args[1] === "--abbrev-ref") {
+        return { stdout: "other-branch\n", stderr: "", exitCode: 0 };
+      }
+      if (args[0] === "rev-parse" && args[1] === "HEAD") {
+        return { stdout: "abc1234\n", stderr: "", exitCode: 0 };
+      }
+      return { stdout: "", stderr: "", exitCode: 0 };
+    });
+
+    await createWorktree({
+      branch: "feat/new",
+      baseBranch: "main",
+    });
+
+    // Should verify current branch
+    expect(execModule.gitExec).toHaveBeenCalledWith(
+      ["rev-parse", "--abbrev-ref", "HEAD"],
+      expect.any(Object),
+    );
+
+    // Should attempt to fetch origin main:main
+    expect(execModule.gitExec).toHaveBeenCalledWith(
+      ["fetch", "origin", "main:main"],
+      expect.objectContaining({ throwOnError: false }),
+    );
+  });
 });
 
 describe("worktreeExists", () => {

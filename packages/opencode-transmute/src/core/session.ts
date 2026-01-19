@@ -48,7 +48,7 @@ export type State = z.infer<typeof stateSchema>;
 /**
  * Default state file path relative to repository root
  */
-export const STATE_FILE_PATH = ".opencode/transmute.sessions.json";
+const STATE_FILE_PATH = ".opencode/transmute.sessions.json";
 
 /**
  * Get the full path to the state file

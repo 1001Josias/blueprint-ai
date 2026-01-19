@@ -15,16 +15,9 @@ import { createWezTermAdapter } from "./adapters/terminal/wezterm";
 import { getGitRoot } from "./core/exec";
 import { loadConfig, getHooksConfig, type Config } from "./core/config";
 
-// Re-export types and functions for programmatic use
-export * from "./core/naming";
-export * from "./core/worktree";
-export * from "./core/session";
-export * from "./core/hooks";
-export * from "./core/errors";
-export * from "./core/exec";
-export * from "./core/config";
-export * from "./adapters/terminal/types";
-export * from "./tools/start-task";
+// NOTE: Named exports removed to avoid "mixed exports" bundler warning.
+// The plugin only exports the default TransmutePlugin function.
+// For programmatic use of utilities, import directly from submodules.
 
 /**
  * Create terminal adapter based on configuration
@@ -50,21 +43,36 @@ function createTerminalAdapter(config: Config) {
  * - Session persistence across restarts
  * - Terminal integration (WezTerm)
  */
-export const TransmutePlugin: Plugin = async (ctx: PluginInput) => {
+const TransmutePlugin: Plugin = async (ctx: PluginInput) => {
   // Extract client for AI operations
   const client = ctx.client as unknown as OpenCodeClient;
 
-  // Get repository root
-  const basePath = await getGitRoot();
+  // Initialize with safe defaults
+  let basePath: string;
+  let config: Config;
+  let source: string;
+  let configPath: string | undefined;
 
-  // Load configuration
-  const { config, source, configPath } = await loadConfig(basePath);
+  try {
+    // Get repository root
+    basePath = await getGitRoot();
 
-  // Log configuration source (for debugging)
-  if (configPath) {
-    console.log(`[transmute] Loaded config from: ${configPath}`);
-  } else {
-    console.log(`[transmute] Using default configuration`);
+    // Load configuration
+    const loadResult = await loadConfig(basePath);
+    config = loadResult.config;
+    source = loadResult.source;
+    configPath = loadResult.configPath;
+
+    // Log configuration source (for debugging)
+    if (configPath) {
+      console.log(`[transmute] Loaded config from: ${configPath}`);
+    } else {
+      console.log(`[transmute] Using default configuration`);
+    }
+  } catch (error) {
+    console.error(`[transmute] Plugin initialization failed:`, error);
+    // Return empty plugin if init fails - tools won't be available
+    return {};
   }
 
   // Create terminal adapter based on config
@@ -110,40 +118,59 @@ export const TransmutePlugin: Plugin = async (ctx: PluginInput) => {
             ),
         },
         async execute(args, context) {
-          // Execute the full start-task flow
-          const result = await startTask(
-            {
-              taskId: args.taskId,
-              title: args.title,
-              description: args.description,
-              priority: args.priority,
-              type: args.type,
-              baseBranch: args.baseBranch || config.defaultBaseBranch,
-            },
-            basePath,
-            {
-              client: config.useAiBranchNaming ? client : undefined,
-              opencodeSessionId: context.sessionID,
-              terminal,
-              openTerminal: config.autoOpenTerminal,
-              runHooks: config.autoRunHooks,
-              hooks,
-            },
-          );
+          try {
+            // Execute the full start-task flow
+            const result = await startTask(
+              {
+                taskId: args.taskId,
+                title: args.title,
+                description: args.description,
+                priority: args.priority,
+                type: args.type,
+                baseBranch: args.baseBranch || config.defaultBaseBranch,
+              },
+              basePath,
+              {
+                client: config.useAiBranchNaming ? client : undefined,
+                opencodeSessionId: context.sessionID,
+                terminal,
+                openTerminal: config.autoOpenTerminal,
+                runHooks: config.autoRunHooks,
+                hooks,
+              },
+            );
 
-          return JSON.stringify({
-            status: result.status,
-            message:
-              result.status === "created"
-                ? `Created new worktree for task: ${result.taskId}`
-                : `Resumed existing worktree for task: ${result.taskId}`,
-            taskId: result.taskId,
-            taskName: result.taskName,
-            branch: result.branch,
-            worktreePath: result.worktreePath,
-            opencodeSessionId: result.opencodeSessionId,
-            configSource: source,
-          });
+            // Build appropriate message based on status
+            let message: string;
+            if (result.status === "created") {
+              message = `Created new worktree for task: ${result.taskId}`;
+            } else if (result.status === "existing") {
+              message = `Resumed existing worktree for task: ${result.taskId}`;
+            } else {
+              message = result.message || `Failed to start task: ${result.taskId}`;
+            }
+
+            return JSON.stringify({
+              status: result.status,
+              message,
+              taskId: result.taskId,
+              taskName: result.taskName,
+              branch: result.branch,
+              worktreePath: result.worktreePath,
+              opencodeSessionId: result.opencodeSessionId,
+              configSource: source,
+            });
+          } catch (error) {
+            // Catch any unhandled errors and log to console instead of crashing
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.error(`[opencode-transmute] Unhandled error in start-task:`, error);
+            
+            return JSON.stringify({
+              status: "failed",
+              message: `Error: ${errorMessage}`,
+              taskId: args.taskId || "unknown",
+            });
+          }
         },
       }),
     },
@@ -154,6 +181,9 @@ export const TransmutePlugin: Plugin = async (ctx: PluginInput) => {
     // },
   };
 };
+
+// Named export for consumers that import { TransmutePlugin }
+export { TransmutePlugin };
 
 // Default export for OpenCode plugin loading
 export default TransmutePlugin;

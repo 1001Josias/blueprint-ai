@@ -230,9 +230,8 @@ describe("startTask", () => {
         expect.objectContaining({
           cwd: expect.stringContaining("worktrees"),
           title: expect.stringContaining("Task with terminal"),
-          commands: expect.arrayContaining([
-            expect.stringContaining("opencode --session session-term"),
-          ]),
+          // Each worktree gets a fresh OpenCode session (no --session flag)
+          commands: expect.arrayContaining(["opencode"]),
         }),
       );
     });

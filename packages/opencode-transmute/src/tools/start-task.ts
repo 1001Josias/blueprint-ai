@@ -153,10 +153,10 @@ export async function startTask(
         },
       });
     }
-    
+
     // Log to console for visibility
     console.error(`[opencode-transmute] Invalid input for start-task:`, error);
-    
+
     return {
       status: "failed",
       taskId: input.taskId || "unknown",
@@ -169,7 +169,7 @@ export async function startTask(
     const repoRoot = basePath || (await getGitRoot());
 
     // Load configuration
-    const config = options.config || (await loadConfig(repoRoot));
+    const config = options.config || (await loadConfig(repoRoot)).config;
 
     // Merge hooks from options and config
     const activeHooks = options.hooks || config.hooks;
@@ -269,10 +269,13 @@ export async function startTask(
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    
+
     // Log to console for visibility
-    console.error(`[opencode-transmute] Error in start-task implementation:`, error);
-    
+    console.error(
+      `[opencode-transmute] Error in start-task implementation:`,
+      error,
+    );
+
     if (client) {
       await client.app?.log({
         body: {
@@ -314,10 +317,10 @@ async function openTerminalSession(
   // Build commands to run in terminal
   const commands: string[] = [];
 
-  // Add opencode command to resume session
-  if (session.opencodeSessionId) {
-    commands.push(`opencode --session ${session.opencodeSessionId}`);
-  }
+  // Start a fresh OpenCode session in the worktree
+  // Each worktree gets its own isolated session since OpenCode sessions are project-specific
+  // (sessions are bound to the directory they were created in)
+  commands.push("opencode");
 
   // Add any additional commands
   if (additionalCommands && additionalCommands.length > 0) {

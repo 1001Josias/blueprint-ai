@@ -156,16 +156,26 @@ export class WezTermAdapter implements TerminalAdapter {
     // Note: WezTerm CLI does not support --pane-title flag
     // Title is ignored for now. Could be set via escape sequences in the future.
 
-    // If commands are provided, execute them and keep the shell open
+    // If commands are provided, execute them
     if (options.commands && options.commands.length > 0) {
       // Use -- to separate wezterm args from the command
       args.push("--");
 
-      // Combine commands with && to run sequentially
-      // Add exec $SHELL at the end to keep the terminal open after commands complete
-      // This ensures the pane doesn't close if a command fails or completes
-      const combinedCommand = options.commands.join(" && ");
-      args.push("sh", "-c", `${combinedCommand}; exec $SHELL`);
+      // For a single command that is a TUI app (like opencode), run it directly
+      // This ensures proper TTY handling for interactive applications
+      if (
+        options.commands.length === 1 &&
+        options.commands[0].startsWith("opencode")
+      ) {
+        // Run opencode directly without sh wrapper for proper TUI rendering
+        const parts = options.commands[0].split(" ");
+        args.push(...parts);
+      } else {
+        // For multiple commands or non-TUI commands, use sh -c wrapper
+        // Add exec $SHELL at the end to keep the terminal open after commands complete
+        const combinedCommand = options.commands.join(" && ");
+        args.push("sh", "-c", `${combinedCommand}; exec $SHELL`);
+      }
     }
 
     return args;
