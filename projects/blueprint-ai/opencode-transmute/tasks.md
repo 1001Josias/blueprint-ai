@@ -184,6 +184,7 @@ Executar `git worktree add -b <branch> <path> <base>`.
 
 - Verificar se branch já existe
 - Criar diretório worktrees se necessário
+- **Novo:** Atualizar branch base (fetch/pull) antes de criar para evitar conflitos
 
 #### [ ] Implementar worktreeExists
 
@@ -420,6 +421,8 @@ Fluxo implementado em `startTask()`:
 5. Persiste sessão com `opencodeSessionId` (`addSession`)
 6. Executa hooks afterCreate (`executeAfterCreateHooks`)
 7. Abre terminal no worktree (`openSession`)
+   - **Novo:** Para novas tasks, inicializar com `--prompt` contendo contexto
+   - **Novo:** Para tasks existentes, usar `--continue` para retomar histórico
 8. Retorna resultado
 
 #### [ ] Definir schema de output
