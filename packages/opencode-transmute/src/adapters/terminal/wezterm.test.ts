@@ -263,7 +263,6 @@ describe("WezTermAdapter", () => {
       });
 
       // Note: --pane-title is NOT included because WezTerm CLI doesn't support it
-      // opencode commands are run directly without sh wrapper for proper TUI rendering
       expect(mockExec).toHaveBeenLastCalledWith(
         "wezterm",
         [
@@ -272,9 +271,9 @@ describe("WezTermAdapter", () => {
           "--cwd",
           "/path/to/worktree",
           "--",
-          "opencode",
-          "--session",
-          "abc123",
+          "sh",
+          "-c",
+          "opencode --session abc123; exec $SHELL",
         ],
         { throwOnError: false },
       );

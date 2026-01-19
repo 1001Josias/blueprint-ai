@@ -230,8 +230,10 @@ describe("startTask", () => {
         expect.objectContaining({
           cwd: expect.stringContaining("worktrees"),
           title: expect.stringContaining("Task with terminal"),
-          // Each worktree gets a fresh OpenCode session (no --session flag)
-          commands: expect.arrayContaining(["opencode"]),
+          // New task uses --prompt
+          commands: expect.arrayContaining([
+            expect.stringContaining("opencode --prompt"),
+          ]),
         }),
       );
     });
@@ -312,7 +314,14 @@ describe("startTask", () => {
         runHooks: false,
       });
 
-      expect(mockTerminal.openSession).toHaveBeenCalled();
+      expect(mockTerminal.openSession).toHaveBeenCalledWith(
+        expect.objectContaining({
+          // Existing task uses --continue
+          commands: expect.arrayContaining([
+            expect.stringContaining("opencode --continue"),
+          ]),
+        }),
+      );
     });
   });
 

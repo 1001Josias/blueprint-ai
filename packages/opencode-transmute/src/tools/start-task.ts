@@ -193,7 +193,10 @@ export async function startTask(
 
       // Optionally open terminal for existing session
       if (openTerminal && terminal) {
-        await openTerminalSession(terminal, existingSession, terminalCommands);
+        await openTerminalSession(terminal, existingSession, {
+          additionalCommands: terminalCommands,
+          // No taskContext means "resume existing session"
+        });
       }
 
       return result;
@@ -255,7 +258,10 @@ export async function startTask(
 
     // 6. Open terminal in worktree
     if (openTerminal && terminal) {
-      await openTerminalSession(terminal, newSession, terminalCommands);
+      await openTerminalSession(terminal, newSession, {
+        additionalCommands: terminalCommands,
+        taskContext, // Pass context to initialize new session with prompt
+      });
     }
 
     // 7. Return result
@@ -298,13 +304,18 @@ export async function startTask(
  *
  * @param terminal - Terminal adapter
  * @param session - Session to open
- * @param additionalCommands - Additional commands to run
+ * @param options - Configuration for opening the session
  */
 async function openTerminalSession(
   terminal: TerminalAdapter,
   session: Session,
-  additionalCommands?: string[],
+  options: {
+    additionalCommands?: string[];
+    taskContext?: TaskContext;
+  } = {},
 ): Promise<void> {
+  const { additionalCommands, taskContext } = options;
+
   // Check if terminal is available
   const isAvailable = await terminal.isAvailable();
   if (!isAvailable) {
@@ -317,24 +328,38 @@ async function openTerminalSession(
   // Build commands to run in terminal
   const commands: string[] = [];
 
-  // Start a fresh OpenCode session in the worktree
-  // Each worktree gets its own isolated session since OpenCode sessions are project-specific
-  // (sessions are bound to the directory they were created in)
-  commands.push("opencode");
+  // Determine opencode startup command
+  if (taskContext) {
+    // New task: Initialize with context prompt
+    const prompt = `Starting work on task: ${taskContext.title} (${taskContext.id})
+
+${taskContext.description || "No description provided."}
+
+Priority: ${taskContext.priority || "Not specified"}
+Type: ${taskContext.type || "Not specified"}
+
+Please analyze the codebase and create a plan to implement this task.`;
+
+    // Use JSON.stringify to safely escape the prompt string for shell
+    commands.push(`opencode --prompt ${JSON.stringify(prompt)}`);
+  } else {
+    // Existing task: Continue previous session
+    commands.push("opencode --continue");
+  }
 
   // Add any additional commands
   if (additionalCommands && additionalCommands.length > 0) {
     commands.push(...additionalCommands);
   }
 
-  const options: OpenSessionOptions = {
+  const sessionOptions: OpenSessionOptions = {
     cwd: session.worktreePath,
     title: `${session.taskName} (${session.branch})`,
     commands: commands.length > 0 ? commands : undefined,
   };
 
   try {
-    await terminal.openSession(options);
+    await terminal.openSession(sessionOptions);
   } catch (error) {
     // Log but don't fail - terminal is a nice-to-have
     console.warn(`[transmute] Failed to open terminal session:`, error);
@@ -360,11 +385,10 @@ export async function resumeTask(
   const session = await findSessionByTask(repoRoot, taskId);
 
   if (session && options.terminal) {
-    await openTerminalSession(
-      options.terminal,
-      session,
-      options.terminalCommands,
-    );
+    await openTerminalSession(options.terminal, session, {
+      additionalCommands: options.terminalCommands,
+      // No taskContext means "resume"
+    });
   }
 
   return session;
