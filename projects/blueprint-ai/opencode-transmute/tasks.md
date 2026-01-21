@@ -138,13 +138,14 @@ Implementada com:
 
 #### [x] Adicionar testes unitários
 
-30 testes criados em `naming.test.ts` cobrindo:
+33 testes criados em `naming.test.ts` cobrindo:
 
 - `sanitizeBranchName`: lowercase, remove caracteres inválidos, limite de tamanho
 - `generateFallbackBranchName`: gera nome correto a partir de task ID e título
 - `generateBranchNameWithAI`: retorna resultado válido (mock da IA)
 - `generateBranchName`: usa fallback quando IA falha
 - Diferentes tipos inferidos (feat, fix, refactor, docs, chore, test)
+- Prevenção de duplicação de ID quando título começa com o ID ([f29cc5c](https://github.com/1001Josias/transmute/commit/f29cc5c))
 
 ---
 
