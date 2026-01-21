@@ -287,6 +287,7 @@ describe("generateBranchNameWithAI", () => {
           },
         ],
         assistant: { prefill: '{"type":"' },
+        noReply: true,
       },
     });
 

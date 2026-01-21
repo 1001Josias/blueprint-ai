@@ -8,8 +8,8 @@
 import { z } from "zod";
 
 /**
- * Simplified OpenCode SDK client interface for branch name generation.
- * Only includes the session.prompt method needed for AI inference.
+ * OpenCode SDK client interface for branch name generation.
+ * Uses session.prompt with noReply flag to inject context without triggering response.
  */
 export interface OpenCodeClient {
   session: {
@@ -17,6 +17,7 @@ export interface OpenCodeClient {
       path: { id: string };
       body: {
         parts: Array<{ type: "text"; text: string }>;
+        noReply?: boolean; // CRITICAL: prevents AI response queue
         assistant?: { prefill?: string };
       };
     }): Promise<{
@@ -28,6 +29,9 @@ export interface OpenCodeClient {
 /**
  * Prompt template for AI branch name generation.
  * Uses structured output to get consistent JSON responses.
+ * 
+ * IMPORTANT: This prompt is sent with noReply:true to avoid deadlock.
+ * The AI injects its response into the session context without queuing a new response.
  */
 const BRANCH_NAME_PROMPT = `You are a git branch name generator. Analyze the task and generate an appropriate branch name.
 
@@ -117,12 +121,15 @@ export const branchNameResultSchema = z.object({
 });
 
 /**
- * Generate a branch name using AI inference
+ * Generate a branch name using AI inference with noReply flag
  *
  * @param context - Task context for generating the branch name
  * @param client - Optional OpenCode client for AI inference
  * @param sessionId - Session ID for the AI prompt
  * @returns Branch name result with type and slug
+ *
+ * IMPORTANT: Uses noReply:true to inject prompt without triggering AI response queue.
+ * This should prevent deadlock during tool execution.
  *
  * @example
  * ```ts
@@ -142,7 +149,7 @@ export async function generateBranchName(
   // Validate input
   taskContextSchema.parse(context);
 
-  // If client and sessionId provided, try AI generation
+  // If client and sessionId provided, try AI generation with noReply
   if (client && sessionId) {
     try {
       return await generateBranchNameWithAI(context, client, sessionId);
@@ -159,13 +166,16 @@ export async function generateBranchName(
 }
 
 /**
- * Generate a branch name using AI inference
+ * Generate a branch name using AI inference with noReply flag
  *
  * @param context - Task context
- * @param client - OpenCode client for AI inference
+ * @param client - OpenCode client for AI inference  
  * @param sessionId - Session ID for the AI prompt
  * @returns Branch name result
  * @throws Error if AI call fails (caller should handle fallback)
+ * 
+ * IMPLEMENTATION NOTE: Uses noReply:true to prevent AI from queuing a response.
+ * This allows injecting the prompt into session context without blocking tool execution.
  */
 export async function generateBranchNameWithAI(
   context: TaskContext,
@@ -177,12 +187,14 @@ export async function generateBranchNameWithAI(
     .replace("{title}", context.title)
     .replace("{description}", context.description || "No description provided");
 
-  // Call the AI via OpenCode client
+  // Call the AI via OpenCode client WITH noReply flag
+  // This injects the prompt without triggering a queued AI response
   const response = await client.session.prompt({
     path: { id: sessionId },
     body: {
       parts: [{ type: "text", text: prompt }],
-      // Prefill helps the AI respond with JSON directly
+      noReply: true, // CRITICAL: Prevents deadlock by not queuing AI response
+      // Prefill helps the AI respond with JSON directly when it does process
       assistant: { prefill: '{"type":"' },
     },
   });
