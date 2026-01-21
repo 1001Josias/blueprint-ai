@@ -241,8 +241,20 @@ export function generateFallbackBranchName(
       ? (context.type as BranchType)
       : "feat";
 
+  // Remove the task ID from the title if it appears at the start to avoid duplication
+  // e.g., title "oc-trans-002 - AI Branch Naming" with id "oc-trans-002" would otherwise
+  // produce "oc-trans-002-oc-trans-002-ai-branch-naming"
+  const normalizedId = context.id.toLowerCase();
+  const normalizedTitle = context.title.toLowerCase();
+  let cleanTitle = context.title;
+
+  // Check if title starts with the ID (with optional separator like " - " or ": ")
+  if (normalizedTitle.startsWith(normalizedId)) {
+    cleanTitle = context.title.slice(context.id.length).replace(/^[\s\-:]+/, "");
+  }
+
   // Slugify the title
-  const slug = slugify(`${context.id}-${context.title}`);
+  const slug = slugify(`${context.id}-${cleanTitle}`);
 
   return {
     branch: `${type}/${slug}`,

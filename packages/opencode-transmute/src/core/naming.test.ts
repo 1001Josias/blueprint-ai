@@ -104,6 +104,32 @@ describe("generateFallbackBranchName", () => {
     });
     expect(result.slug.length).toBeLessThanOrEqual(40);
   });
+
+  it("avoids duplicating ID when title starts with task ID", () => {
+    const result = generateFallbackBranchName({
+      id: "task-123",
+      title: "task-123 Implement feature",
+    });
+    expect(result.branch).toBe("feat/task-123-implement-feature");
+    expect(result.slug).not.toContain("task-123-task-123");
+  });
+
+  it("avoids duplicating ID when title contains ID with separator", () => {
+    const result = generateFallbackBranchName({
+      id: "oc-trans-002",
+      title: "oc-trans-002 - AI Branch Naming",
+    });
+    expect(result.branch).toBe("feat/oc-trans-002-ai-branch-naming");
+    expect(result.slug).not.toContain("oc-trans-002-oc-trans-002");
+  });
+
+  it("handles title with ID and colon separator", () => {
+    const result = generateFallbackBranchName({
+      id: "task-1",
+      title: "task-1: Fix the bug",
+    });
+    expect(result.branch).toBe("feat/task-1-fix-the-bug");
+  });
 });
 
 describe("generateBranchNameWithAI", () => {
