@@ -7,7 +7,7 @@
 
 import type { Plugin, PluginInput } from "@opencode-ai/plugin";
 import { tool } from "@opencode-ai/plugin";
-import { generateBranchName, type OpenCodeClient } from "./core/naming";
+import { generateBranchName } from "./core/naming";
 
 // Re-export types and functions for programmatic use
 export * from "./core/naming";
@@ -28,44 +28,51 @@ export * from "./adapters/terminal/types";
 export const TransmutePlugin: Plugin = async (ctx: PluginInput) => {
   // Extract client for AI operations
   // Cast to our simplified OpenCodeClient interface
-  const client = ctx.client as unknown as OpenCodeClient;
+
 
   return {
     // Custom tools available to the LLM
     tool: {
       "start-task": tool({
         description:
-          "Create an isolated git worktree for a task with AI-generated branch name. " +
-          "Use this when starting work on a new task to ensure clean separation from other work.",
+          "Create an isolated git worktree for a task. " +
+          "BEFORE calling this tool, use @branch-namer to generate the branchType and branchSlug, " +
+          "then pass them here. Example: first ask '@branch-namer Task: oc-trans-002 - AI Branch Naming', " +
+          "then call start-task with the generated branchType and branchSlug.",
         args: {
           taskId: tool.schema
             .string()
             .describe("Unique task identifier (e.g., task-123)"),
           title: tool.schema
             .string()
-            .describe("Task title for branch name generation"),
+            .describe("Task title"),
           description: tool.schema
             .string()
             .optional()
-            .describe("Task description for better branch name inference"),
-          priority: tool.schema
+            .describe("Task description"),
+          branchType: tool.schema
             .string()
             .optional()
-            .describe("Task priority (low, medium, high, critical)"),
-          type: tool.schema
+            .describe("Branch type from @branch-namer: feat, fix, refactor, docs, chore, or test"),
+          branchSlug: tool.schema
             .string()
             .optional()
-            .describe(
-              "Branch type hint: feat, fix, refactor, docs, chore, test",
-            ),
+            .describe("Branch slug from @branch-namer (e.g., oc-trans-002-ai-branch-naming)"),
           baseBranch: tool.schema
             .string()
             .optional()
             .describe("Base branch to create worktree from (default: main)"),
         },
-        async execute(args, context) {
-          // Generate branch name using AI (or fallback)
-          const branchResult = await generateBranchName(
+        async execute(args) {
+          // Use subagent-provided branch name or fallback to deterministic
+          const branchName = args.branchType && args.branchSlug
+            ? {
+                type: args.branchType as "feat" | "fix" | "refactor" | "docs" | "chore" | "test",
+                slug: args.branchSlug,
+              }
+            : undefined;
+
+          const branchResult = generateBranchName(
             {
               id: args.taskId,
               title: args.title,
@@ -73,8 +80,7 @@ export const TransmutePlugin: Plugin = async (ctx: PluginInput) => {
               priority: args.priority,
               type: args.type,
             },
-            client,
-            context.sessionID,
+            branchName,
           );
 
           // TODO: Implement full flow in Task 7 (oc-trans-007)
