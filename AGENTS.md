@@ -184,6 +184,11 @@ This subtask is done.
       - The Pull Request URL (if applicable)
     - This allows the user to immediately verify the changes in the browser.
 
+21. **Conflicting Specifications**:
+    - When PRD and Task definitions conflict regarding implementation details (e.g., file paths, technology choices, scope, architecture), **ALWAYS ask the user** which source to follow.
+    - Do NOT assume one is more correct than the other — the user has context that resolves the ambiguity.
+    - Example: "I noticed the PRD specifies `apps/opencode-transmute` but the Task says `packages/opencode-transmute`. Which location should I use?"
+
 ## State Management Guidelines
 
 To ensure consistency and correct behavior across the application, follow these boundaries for state management:

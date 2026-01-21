@@ -14,14 +14,14 @@ updated_at: "2026-01-18"
 ## Task 1: Project Setup
 
 - **id:** oc-trans-001
-- **status:** todo
+- **status:** done
 - **priority:** critical
 - **description:** Inicializar estrutura do app opencode-transmute no monorepo Transmute.
 - **comment:** Package created at `packages/opencode-transmute/` (changed from `apps/` per architecture decision for npm-publishable package).
 
 ### Subtasks
 
-#### [ ] Criar estrutura de diretórios
+#### [x] Criar estrutura de diretórios
 
 Criado `packages/opencode-transmute` com estrutura:
 
@@ -46,7 +46,7 @@ packages/opencode-transmute/
 └── eslint.config.mjs
 ```
 
-#### [ ] Configurar package.json
+#### [x] Configurar package.json
 
 Dependências configuradas:
 
@@ -54,11 +54,11 @@ Dependências configuradas:
 - zod (validação)
 - `@opencode-ai/plugin` (peer dependency para SDK do OpenCode)
 
-#### [ ] Configurar TypeScript
+#### [x] Configurar TypeScript
 
 `tsconfig.json` estendendo `@repo/typescript-config/base.json`.
 
-#### [ ] Registrar no Turborepo
+#### [x] Registrar no Turborepo
 
 Package automaticamente detectado pelo pnpm workspace. Build e lint funcionando via turbo.
 
