@@ -67,14 +67,14 @@ Package automaticamente detectado pelo pnpm workspace. Build e lint funcionando 
 ## Task 2: Core - AI Branch Naming
 
 - **id:** oc-trans-002
-- **status:** todo
+- **status:** done
 - **priority:** high
 - **description:** Implementar geração inteligente de nomes de branch via IA, baseada no contexto da tarefa.
 - **dependencies:** oc-trans-001
 
 ### Subtasks
 
-#### [ ] Definir schema de entrada (TaskContext)
+#### [x] Definir schema de entrada (TaskContext)
 
 ```typescript
 interface TaskContext {
@@ -92,7 +92,7 @@ interface BranchNameResult {
 }
 ```
 
-#### [ ] Implementar prompt para geração de branch name
+#### [x] Implementar prompt para geração de branch name
 
 Prompt estruturado criado em `naming.ts` que instrui a IA a:
 
@@ -103,7 +103,7 @@ Prompt estruturado criado em `naming.ts` que instrui a IA a:
 - Seguir convenções de git branch naming
 - Responder em formato JSON
 
-#### [ ] Implementar função generateBranchName
+#### [x] Implementar função generateBranchName
 
 ```typescript
 // packages/opencode-transmute/src/core/naming.ts
@@ -120,7 +120,7 @@ Implementada com:
 - `generateBranchName()` - função principal que tenta IA e faz fallback
 - `generateBranchNameWithAI()` - usa OpenCode client para chamar LLM
 
-#### [ ] Implementar sanitização e validação
+#### [x] Implementar sanitização e validação
 
 `sanitizeBranchName()` garante que o nome gerado:
 
@@ -129,22 +129,23 @@ Implementada com:
 - Não excede limite de tamanho
 - Tem formato `<type>/<slug>`
 
-#### [ ] Implementar fallback determinístico
+#### [x] Implementar fallback determinístico
 
 `generateFallbackBranchName()` gera nome baseado em:
 
 - Task ID + primeiras palavras do título
 - Ex: `feat/task-123-implement-auth`
 
-#### [ ] Adicionar testes unitários
+#### [x] Adicionar testes unitários
 
-30 testes criados em `naming.test.ts` cobrindo:
+33 testes criados em `naming.test.ts` cobrindo:
 
 - `sanitizeBranchName`: lowercase, remove caracteres inválidos, limite de tamanho
 - `generateFallbackBranchName`: gera nome correto a partir de task ID e título
 - `generateBranchNameWithAI`: retorna resultado válido (mock da IA)
 - `generateBranchName`: usa fallback quando IA falha
 - Diferentes tipos inferidos (feat, fix, refactor, docs, chore, test)
+- Prevenção de duplicação de ID quando título começa com o ID ([f29cc5c](https://github.com/1001Josias/transmute/commit/f29cc5c))
 
 ---
 
