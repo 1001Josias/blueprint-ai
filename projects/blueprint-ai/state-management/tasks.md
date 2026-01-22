@@ -8,6 +8,7 @@ updated_at: "2026-01-07"
 # State Management Improvements - Tasks
 
 ## Task 1: Implement nuqs for URL Query Params
+
 - [x] Install `nuqs` package
 - [x] Create query param hooks for common patterns:
   - [x] `useTaskIdParam()` - selected task ID
@@ -18,6 +19,7 @@ updated_at: "2026-01-07"
 - [x] Test URL sharing and bookmarking
 
 ## Task 2: Implement Zustand for Global State
+
 - [x] Install `zustand` package
 - [x] Create stores:
   - [x] `useTaskStore` - task cache and optimistic updates
@@ -27,6 +29,7 @@ updated_at: "2026-01-07"
 - [x] Add devtools middleware for debugging
 
 ## Task 3: Combine nuqs + Zustand
+
 - [x] Define clear boundaries:
   - URL state (nuqs): filters, selected items, pagination
   - Memory state (Zustand): cache, loading states, UI state

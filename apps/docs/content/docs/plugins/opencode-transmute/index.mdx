@@ -1,0 +1,128 @@
+---
+title: OpenCode Transmute
+description: AI-powered task isolation with git worktrees
+---
+
+# OpenCode Transmute
+
+**opencode-transmute** is a plugin for [OpenCode](https://opencode.ai) that creates isolated development environments for each task using git worktrees.
+
+## Why Use This Plugin?
+
+When working on multiple tasks, code changes can interfere with each other. This plugin solves that by:
+
+- **Isolating each task** in its own git worktree
+- **Generating intelligent branch names** using AI
+- **Persisting sessions** so you can resume work seamlessly
+- **Opening terminals** in the correct directory automatically
+
+## Quick Start
+
+### 1. Install the Plugin
+
+```bash
+pnpm add opencode-transmute
+```
+
+### 2. Configure OpenCode
+
+Add to your `opencode.config.ts`:
+
+```typescript
+import { TransmutePlugin } from "opencode-transmute";
+
+export default {
+  plugins: [TransmutePlugin],
+};
+```
+
+### 3. Use the Tool
+
+The plugin adds a `start-task` tool that AI agents can use:
+
+```
+Agent: I'll create an isolated environment for this task.
+[Calls start-task with taskId="task-123", title="Add OAuth login"]
+
+Result: Created worktree at ./worktrees/feat-add-oauth-login
+```
+
+## How It Works
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  1. Agent calls start-task                                  │
+│     taskId: "task-123"                                      │
+│     title: "Add OAuth login"                                │
+├─────────────────────────────────────────────────────────────┤
+│  2. AI generates branch name                                │
+│     → "feat/add-oauth-login"                                │
+├─────────────────────────────────────────────────────────────┤
+│  3. Git worktree created                                    │
+│     → ./worktrees/feat-add-oauth-login                      │
+├─────────────────────────────────────────────────────────────┤
+│  4. Session persisted                                       │
+│     → .opencode/transmute.sessions.json                     │
+├─────────────────────────────────────────────────────────────┤
+│  5. Hooks executed (optional)                               │
+│     → pnpm install                                          │
+├─────────────────────────────────────────────────────────────┤
+│  6. Terminal opened                                         │
+│     → WezTerm spawns in worktree directory                  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Features
+
+### AI Branch Naming
+
+The plugin uses AI to generate meaningful branch names based on task context:
+
+| Task Title                  | Generated Branch              |
+| --------------------------- | ----------------------------- |
+| "Add Google OAuth login"    | `feat/add-google-oauth-login` |
+| "Fix memory leak in parser" | `fix/memory-leak-parser`      |
+| "Refactor database layer"   | `refactor/database-layer`     |
+
+If AI is unavailable, it falls back to deterministic naming:
+
+```
+feat/task-123-add-google-oauth
+```
+
+### Session Persistence
+
+Sessions are saved to `.opencode/transmute.sessions.json`:
+
+```json
+{
+  "sessions": [
+    {
+      "taskId": "task-123",
+      "taskName": "Add OAuth login",
+      "branch": "feat/add-oauth-login",
+      "worktreePath": "/repo/worktrees/feat-add-oauth-login",
+      "createdAt": "2026-01-18T10:30:00Z",
+      "opencodeSessionId": "ses_abc123"
+    }
+  ]
+}
+```
+
+When you call `start-task` for an existing task, it resumes the session instead of creating a new one.
+
+### Terminal Integration
+
+Currently supports **WezTerm** with planned support for tmux and kitty.
+
+The terminal opens with:
+
+- Working directory set to the worktree
+- OpenCode session resumed automatically
+- Custom title showing task name and branch
+
+## Next Steps
+
+- [Configuration](/docs/plugins/opencode-transmute/configuration) - Customize the plugin behavior
+- [API Reference](/docs/plugins/opencode-transmute/api) - Tools and schemas
+- [Troubleshooting](/docs/plugins/opencode-transmute/troubleshooting) - Common issues and solutions

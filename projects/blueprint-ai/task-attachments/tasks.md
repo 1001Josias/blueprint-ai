@@ -8,6 +8,7 @@ updated_at: "2026-01-07"
 # Tasks: Task Attachments
 
 ## Task 1: Schema & Parser Updates
+
 - **id:** att-001
 - **status:** todo
 - **priority:** high
@@ -16,17 +17,21 @@ updated_at: "2026-01-07"
 ### Subtasks
 
 #### [ ] Add attachments field to taskSchema
+
 Array of `{ url: string, alt: string, type: "image" | "file" }`.
 
 #### [ ] Update markdown parser
+
 Detect `![alt](path)` syntax and extract to attachments array.
 
 #### [ ] Create assets directory convention
+
 Document `projects/<slug>/assets/` as standard location.
 
 ---
 
 ## Task 2: UI Display
+
 - **id:** att-002
 - **status:** todo
 - **priority:** high
@@ -35,17 +40,21 @@ Document `projects/<slug>/assets/` as standard location.
 ### Subtasks
 
 #### [ ] Render images in task description
+
 Already works via remark-html, verify rendering.
 
 #### [ ] Attachments gallery in modal
+
 Grid of thumbnails in Task Detail Modal.
 
 #### [ ] Lightbox component
+
 Click to view full-size image with zoom.
 
 ---
 
 ## Task 3: Upload Feature
+
 - **id:** att-003
 - **status:** todo
 - **priority:** medium
@@ -54,10 +63,13 @@ Click to view full-size image with zoom.
 ### Subtasks
 
 #### [ ] Create upload API endpoint
+
 `POST /api/projects/:slug/assets` to receive files.
 
 #### [ ] Drag & drop zone in modal
+
 Drop area to upload images.
 
 #### [ ] Auto-insert markdown reference
+
 After upload, insert `![filename](assets/filename.png)` in description.

@@ -4,7 +4,6 @@ import { TaskWithProject } from "@/lib/markdown";
 import { TaskDetailModal } from "@/components/task-detail-modal";
 import { useTaskIdParam } from "@/lib/search-params";
 
-
 interface UpcomingPageProps {
   tasks: TaskWithProject[];
 }
@@ -61,7 +60,9 @@ const TaskSection = ({
                 </span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="text-xs text-slate-500">{task.projectTitle}</span>
+                <span className="text-xs text-slate-500">
+                  {task.projectTitle}
+                </span>
                 <span
                   className={`px-2 py-0.5 text-xs rounded-full border ${priorityColors[task.priority]}`}
                 >
@@ -82,13 +83,13 @@ const TaskSection = ({
 
 function UpcomingContent({ tasks }: UpcomingPageProps) {
   const [selectedTaskId, setSelectedTaskId] = useTaskIdParam();
-  
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
-  
+
   const nextWeek = new Date(today);
   nextWeek.setDate(nextWeek.getDate() + 7);
 
@@ -120,8 +121,6 @@ function UpcomingContent({ tasks }: UpcomingPageProps) {
 
   const selectedTask = tasks.find((t) => t.id === selectedTaskId);
 
-
-
   return (
     <div className="p-8">
       {/* Header */}
@@ -144,7 +143,9 @@ function UpcomingContent({ tasks }: UpcomingPageProps) {
           </div>
           <div>
             <h1 className="text-3xl font-bold text-white">Upcoming</h1>
-            <p className="text-slate-400">Tasks scheduled for the next 7 days</p>
+            <p className="text-slate-400">
+              Tasks scheduled for the next 7 days
+            </p>
           </div>
         </div>
       </div>

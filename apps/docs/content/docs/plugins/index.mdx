@@ -1,0 +1,48 @@
+---
+title: Plugins
+description: Extend Transmute with powerful plugins and integrations
+---
+
+# Plugins
+
+Transmute can be extended with plugins that integrate with AI coding assistants and development tools.
+
+## Available Plugins
+
+### OpenCode Transmute
+
+The **opencode-transmute** plugin integrates Transmute with [OpenCode](https://opencode.ai), enabling AI agents to create isolated development environments for each task using git worktrees.
+
+[Learn more about OpenCode Transmute](/docs/plugins/opencode-transmute)
+
+## Plugin Architecture
+
+Plugins in Transmute follow a simple pattern:
+
+1. **Tools** - Functions that AI agents can call to perform actions
+2. **Configuration** - User-customizable settings loaded from config files
+3. **Adapters** - Integrations with external tools (terminals, IDEs, etc.)
+
+## Creating Plugins
+
+Plugins are npm packages that export a `Plugin` function compatible with the host platform (e.g., OpenCode).
+
+```typescript
+import type { Plugin } from "@opencode-ai/plugin";
+
+export const MyPlugin: Plugin = async (ctx) => {
+  return {
+    tool: {
+      "my-tool": tool({
+        description: "My custom tool",
+        args: {
+          /* ... */
+        },
+        execute: async (args) => {
+          /* ... */
+        },
+      }),
+    },
+  };
+};
+```

@@ -18,19 +18,47 @@ interface TaskDetailModalProps {
 }
 
 const statusConfig = {
-  todo: { label: "To Do", color: "bg-slate-500/20 text-slate-400 border-slate-500/30", icon: "○" },
-  in_progress: { label: "In Progress", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30", icon: "◐" },
-  done: { label: "Done", color: "bg-green-500/20 text-green-400 border-green-500/30", icon: "✓" },
-  blocked: { label: "Blocked", color: "bg-red-500/20 text-red-400 border-red-500/30", icon: "✕" },
+  todo: {
+    label: "To Do",
+    color: "bg-slate-500/20 text-slate-400 border-slate-500/30",
+    icon: "○",
+  },
+  in_progress: {
+    label: "In Progress",
+    color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    icon: "◐",
+  },
+  done: {
+    label: "Done",
+    color: "bg-green-500/20 text-green-400 border-green-500/30",
+    icon: "✓",
+  },
+  blocked: {
+    label: "Blocked",
+    color: "bg-red-500/20 text-red-400 border-red-500/30",
+    icon: "✕",
+  },
 };
 
 const statusOrder: TaskStatus[] = ["todo", "in_progress", "done", "blocked"];
 
 const priorityConfig = {
-  low: { label: "Low", color: "text-slate-400 bg-slate-500/10 border-slate-500/20" },
-  medium: { label: "Medium", color: "text-blue-400 bg-blue-500/10 border-blue-500/20" },
-  high: { label: "High", color: "text-orange-400 bg-orange-500/10 border-orange-500/20" },
-  critical: { label: "Critical", color: "text-red-400 bg-red-500/10 border-red-500/20" },
+  low: {
+    label: "Low",
+    color: "text-slate-400 bg-slate-500/10 border-slate-500/20",
+  },
+  medium: {
+    label: "Medium",
+    color: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+  },
+  high: {
+    label: "High",
+    color: "text-orange-400 bg-orange-500/10 border-orange-500/20",
+  },
+  critical: {
+    label: "Critical",
+    color: "text-red-400 bg-red-500/10 border-red-500/20",
+  },
 };
 
 export function TaskDetailModal({
@@ -40,20 +68,20 @@ export function TaskDetailModal({
   workspace,
   projectSlug,
 }: TaskDetailModalProps) {
-  const { 
-    getStatus, 
-    setOptimisticStatus, 
-    getSubtasks, 
-    setOptimisticSubtasks, 
-    clearOptimistic, 
-    isPending, 
-    setPending 
+  const {
+    getStatus,
+    setOptimisticStatus,
+    getSubtasks,
+    setOptimisticSubtasks,
+    clearOptimistic,
+    isPending,
+    setPending,
   } = useTaskStore();
-  
+
   const currentStatus = task ? getStatus(task.id, task.status) : "todo";
   const optimisticSubtasks = task ? getSubtasks(task.id, task.subtasks) : [];
   const pending = task ? isPending(task.id) : false;
-  
+
   const [, startTransition] = useTransition();
   const router = useRouter();
 
@@ -62,14 +90,16 @@ export function TaskDetailModal({
     if (task && currentStatus === task.status && !pending) {
       clearOptimistic(task.id);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task?.status, task?.subtasks]);
 
   if (!task) return null;
 
   const status = statusConfig[currentStatus];
   const priority = priorityConfig[task.priority];
-  const completedSubtasks = optimisticSubtasks.filter((s) => s.completed).length;
+  const completedSubtasks = optimisticSubtasks.filter(
+    (s) => s.completed,
+  ).length;
   const totalSubtasks = optimisticSubtasks.length;
 
   const cycleStatus = async () => {
@@ -154,11 +184,15 @@ export function TaskDetailModal({
                   "w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold shrink-0 transition-all duration-200",
                   "hover:scale-110 hover:ring-2 hover:ring-violet-500/50",
                   pending && "opacity-50 cursor-wait",
-                  status.color
+                  status.color,
                 )}
                 title="Click to change status"
               >
-                {pending ? <span className="animate-spin">⟳</span> : status.icon}
+                {pending ? (
+                  <span className="animate-spin">⟳</span>
+                ) : (
+                  status.icon
+                )}
               </button>
 
               <div className="flex-1 min-w-0">
@@ -171,7 +205,7 @@ export function TaskDetailModal({
                   <span
                     className={cn(
                       "px-2.5 py-1 text-xs font-medium rounded-lg border transition-colors",
-                      status.color
+                      status.color,
                     )}
                   >
                     {status.label}
@@ -179,7 +213,7 @@ export function TaskDetailModal({
                   <span
                     className={cn(
                       "px-2.5 py-1 text-xs font-medium rounded-lg border",
-                      priority.color
+                      priority.color,
                     )}
                   >
                     {priority.label} Priority
@@ -194,8 +228,18 @@ export function TaskDetailModal({
 
               {/* Close button */}
               <Dialog.Close className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </Dialog.Close>
             </div>
@@ -228,7 +272,7 @@ export function TaskDetailModal({
                         "hover:bg-slate-800/50",
                         subtask.completed
                           ? "bg-emerald-900/10 border-emerald-900/30"
-                          : "bg-slate-800/30 border-slate-700/50"
+                          : "bg-slate-800/30 border-slate-700/50",
                       )}
                       onClick={() => toggleSubtask(index)}
                     >
@@ -237,7 +281,7 @@ export function TaskDetailModal({
                           "w-5 h-5 rounded-md flex items-center justify-center text-xs shrink-0 mt-0.5 transition-colors",
                           subtask.completed
                             ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                            : "bg-slate-700 text-slate-500 border border-slate-600"
+                            : "bg-slate-700 text-slate-500 border border-slate-600",
                         )}
                       >
                         {subtask.completed ? "✓" : ""}
@@ -246,13 +290,17 @@ export function TaskDetailModal({
                         <p
                           className={cn(
                             "text-sm font-medium transition-colors",
-                            subtask.completed ? "text-slate-500 line-through" : "text-white"
+                            subtask.completed
+                              ? "text-slate-500 line-through"
+                              : "text-white",
                           )}
                         >
                           {subtask.title}
                         </p>
                         {subtask.description && (
-                          <p className="text-xs text-slate-500 mt-1">{subtask.description}</p>
+                          <p className="text-xs text-slate-500 mt-1">
+                            {subtask.description}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -275,17 +323,25 @@ export function TaskDetailModal({
                     >
                       <div className="flex items-start gap-2">
                         <span className="shrink-0 text-violet-400">💬</span>
-                        <MarkdownContent content={comment} className="text-sm" />
+                        <MarkdownContent
+                          content={comment}
+                          className="text-sm"
+                        />
                       </div>
                     </div>
                   ))}
                 </div>
-                
+
                 {/* Formatting Toolbar (placeholder for future comment input) */}
                 <div className="mt-4 p-3 rounded-xl bg-slate-800/30 border border-slate-700/30">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-slate-500">Add a comment</span>
-                    <FormattingToolbar onInsert={() => {}} className="opacity-50" />
+                    <span className="text-xs text-slate-500">
+                      Add a comment
+                    </span>
+                    <FormattingToolbar
+                      onInsert={() => {}}
+                      className="opacity-50"
+                    />
                   </div>
                   <div className="text-xs text-slate-600 italic">
                     Comment editing coming soon...
@@ -295,11 +351,13 @@ export function TaskDetailModal({
             )}
 
             {/* Empty state */}
-            {!task.description && optimisticSubtasks.length === 0 && (!task.comments || task.comments.length === 0) && (
-              <div className="text-center py-8 text-slate-500">
-                <p>No additional details for this task.</p>
-              </div>
-            )}
+            {!task.description &&
+              optimisticSubtasks.length === 0 &&
+              (!task.comments || task.comments.length === 0) && (
+                <div className="text-center py-8 text-slate-500">
+                  <p>No additional details for this task.</p>
+                </div>
+              )}
           </div>
         </Dialog.Content>
       </Dialog.Portal>

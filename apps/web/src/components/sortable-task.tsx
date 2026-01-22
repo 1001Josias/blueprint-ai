@@ -12,7 +12,12 @@ interface SortableTaskProps {
   onClick?: () => void;
 }
 
-export function SortableTask({ task, workspace, projectSlug, onClick }: SortableTaskProps) {
+export function SortableTask({
+  task,
+  workspace,
+  projectSlug,
+  onClick,
+}: SortableTaskProps) {
   const {
     attributes,
     listeners,

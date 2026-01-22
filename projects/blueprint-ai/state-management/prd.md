@@ -24,6 +24,7 @@ Improve the state management architecture of the web application by introducing 
 ## Background
 
 Currently, the app uses:
+
 - React `useState` for local component state
 - `useTransition` for optimistic updates
 - Manual `window.history.replaceState()` for URL query param sync (hack to avoid infinite re-renders)
@@ -33,11 +34,13 @@ This approach works but is fragile and doesn't scale well.
 ## Proposed Libraries
 
 ### nuqs
+
 - Type-safe query param management for Next.js
 - Automatic URL sync without re-render issues
 - Shareable, bookmarkable URLs
 
 ### Zustand
+
 - Lightweight global state management
 - No boilerplate, simple API
 - Works well with React Server Components

@@ -74,7 +74,9 @@ export default async function Home() {
               />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-white mb-2">No projects yet</h3>
+          <h3 className="text-lg font-semibold text-white mb-2">
+            No projects yet
+          </h3>
           <p className="text-slate-400 max-w-md mx-auto">
             Create a new project by adding a PRD and tasks markdown file in the{" "}
             <code className="px-1.5 py-0.5 bg-slate-700 rounded text-violet-300">

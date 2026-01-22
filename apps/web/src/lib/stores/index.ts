@@ -1,2 +1,2 @@
-export { useTaskStore } from './task-store'
-export { useUIStore } from './ui-store'
+export { useTaskStore } from "./task-store";
+export { useUIStore } from "./ui-store";

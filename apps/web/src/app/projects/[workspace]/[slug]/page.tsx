@@ -22,15 +22,28 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   const { prd, tasks } = project;
   const completedTasks = tasks.items.filter((t) => t.status === "done").length;
-  const progress = tasks.items.length > 0
-    ? Math.round((completedTasks / tasks.items.length) * 100)
-    : 0;
+  const progress =
+    tasks.items.length > 0
+      ? Math.round((completedTasks / tasks.items.length) * 100)
+      : 0;
 
   const statusConfig = {
-    draft: { label: "Draft", color: "bg-gray-500/20 text-gray-400 border-gray-500/30" },
-    in_review: { label: "In Review", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" },
-    approved: { label: "Approved", color: "bg-green-500/20 text-green-400 border-green-500/30" },
-    rejected: { label: "Rejected", color: "bg-red-500/20 text-red-400 border-red-500/30" },
+    draft: {
+      label: "Draft",
+      color: "bg-gray-500/20 text-gray-400 border-gray-500/30",
+    },
+    in_review: {
+      label: "In Review",
+      color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    },
+    approved: {
+      label: "Approved",
+      color: "bg-green-500/20 text-green-400 border-green-500/30",
+    },
+    rejected: {
+      label: "Rejected",
+      color: "bg-red-500/20 text-red-400 border-red-500/30",
+    },
   };
 
   const status = statusConfig[prd.frontmatter.status];
@@ -107,15 +120,21 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-slate-500">Author</dt>
-                  <dd className="text-slate-300">{prd.frontmatter.author || "Unknown"}</dd>
+                  <dd className="text-slate-300">
+                    {prd.frontmatter.author || "Unknown"}
+                  </dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-slate-500">Created</dt>
-                  <dd className="text-slate-300">{prd.frontmatter.created_at}</dd>
+                  <dd className="text-slate-300">
+                    {prd.frontmatter.created_at}
+                  </dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-slate-500">Updated</dt>
-                  <dd className="text-slate-300">{prd.frontmatter.updated_at}</dd>
+                  <dd className="text-slate-300">
+                    {prd.frontmatter.updated_at}
+                  </dd>
                 </div>
               </dl>
             </div>
@@ -146,8 +165,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             </h2>
           </div>
 
-          <Suspense fallback={<div className="text-slate-500">Loading tasks...</div>}>
-            <TaskList tasks={tasks.items} workspace={workspace} projectSlug={slug} />
+          <Suspense
+            fallback={<div className="text-slate-500">Loading tasks...</div>}
+          >
+            <TaskList
+              tasks={tasks.items}
+              workspace={workspace}
+              projectSlug={slug}
+            />
           </Suspense>
         </div>
       </div>

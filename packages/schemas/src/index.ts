@@ -31,12 +31,7 @@ export const taskStatusSchema = z.enum([
   "blocked",
 ]);
 
-export const taskPrioritySchema = z.enum([
-  "low",
-  "medium",
-  "high",
-  "critical",
-]);
+export const taskPrioritySchema = z.enum(["low", "medium", "high", "critical"]);
 
 export const subtaskSchema = z.object({
   title: z.string(),

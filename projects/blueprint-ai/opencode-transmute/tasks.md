@@ -2,7 +2,7 @@
 project_id: opencode-transmute
 prd_version: "1.0"
 created_at: "2026-01-17"
-updated_at: "2026-01-17"
+updated_at: "2026-01-18"
 ---
 
 # Tasks: OpenCode Transmute Plugin
@@ -185,6 +185,7 @@ Executar `git worktree add -b <branch> <path> <base>`.
 
 - Verificar se branch já existe
 - Criar diretório worktrees se necessário
+- **Novo:** Atualizar branch base (fetch/pull) antes de criar para evitar conflitos
 
 #### [ ] Implementar worktreeExists
 
@@ -205,6 +206,8 @@ Cobrir casos com vitest:
 - `createWorktree`: chamada correta ao git, criação de diretório
 - `worktreeExists`: retorna true/false corretamente
 - Erros: branch já existe, diretório já existe, git não inicializado
+
+**PR:** [feat(opencode-transmute): implement git worktree management](https://github.com/1001Josias/transmute/pull/35)
 
 ---
 
@@ -227,6 +230,7 @@ const sessionSchema = z.object({
   branch: z.string(),
   worktreePath: z.string(),
   createdAt: z.string().datetime(),
+  opencodeSessionId: z.string(), // Vínculo obrigatório com session do OpenCode
 });
 
 const stateSchema = z.object({
@@ -277,9 +281,11 @@ Cobrir casos com vitest:
 
 #### [ ] Definir interface abstrata de terminal
 
+Interface já definida em `types.ts`:
+
 ```typescript
-// apps/opencode-transmute/src/adapters/terminal/types.ts
 interface TerminalAdapter {
+  name: string;
   isAvailable(): Promise<boolean>;
   openSession(options: OpenSessionOptions): Promise<void>;
 }
@@ -288,31 +294,38 @@ interface OpenSessionOptions {
   cwd: string;
   commands?: string[];
   title?: string;
+  env?: Record<string, string>;
 }
 ```
 
 #### [ ] Verificar disponibilidade do WezTerm
 
-Checar se `wezterm` está no PATH.
+Implementado `isAvailable()` que executa `wezterm --version` e verifica exit code.
 
 #### [ ] Implementar openSession para WezTerm
 
-Usar `wezterm cli spawn --cwd <path>` para abrir nova pane/tab.
-Opcionalmente executar comandos iniciais.
+Implementado usando `wezterm cli spawn --cwd <path>`:
+
+- Suporta `--pane-title` para definir título
+- Suporta execução de comandos via `sh -c`
+- Verifica disponibilidade antes de abrir
 
 #### [ ] Tratamento de erros
 
-- WezTerm não instalado
-- Falha ao abrir sessão
-- Path inválido
+Novas classes de erro em `errors.ts`:
+
+- `TerminalNotAvailableError` - WezTerm não instalado
+- `TerminalSpawnError` - Falha ao abrir sessão
+- `InvalidPathError` - Path inválido
 
 #### [ ] Adicionar testes unitários
 
-Cobrir casos com vitest (mockando execução de comandos):
+21 testes criados em `wezterm.test.ts` cobrindo:
 
-- `isAvailable`: retorna true quando wezterm está no PATH, false caso contrário
-- `openSession`: constrói comando correto com cwd e title
-- Erros: WezTerm não instalado, path inválido
+- `isAvailable`: true quando wezterm disponível, false caso contrário
+- `getVersion`: extrai versão do output
+- `openSession`: constrói comando correto com cwd, title e commands
+- Erros: TerminalNotAvailableError, InvalidPathError, TerminalSpawnError
 
 ---
 
@@ -328,6 +341,8 @@ Cobrir casos com vitest (mockando execução de comandos):
 
 #### [ ] Definir schema de configuração de hooks
 
+Schema já definido com Zod:
+
 ```typescript
 const hooksConfigSchema = z.object({
   afterCreate: z.array(z.string()).optional(),
@@ -337,23 +352,37 @@ const hooksConfigSchema = z.object({
 
 #### [ ] Implementar executeHooks
 
-Executar array de comandos sequencialmente.
-Capturar stdout/stderr.
-Continuar ou parar em caso de erro (configurável).
+Implementado com:
+
+- Execução sequencial de comandos via `sh -c`
+- Captura de stdout/stderr
+- Medição de duração de cada comando
+- Modo `stopOnError: true` (strict, default) - para na primeira falha
+- Modo `stopOnError: false` (lenient) - continua após falhas
+- Suporte a variáveis de ambiente customizadas
 
 #### [ ] Implementar logging de hooks
 
-Mostrar output de cada comando executado.
-Indicar sucesso/falha claramente.
+Resultado de cada comando inclui:
+
+- `command`: comando executado
+- `success`: boolean de sucesso
+- `stdout`/`stderr`: saída capturada
+- `exitCode`: código de saída
+- `duration`: tempo de execução em ms
 
 #### [ ] Adicionar testes unitários
 
-Cobrir casos com vitest (mockando execução de comandos):
+32 testes criados em `hooks.test.ts` cobrindo:
 
-- `executeHooks`: executa comandos em sequência
-- `executeHooks`: para na primeira falha (modo strict)
-- `executeHooks`: continua após falha (modo lenient)
-- `executeHooks`: captura stdout/stderr corretamente
+- Schema validation
+- Execução básica e múltiplos comandos
+- Working directory correto
+- Modo strict (stopOnError: true)
+- Modo lenient (stopOnError: false)
+- Variáveis de ambiente
+- Comandos complexos (pipes, conditionals)
+- executeAfterCreateHooks / executeBeforeDestroyHooks
 
 ---
 
@@ -369,27 +398,33 @@ Cobrir casos com vitest (mockando execução de comandos):
 
 #### [ ] Definir schema de input da tool
 
+Schema definido com Zod:
+
 ```typescript
 const startTaskInputSchema = z.object({
-  taskId: z.string(),
-  title: z.string(),
+  taskId: z.string().min(1),
+  title: z.string().min(1),
   description: z.string().optional(),
   priority: z.string().optional(),
-  type: z.string().optional(), // hint: feat, fix, refactor, etc.
+  type: z.string().optional(),
   baseBranch: z.string().optional(),
 });
 ```
 
 #### [ ] Implementar fluxo completo
 
-1. Verificar se já existe sessão para taskId
-2. Se existe, retornar worktree existente
-3. Gerar nome de branch via IA (usando título, descrição, contexto)
-4. Criar worktree
-5. Persistir sessão
-6. Abrir terminal no worktree
-7. Executar hooks afterCreate
-8. Retornar resultado
+Fluxo implementado em `startTask()`:
+
+1. Verifica se sessão existe para taskId (`findSessionByTask`)
+2. Se existe, retorna worktree existente e abre terminal
+3. Gera nome de branch via IA (`generateBranchName`)
+4. Cria worktree (`createWorktree`)
+5. Persiste sessão com `opencodeSessionId` (`addSession`)
+6. Executa hooks afterCreate (`executeAfterCreateHooks`)
+7. Abre terminal no worktree (`openSession`)
+   - **Novo:** Para novas tasks, inicializar com `--prompt` contendo contexto
+   - **Novo:** Para tasks existentes, usar `--continue` para retomar histórico
+8. Retorna resultado
 
 #### [ ] Definir schema de output
 
@@ -399,12 +434,32 @@ const startTaskOutputSchema = z.object({
   branch: z.string(),
   worktreePath: z.string(),
   taskId: z.string(),
+  taskName: z.string(),
+  opencodeSessionId: z.string().optional(),
 });
 ```
 
 #### [ ] Registrar como tool do OpenCode
 
-Expor tool com nome, descrição e schemas adequados.
+Tool registrada no plugin com:
+
+- Nome: `start-task`
+- Descrição clara do propósito
+- Schemas de input/output integrados
+- Execução do fluxo completo
+
+#### [ ] Adicionar testes unitários
+
+19 testes criados em `start-task.test.ts` cobrindo:
+
+- Schema validation
+- Criação de nova task (worktree + session)
+- Uso de branch type hint
+- Execução de hooks
+- Abertura de terminal
+- Retomada de sessão existente
+- Tratamento de erros (terminal indisponível, hooks falhando)
+- Função `resumeTask` auxiliar
 
 ---
 
@@ -420,26 +475,62 @@ Expor tool com nome, descrição e schemas adequados.
 
 #### [ ] Definir schema de configuração
 
+Schema implementado em `config.ts`:
+
 ```typescript
 const configSchema = z.object({
   worktreesDir: z.string().default("./worktrees"),
-  branchPrefix: z.string().default("feat"),
-  hooks: hooksConfigSchema.optional(),
-  terminal: z.enum(["wezterm"]).default("wezterm"),
+  defaultBranchType: branchTypeSchema.default("feat"),
+  maxBranchSlugLength: z.number().int().positive().default(40),
+  hooks: hooksConfigSchema.default(defaultHooks),
+  terminal: terminalTypeSchema.default("wezterm"), // wezterm | tmux | kitty | none
+  autoOpenTerminal: z.boolean().default(true),
+  autoRunHooks: z.boolean().default(true),
+  defaultBaseBranch: z.string().default("main"),
+  useAiBranchNaming: z.boolean().default(true),
 });
 ```
 
 #### [ ] Implementar loadConfig
 
-Buscar configuração em:
+Buscar configuração em ordem de precedência:
 
-1. `opencode.config.ts` (seção transmute)
+1. `opencode.config.ts` (seção transmute) - via dynamic import
 2. `.opencode/transmute.config.json`
-3. Defaults
+3. `transmute.config.json`
+4. Defaults
+
+Funções implementadas:
+
+- `loadConfig()` - carrega de todas as fontes com precedência
+- `loadConfigFromFile()` - carrega de arquivo JSON
+- `loadConfigFromOpencodeConfig()` - carrega de opencode.config.ts
+- `findConfigFile()` - encontra arquivo de config no repositório
 
 #### [ ] Validar configuração
 
-Usar Zod para validação e merge com defaults.
+- `validateConfig()` - valida com Zod e retorna resultado tipado
+- `mergeConfig()` - merge com defaults via Zod parse
+
+#### [ ] Integração com plugin
+
+- Plugin agora carrega config na inicialização
+- Terminal adapter criado baseado em config
+- Hooks e flags respeitam configuração
+- Logs de fonte de configuração para debugging
+
+#### [ ] Adicionar testes unitários
+
+30 testes criados em `config.test.ts` cobrindo:
+
+- Schema validation e defaults
+- `mergeConfig`: merge parcial com defaults
+- `validateConfig`: sucesso e erro
+- `findConfigFile`: encontra arquivos em ordem de precedência
+- `loadConfigFromFile`: parse JSON e erros
+- `loadConfig`: todas as fontes com fallback
+- `getHooksConfig`: resolve hooks com defaults
+- `resolveWorktreesDir`: resolve paths relativos e absolutos
 
 ---
 
@@ -484,24 +575,24 @@ Verificar que worktree pode ser removido corretamente.
 
 ### Subtasks
 
-#### [ ] README do app
+#### [ ] Criar seção Plugins no docs
 
-- Overview do plugin
-- Como funciona no contexto do monorepo Transmute
-- Configuração básica
-- Exemplo de uso
+Nova seção `apps/docs/content/docs/plugins/` criada com:
 
-#### [ ] Documentação de API
+- `index.mdx` - Overview da seção de plugins
 
-- Tools disponíveis
-- Schemas de input/output
-- Configurações suportadas
+#### [ ] Documentação do Plugin
 
-#### [ ] Troubleshooting
+Documentação completa em `apps/docs/content/docs/plugins/opencode-transmute/`:
 
-- WezTerm não encontrado
-- Erros comuns de Git
-- Como limpar worktrees manualmente
+- `index.mdx` - Overview, quick start, como funciona
+- `configuration.mdx` - Todas as opções de configuração com exemplos
+- `api.mdx` - Referência de API (tools, funções, schemas, erros)
+- `troubleshooting.mdx` - Guia de solução de problemas
+
+#### [ ] Build do docs funcionando
+
+Verificado que `pnpm build` no apps/docs compila as novas páginas corretamente.
 
 ---
 

@@ -2,9 +2,9 @@
 id: workspaces
 title: Workspaces & Access Control
 status: draft
-version: '1.0'
-created_at: '2026-01-06'
-updated_at: '2026-01-06'
+version: "1.0"
+created_at: "2026-01-06"
+updated_at: "2026-01-06"
 author: ai-agent
 ---
 
@@ -21,22 +21,24 @@ Currently, the system uses a flat `projects/` directory. All agents have visibil
 ## Functional Requirements
 
 ### Data Structure (Hierarchy)
+
 1.  **Workspaces Directory**: Refactor the file structure to support `projects/<workspace_slug>/<project_slug>`.
 2.  **Manifest**: Each workspace may have a `workspace.md` or similar to define its metadata (Name, Owner, allowed Keys).
 
 ### Authentication & Authorization
+
 1.  **Scoped Keys**: API Keys currently global must be scoped. An Agent connecting with Key A (Maria) maps to Workspace A (House X).
 2.  **Access Enforcement**: The API `GET /projects` must filter results based on the authenticated Workspace.
 3.  **Isolation**: An agent in Workspace A cannot read or write tasks in Workspace B.
 
 ## Non-Functional Requirements
 
--   **Backward Compatibility**: Existing projects in the root of `projects/` should be treated as a "Default Workspace" or migrated.
--   **Scalability**: The filesystem traversal must be efficient (avoid scanning the entire disk).
+- **Backward Compatibility**: Existing projects in the root of `projects/` should be treated as a "Default Workspace" or migrated.
+- **Scalability**: The filesystem traversal must be efficient (avoid scanning the entire disk).
 
 ## Out of Scope
 
--   Fine-grained permissions *within* a project (e.g., read-only users). The security boundary is the Workspace.
+- Fine-grained permissions _within_ a project (e.g., read-only users). The security boundary is the Workspace.
 
 ## Success Metrics
 

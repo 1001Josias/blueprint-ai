@@ -1,50 +1,30 @@
 {
   "name": "opencode-transmute",
   "version": "0.1.0",
-  "description": "OpenCode plugin for task-based development with git worktrees",
-  "type": "module",
-  "main": "./dist/index.cjs",
+  "private": true,
+  "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
-    }
-  },
-  "files": [
-    "dist"
-  ],
   "scripts": {
-    "build": "unbuild",
-    "dev": "unbuild --stub",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "lint": "eslint .",
+    "check-types": "tsc --noEmit",
     "test": "vitest"
-  },
-  "keywords": [
-    "opencode",
-    "plugin",
-    "git",
-    "worktree",
-    "task-management"
-  ],
-  "author": "",
-  "license": "MIT",
-  "peerDependencies": {
-    "@opencode-ai/plugin": ">=1.0.0"
   },
   "dependencies": {
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@eslint/js": "^9.0.0",
-    "@opencode-ai/plugin": "^1.0.0",
     "@repo/typescript-config": "workspace:*",
-    "eslint": "^9.0.0",
+    "@repo/eslint-config": "workspace:*",
     "typescript": "^5.3.3",
-    "typescript-eslint": "^8.0.0",
-    "unbuild": "^3.6.1",
-    "vitest": "^1.0.0"
+    "tsup": "^8.0.1",
+    "eslint": "^9.0.0",
+    "@types/node": "^20.11.16",
+    "vitest": "^1.2.2"
+  },
+  "peerDependencies": {
+    "@opencode-ai/plugin": "*"
   }
 }

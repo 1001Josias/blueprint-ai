@@ -1,0 +1,317 @@
+---
+title: Troubleshooting
+description: Common issues and solutions for opencode-transmute
+---
+
+# Troubleshooting
+
+This guide covers common issues you might encounter when using opencode-transmute.
+
+## Terminal Issues
+
+### WezTerm Not Found
+
+**Error:** `TerminalNotAvailableError: Terminal 'wezterm' is not available`
+
+**Cause:** WezTerm is not installed or not in your PATH.
+
+**Solutions:**
+
+1. **Install WezTerm:**
+
+   ```bash
+   # macOS
+   brew install wezterm
+
+   # Linux (Debian/Ubuntu)
+   curl -fsSL https://apt.fury.io/wez/gpg.key | sudo gpg --dearmor -o /usr/share/keyrings/wezterm-fury.gpg
+   echo 'deb [signed-by=/usr/share/keyrings/wezterm-fury.gpg] https://apt.fury.io/wez/ * *' | sudo tee /etc/apt/sources.list.d/wezterm.list
+   sudo apt update && sudo apt install wezterm
+   ```
+
+2. **Verify installation:**
+
+   ```bash
+   wezterm --version
+   ```
+
+3. **Or disable terminal integration:**
+   ```json
+   {
+     "terminal": "none",
+     "autoOpenTerminal": false
+   }
+   ```
+
+### Terminal Opens But Commands Fail
+
+**Cause:** The terminal opens but OpenCode session resume fails.
+
+**Solutions:**
+
+1. Check that OpenCode is installed and in PATH:
+
+   ```bash
+   opencode --version
+   ```
+
+2. Verify the session ID exists:
+   ```bash
+   cat .opencode/transmute.sessions.json
+   ```
+
+## Git Worktree Issues
+
+### Branch Already Exists
+
+**Error:** `BranchAlreadyExistsError: Branch 'feat/my-feature' already has a worktree`
+
+**Cause:** You're trying to create a worktree for a branch that already exists.
+
+**Solutions:**
+
+1. **Check existing worktrees:**
+
+   ```bash
+   git worktree list
+   ```
+
+2. **Remove the existing worktree:**
+
+   ```bash
+   git worktree remove ./worktrees/feat-my-feature
+   ```
+
+3. **Or use a different branch name** by providing a `type` hint.
+
+### Directory Already Exists
+
+**Error:** `DirectoryAlreadyExistsError: Directory './worktrees/feat-my-feature' already exists`
+
+**Cause:** The target directory exists but isn't a valid worktree.
+
+**Solutions:**
+
+1. **Remove the directory:**
+
+   ```bash
+   rm -rf ./worktrees/feat-my-feature
+   ```
+
+2. **Prune stale worktrees:**
+   ```bash
+   git worktree prune
+   ```
+
+### Base Branch Not Found
+
+**Error:** `BaseBranchNotFoundError: Base branch 'develop' does not exist`
+
+**Cause:** The configured base branch doesn't exist locally.
+
+**Solutions:**
+
+1. **Fetch the branch:**
+
+   ```bash
+   git fetch origin develop
+   git checkout -b develop origin/develop
+   ```
+
+2. **Or use a different base branch:**
+   ```json
+   {
+     "defaultBaseBranch": "main"
+   }
+   ```
+
+### Git Not Initialized
+
+**Error:** `GitNotInitializedError: Not a git repository`
+
+**Cause:** You're trying to use the plugin outside a git repository.
+
+**Solution:**
+
+Initialize a git repository:
+
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+```
+
+## Session Issues
+
+### Session Not Found
+
+**Symptom:** Calling `start-task` for an existing task creates a new worktree instead of resuming.
+
+**Cause:** The session file was deleted or corrupted.
+
+**Solutions:**
+
+1. **Check the session file:**
+
+   ```bash
+   cat .opencode/transmute.sessions.json
+   ```
+
+2. **If corrupted, reset:**
+   ```bash
+   echo '{"sessions":[]}' > .opencode/transmute.sessions.json
+   ```
+
+### Orphaned Worktrees
+
+**Symptom:** Worktrees exist but no session records.
+
+**Solutions:**
+
+1. **List all worktrees:**
+
+   ```bash
+   git worktree list
+   ```
+
+2. **Remove orphaned worktrees manually:**
+
+   ```bash
+   git worktree remove ./worktrees/feat-old-feature --force
+   ```
+
+3. **Prune all stale worktrees:**
+   ```bash
+   git worktree prune
+   ```
+
+## Hook Issues
+
+### Hooks Not Running
+
+**Symptom:** `afterCreate` hooks don't execute.
+
+**Cause:** `autoRunHooks` is set to `false` or hooks array is empty.
+
+**Solutions:**
+
+1. **Check configuration:**
+
+   ```bash
+   cat .opencode/transmute.config.json
+   ```
+
+2. **Ensure hooks are enabled:**
+   ```json
+   {
+     "autoRunHooks": true,
+     "hooks": {
+       "afterCreate": ["pnpm install"]
+     }
+   }
+   ```
+
+### Hook Command Fails
+
+**Symptom:** Hook runs but fails with exit code.
+
+**Solutions:**
+
+1. **Check the command works manually:**
+
+   ```bash
+   cd ./worktrees/feat-my-feature
+   pnpm install
+   ```
+
+2. **Make commands fault-tolerant:**
+
+   ```json
+   {
+     "hooks": {
+       "afterCreate": ["pnpm install || true"]
+     }
+   }
+   ```
+
+3. **Check hook execution results** - they're logged to console.
+
+## Configuration Issues
+
+### Config Not Loading
+
+**Symptom:** Custom configuration is ignored.
+
+**Cause:** Config file is in wrong location or has syntax errors.
+
+**Solutions:**
+
+1. **Check file location** (in order of precedence):
+   - `opencode.config.ts`
+   - `.opencode/transmute.config.json`
+   - `transmute.config.json`
+
+2. **Validate JSON syntax:**
+
+   ```bash
+   cat .opencode/transmute.config.json | jq .
+   ```
+
+3. **Check console for config source:**
+   ```
+   [transmute] Loaded config from: /repo/.opencode/transmute.config.json
+   ```
+
+### Invalid Configuration
+
+**Symptom:** Plugin fails to initialize with Zod error.
+
+**Cause:** Configuration values don't match schema.
+
+**Solutions:**
+
+1. **Check allowed values:**
+   - `terminal`: `"wezterm"`, `"tmux"`, `"kitty"`, `"none"`
+   - `defaultBranchType`: `"feat"`, `"fix"`, `"refactor"`, `"docs"`, `"chore"`, `"test"`
+
+2. **Validate programmatically:**
+
+   ```typescript
+   import { validateConfig } from "opencode-transmute";
+
+   const result = validateConfig(myConfig);
+   if (!result.success) {
+     console.error(result.error.issues);
+   }
+   ```
+
+## Manual Cleanup
+
+If things get into a bad state, here's how to clean up:
+
+```bash
+# 1. List all worktrees
+git worktree list
+
+# 2. Remove all non-main worktrees
+for wt in ./worktrees/*; do
+  git worktree remove "$wt" --force
+done
+
+# 3. Prune git worktree metadata
+git worktree prune
+
+# 4. Reset session state
+echo '{"sessions":[]}' > .opencode/transmute.sessions.json
+
+# 5. Delete orphan branches (optional)
+git branch | grep -v main | xargs git branch -D
+```
+
+## Getting Help
+
+If you're still stuck:
+
+1. **Check the logs** - the plugin logs useful information to console
+2. **Open an issue** on [GitHub](https://github.com/1001Josias/transmute/issues)
+3. **Include** your configuration, error message, and steps to reproduce

@@ -1,6 +1,5 @@
 "use client";
 
-
 import { TaskWithProject } from "@/lib/markdown";
 import { TaskDetailModal } from "@/components/task-detail-modal";
 import { useTaskIdParam } from "@/lib/search-params";
@@ -27,7 +26,7 @@ function TodayContent({ tasks }: TodayPageProps) {
       acc[key].tasks.push(task);
       return acc;
     },
-    {} as Record<string, { title: string; tasks: TaskWithProject[] }>
+    {} as Record<string, { title: string; tasks: TaskWithProject[] }>,
   );
 
   const selectedTask = tasks.find((t) => t.id === selectedTaskId);
