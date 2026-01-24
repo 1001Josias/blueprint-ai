@@ -15,7 +15,9 @@ export * from "./core/hooks";
 export * from "./core/errors";
 export * from "./core/exec";
 export * from "./adapters/terminal/types";
-export * from "./tools/start-task";
+import * as createWorkspace from "./tools/create-workspace";
+
+export * from "./tools/create-workspace";
 
 /**
  * Main Transmute Plugin
@@ -31,10 +33,16 @@ export * from "./tools/start-task";
  */
 export const TransmutePlugin: Plugin = async (_ctx: PluginInput) => {
   return {
-    // Tools will be implemented in future tasks (oc-trans-007)
-    // For now, we rely on the @branch-namer subagent for branch naming
-    // and the startTask function can be called programmatically
-    tool: {},
+    tool: {
+      createWorkspace: {
+        description: "Create or resume an isolated task workspace",
+        inputSchema: createWorkspace.createWorkspaceInputSchema,
+        outputSchema: createWorkspace.createWorkspaceOutputSchema,
+        handler: async (input: createWorkspace.CreateWorkspaceInput, options?: any) => {
+            return await createWorkspace.createWorkspace(input, undefined, options);
+        },
+      },
+    },
 
     // Event hooks (to be implemented in future tasks)
     // event: async ({ event }) => {
