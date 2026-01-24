@@ -1,8 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { setupAgents } from "./setup-agents";
 import * as execCore from "../core/exec";
 import * as fs from "node:fs/promises";
-import * as path from "node:path";
 
 vi.mock("../core/exec");
 // We don't mock fs globally because we want to test copying, but we will mock specific calls if needed or use temp dirs.
@@ -22,6 +21,7 @@ describe("setupAgents Tool", () => {
     
     it("should locate source agents and copy them", async () => {
         // Mock readdir to return our agents
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         vi.mocked(fs.readdir).mockResolvedValue(["task-manager.md", "cleaner.md"] as any);
         
         // Mock access to fail for target files (so they don't exist yet)
@@ -78,6 +78,7 @@ describe("setupAgents Tool", () => {
     });
     
     it("should skip existing files if overwrite is false", async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         vi.mocked(fs.readdir).mockResolvedValue(["task-manager.md"] as any);
         
         // Mock access to succeed for target file (it exists)
@@ -91,6 +92,7 @@ describe("setupAgents Tool", () => {
     });
 
     it("should overwrite existing files if overwrite is true", async () => {
+         // eslint-disable-next-line @typescript-eslint/no-explicit-any
          vi.mocked(fs.readdir).mockResolvedValue(["task-manager.md"] as any);
          vi.mocked(fs.access).mockResolvedValue(undefined); // exists
 

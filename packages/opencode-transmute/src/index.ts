@@ -5,7 +5,7 @@
  * Creates isolated environments for each task with AI-generated branch names.
  */
 
-import type { Plugin, PluginInput } from "@opencode-ai/plugin";
+import type { Plugin } from "@opencode-ai/plugin";
 
 // Re-export types and functions for programmatic use
 export * from "./core/naming";
@@ -44,46 +44,46 @@ export * from "./tools/setup-agents";
  */
 import { tool } from "@opencode-ai/plugin";
 
-export const TransmutePlugin: Plugin = async (_ctx: PluginInput) => {
+export const TransmutePlugin: Plugin = async () => {
   return {
     tool: {
       createWorkspace: tool({
         description: "Create or resume an isolated task workspace",
         // Extract the Zod shape from the schema
-        args: createWorkspaceTool.createWorkspaceInputSchema.shape as any, 
-        execute: async (input, _context) => {
+        args: createWorkspaceTool.createWorkspaceInputSchema.shape, 
+        execute: async (input, context) => {
             // Note: input is inferred as the object keys, which matches CreateWorkspaceInput
             const safeOptions = {
                 // ...options? context?
                 // The tool execute receives (args, context). 
                 // context has sessionID.
-                opencodeSessionId: _context.sessionID
+                opencodeSessionId: context.sessionID
             };
-            const result = await createWorkspaceTool.createWorkspace(input as any, undefined, safeOptions);
+            const result = await createWorkspaceTool.createWorkspace(input, undefined, safeOptions);
             return JSON.stringify(result);
         },
       }),
       findTasks: tool({
           description: "Find and list tasks from the project",
-          args: findTasksTool.findTasksInputSchema.shape as any,
+          args: findTasksTool.findTasksInputSchema.shape,
           execute: async (input) => {
-              const result = await findTasksTool.findTasks(input as any);
+              const result = await findTasksTool.findTasks(input);
               return JSON.stringify(result);
           }
       }),
       cleanWorkspaces: tool({
           description: "Clean up old or orphaned worktrees",
-          args: cleanWorkspacesTool.cleanWorkspacesInputSchema.shape as any,
+          args: cleanWorkspacesTool.cleanWorkspacesInputSchema.shape,
           execute: async (input) => {
-              const result = await cleanWorkspacesTool.cleanWorkspaces(input as any);
+              const result = await cleanWorkspacesTool.cleanWorkspaces(input);
               return JSON.stringify(result);
           }
       }),
       setupAgents: tool({
           description: "Install Transmute agents to your project",
-          args: setupAgentsTool.setupAgentsInputSchema.shape as any,
+          args: setupAgentsTool.setupAgentsInputSchema.shape,
           execute: async (input) => {
-              const result = await setupAgentsTool.setupAgents(input as any);
+              const result = await setupAgentsTool.setupAgents(input);
               return JSON.stringify(result);
           }
       })

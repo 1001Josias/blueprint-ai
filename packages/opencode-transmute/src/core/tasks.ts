@@ -7,7 +7,6 @@
 
 import fs from "fs/promises";
 import path from "path";
-import { z } from "zod";
 
 export interface Task {
   id: string;
@@ -102,6 +101,7 @@ export async function getProjectTasks(projectPath: string): Promise<Task[]> {
     const content = await fs.readFile(tasksPath, "utf-8");
     return parseTasks(content);
   } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((error as any).code === 'ENOENT') {
        throw new Error(`tasks.md not found in ${projectPath}`);
     }

@@ -9,7 +9,9 @@
 import { z } from "zod";
 import {
   generateBranchName,
+  branchTypeSchema,
   type TaskContext,
+  type BranchType,
 } from "../core/naming";
 import { createWorktree, removeWorktree } from "../core/worktree";
 import { findSessionByTask, addSession, type Session } from "../core/session";
@@ -28,8 +30,7 @@ export const createWorkspaceInputSchema = z.object({
   title: z.string().min(1).describe("Task title"),
   description: z.string().optional().describe("Task description"),
   priority: z.string().optional().describe("Task priority"),
-  type: z
-    .string()
+  type: branchTypeSchema
     .optional()
     .describe("Branch type hint: feat, fix, refactor, etc."),
   slug: z
@@ -149,11 +150,11 @@ export async function createWorkspace(
 
   // Prepare branch name hint if slug is provided
   // If slug is provided, we assume the agent already did the thinking.
-  let branchNameHint: { type: any; slug: string } | undefined;
+  let branchNameHint: { type: BranchType; slug: string } | undefined;
   
   if (validatedInput.slug) {
      branchNameHint = {
-        type: (validatedInput.type as any) || "feat", 
+        type: validatedInput.type || "feat", 
         slug: validatedInput.slug
      };
   }

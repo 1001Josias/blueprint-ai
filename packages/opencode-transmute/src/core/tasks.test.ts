@@ -1,7 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { parseTasks, getProjectTasks, findProjectPaths } from "./tasks";
+import { describe, it, expect, vi } from "vitest";
+import { parseTasks, getProjectTasks } from "./tasks";
 import fs from "fs/promises";
-import path from "path";
 
 vi.mock("fs/promises");
 
@@ -90,6 +89,7 @@ Some random text
 
     it("should throw error if file not found", async () => {
         const error = new Error("ENOENT");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (error as any).code = "ENOENT";
         vi.spyOn(fs, "readFile").mockRejectedValueOnce(error);
         

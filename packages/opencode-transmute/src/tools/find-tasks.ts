@@ -1,6 +1,5 @@
 import { z } from "zod";
-import path from "path";
-import { getProjectTasks, findProjectPaths, type Task } from "../core/tasks";
+import { getProjectTasks, findProjectPaths } from "../core/tasks";
 import { getGitRoot } from "../core/exec";
 
 export const findTasksInputSchema = z.object({
