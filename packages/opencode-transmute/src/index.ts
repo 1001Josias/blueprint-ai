@@ -12,6 +12,8 @@ export * from "./core/naming";
 export * from "./core/worktree";
 export * from "./core/session";
 export * from "./core/hooks";
+export * from "./core/errors";
+export * from "./core/exec";
 export * from "./adapters/terminal/types";
 export * from "./tools/start-task";
 

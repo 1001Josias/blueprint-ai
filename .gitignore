@@ -53,5 +53,7 @@ worktrees/
 
 # opencode state
 .opencode/
+!.opencode/agents/*
+!.opencode/transmute.sessions.json
 
 projects/rpa
