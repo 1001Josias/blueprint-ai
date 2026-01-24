@@ -386,86 +386,62 @@ Resultado de cada comando inclui:
 
 ---
 
-## Task 7: Tool - start-task
+## Task 7: Tool - create-workspace
 
 - **id:** oc-trans-007
-- **status:** todo
+- **status:** done
 - **priority:** critical
 - **description:** Implementar a tool principal que orquestra criação de ambiente isolado.
 - **dependencies:** oc-trans-002, oc-trans-003, oc-trans-004, oc-trans-005, oc-trans-006
 
 ### Subtasks
 
-#### [ ] Definir schema de input da tool
+#### [x] Definir schema de input da tool
 
-Schema definido com Zod:
+Schema definido com Zod (agora aceita slug opcional).
 
-```typescript
-const startTaskInputSchema = z.object({
-  taskId: z.string().min(1),
-  title: z.string().min(1),
-  description: z.string().optional(),
-  priority: z.string().optional(),
-  type: z.string().optional(),
-  baseBranch: z.string().optional(),
-});
-```
+#### [x] Implementar fluxo completo
 
-#### [ ] Implementar fluxo completo
+1. Verifica sessão
+2. Gera branch (ou usa slug fornecido)
+3. Cria worktree
+4. Persiste sessão
+5. Executa hooks
+6. Abre terminal
 
-Fluxo implementado em `startTask()`:
+#### [x] Definir schema de output
 
-1. Verifica se sessão existe para taskId (`findSessionByTask`)
-2. Se existe, retorna worktree existente e abre terminal
-3. Gera nome de branch via IA (`generateBranchName`)
-4. Cria worktree (`createWorktree`)
-5. Persiste sessão com `opencodeSessionId` (`addSession`)
-6. Executa hooks afterCreate (`executeAfterCreateHooks`)
-7. Abre terminal no worktree (`openSession`)
-   - **Novo:** Para novas tasks, inicializar com `--prompt` contendo contexto
-   - **Novo:** Para tasks existentes, usar `--continue` para retomar histórico
-8. Retorna resultado
+#### [x] Registrar como tool do OpenCode
 
-#### [ ] Definir schema de output
+#### [x] Adicionar testes unitários
 
-```typescript
-const startTaskOutputSchema = z.object({
-  status: z.enum(["created", "existing"]),
-  branch: z.string(),
-  worktreePath: z.string(),
-  taskId: z.string(),
-  taskName: z.string(),
-  opencodeSessionId: z.string().optional(),
-});
-```
+---
+...
 
-#### [ ] Registrar como tool do OpenCode
-
-Tool registrada no plugin com:
-
-- Nome: `start-task`
-- Descrição clara do propósito
-- Schemas de input/output integrados
-- Execução do fluxo completo
-
-#### [ ] Adicionar testes unitários
-
-19 testes criados em `start-task.test.ts` cobrindo:
-
-- Schema validation
-- Criação de nova task (worktree + session)
-- Uso de branch type hint
-- Execução de hooks
-- Abertura de terminal
-- Retomada de sessão existente
-- Tratamento de erros (terminal indisponível, hooks falhando)
-- Função `resumeTask` auxiliar
 
 ---
 
-## Task 8: Configuration
+## Task 8: Agents - Task Manager
 
 - **id:** oc-trans-008
+- **status:** todo
+- **priority:** high
+- **description:** Implementar agentes coordenadores para orquestrar as tools.
+- **dependencies:** oc-trans-007
+
+### Subtasks
+
+#### [ ] Criar agente task-manager
+Agente que orquestra list-tasks -> branch-namer -> create-workspace.
+
+#### [ ] Criar agente workspace-cleaner
+Agente que orquestra list-sessions -> cleanup.
+
+---
+
+## Task 9: Configuration
+
+- **id:** oc-trans-009
 - **status:** todo
 - **priority:** medium
 - **description:** Implementar sistema de configuração do plugin.
@@ -534,9 +510,9 @@ Funções implementadas:
 
 ---
 
-## Task 9: Integration Testing
+## Task 10: Integration Testing
 
-- **id:** oc-trans-009
+- **id:** oc-trans-010
 - **status:** todo
 - **priority:** medium
 - **description:** Criar testes de integração para o fluxo completo.
@@ -565,9 +541,9 @@ Verificar que worktree pode ser removido corretamente.
 
 ---
 
-## Task 10: Documentation
+## Task 11: Documentation
 
-- **id:** oc-trans-010
+- **id:** oc-trans-011
 - **status:** todo
 - **priority:** low
 - **description:** Documentar uso e configuração do plugin.
@@ -602,9 +578,9 @@ As tarefas abaixo estão planejadas para iterações futuras, após validação 
 
 ---
 
-## Task 11: Tool - list-sessions
+## Task 12: Tool - list-sessions
 
-- **id:** oc-trans-011
+- **id:** oc-trans-012
 - **status:** todo
 - **priority:** low
 - **description:** Implementar tool para listar sessões/worktrees ativos.
@@ -623,9 +599,9 @@ Worktrees sem sessão registrada e vice-versa.
 
 ---
 
-## Task 12: Tool - cleanup-sessions
+## Task 13: Tool - cleanup-sessions
 
-- **id:** oc-trans-012
+- **id:** oc-trans-013
 - **status:** todo
 - **priority:** low
 - **description:** Implementar tool para limpar worktrees antigos ou órfãos.
@@ -648,9 +624,9 @@ Remover worktrees sem sessão correspondente.
 
 ---
 
-## Task 13: Tool - transmute-list-tasks
+## Task 14: Tool - transmute-list-tasks
 
-- **id:** oc-trans-013
+- **id:** oc-trans-014
 - **status:** todo
 - **priority:** medium
 - **description:** Implementar tool para buscar tarefas do Transmute.
@@ -678,9 +654,9 @@ Permitir escopo específico.
 
 ---
 
-## Task 14: Tool - transmute-update-status
+## Task 15: Tool - transmute-update-status
 
-- **id:** oc-trans-014
+- **id:** oc-trans-015
 - **status:** todo
 - **priority:** medium
 - **description:** Implementar tool para atualizar status de tarefas no Transmute.
@@ -704,9 +680,9 @@ Permitir adicionar notas à tarefa.
 
 ---
 
-## Task 15: Adapter - tmux Integration
+## Task 16: Adapter - tmux Integration
 
-- **id:** oc-trans-015
+- **id:** oc-trans-016
 - **status:** todo
 - **priority:** low
 - **description:** Implementar adapter de terminal para tmux.
@@ -725,9 +701,9 @@ Permitir especificar sessão tmux alvo.
 
 ---
 
-## Task 16: New Window Spawn Option
+## Task 17: New Window Spawn Option
 
-- **id:** oc-trans-016
+- **id:** oc-trans-017
 - **status:** todo
 - **priority:** low
 - **description:** Adicionar opção para abrir worktree em nova janela de terminal.

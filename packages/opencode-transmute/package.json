@@ -10,7 +10,8 @@
     "dev": "tsup --watch",
     "lint": "eslint .",
     "check-types": "tsc --noEmit",
-    "test": "vitest"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "zod": "^3.22.4"
