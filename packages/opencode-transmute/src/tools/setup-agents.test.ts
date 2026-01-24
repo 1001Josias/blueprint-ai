@@ -65,7 +65,7 @@ describe("setupAgents Tool", () => {
             throw new Error("ENOENT");
         });
         
-        const result = await setupAgents({});
+        const result = await setupAgents({ overwrite: false });
         
         expect(result.success).toBe(true);
         expect(result.installedAgents).toEqual(["task-manager.md", "cleaner.md"]);
