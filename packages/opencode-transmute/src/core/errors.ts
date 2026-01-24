@@ -131,3 +131,78 @@ export class ExecError extends WorktreeError {
     this.exitCode = exitCode;
   }
 }
+
+/**
+ * Error codes for terminal operations
+ */
+export const TerminalErrorCode = {
+  NOT_AVAILABLE: "NOT_AVAILABLE",
+  SPAWN_FAILED: "SPAWN_FAILED",
+  INVALID_PATH: "INVALID_PATH",
+} as const;
+
+export type TerminalErrorCodeType =
+  (typeof TerminalErrorCode)[keyof typeof TerminalErrorCode];
+
+/**
+ * Base error class for terminal operations
+ */
+export class TerminalError extends Error {
+  readonly code: TerminalErrorCodeType;
+
+  constructor(message: string, code: TerminalErrorCodeType) {
+    super(message);
+    this.name = "TerminalError";
+    this.code = code;
+  }
+}
+
+/**
+ * Thrown when a terminal emulator is not available
+ */
+export class TerminalNotAvailableError extends TerminalError {
+  readonly terminal: string;
+
+  constructor(terminal: string) {
+    super(
+      `Terminal '${terminal}' is not available. Please install it or check your PATH.`,
+      TerminalErrorCode.NOT_AVAILABLE,
+    );
+    this.name = "TerminalNotAvailableError";
+    this.terminal = terminal;
+  }
+}
+
+/**
+ * Thrown when spawning a terminal session fails
+ */
+export class TerminalSpawnError extends TerminalError {
+  readonly terminal: string;
+  readonly reason: string;
+
+  constructor(terminal: string, reason: string) {
+    super(
+      `Failed to spawn terminal session in '${terminal}': ${reason}`,
+      TerminalErrorCode.SPAWN_FAILED,
+    );
+    this.name = "TerminalSpawnError";
+    this.terminal = terminal;
+    this.reason = reason;
+  }
+}
+
+/**
+ * Thrown when the working directory path is invalid
+ */
+export class InvalidPathError extends TerminalError {
+  readonly path: string;
+
+  constructor(path: string) {
+    super(
+      `Invalid path: '${path}'. The directory does not exist or is not accessible.`,
+      TerminalErrorCode.INVALID_PATH,
+    );
+    this.name = "InvalidPathError";
+    this.path = path;
+  }
+}

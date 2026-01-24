@@ -279,7 +279,7 @@ Cobrir casos com vitest:
 
 ### Subtasks
 
-#### [ ] Definir interface abstrata de terminal
+#### [x] Definir interface abstrata de terminal
 
 Interface já definida em `types.ts`:
 
@@ -298,11 +298,11 @@ interface OpenSessionOptions {
 }
 ```
 
-#### [ ] Verificar disponibilidade do WezTerm
+#### [x] Verificar disponibilidade do WezTerm
 
 Implementado `isAvailable()` que executa `wezterm --version` e verifica exit code.
 
-#### [ ] Implementar openSession para WezTerm
+#### [x] Implementar openSession para WezTerm
 
 Implementado usando `wezterm cli spawn --cwd <path>`:
 
@@ -310,7 +310,7 @@ Implementado usando `wezterm cli spawn --cwd <path>`:
 - Suporta execução de comandos via `sh -c`
 - Verifica disponibilidade antes de abrir
 
-#### [ ] Tratamento de erros
+#### [x] Tratamento de erros
 
 Novas classes de erro em `errors.ts`:
 
@@ -318,7 +318,7 @@ Novas classes de erro em `errors.ts`:
 - `TerminalSpawnError` - Falha ao abrir sessão
 - `InvalidPathError` - Path inválido
 
-#### [ ] Adicionar testes unitários
+#### [x] Adicionar testes unitários
 
 21 testes criados em `wezterm.test.ts` cobrindo:
 
