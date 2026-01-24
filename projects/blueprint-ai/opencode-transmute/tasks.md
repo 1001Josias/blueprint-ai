@@ -221,7 +221,7 @@ Cobrir casos com vitest:
 
 ### Subtasks
 
-#### [ ] Definir schema de estado
+#### [x] Definir schema de estado
 
 ```typescript
 const sessionSchema = z.object({
@@ -238,26 +238,26 @@ const stateSchema = z.object({
 });
 ```
 
-#### [ ] Implementar loadState
+#### [x] Implementar loadState
 
 Ler `.opencode/transmute.sessions.json`.
 Retornar estado vazio se arquivo não existe.
 Validar com Zod.
 
-#### [ ] Implementar saveState
+#### [x] Implementar saveState
 
 Escrever estado validado no arquivo.
 Criar diretório `.opencode` se necessário.
 
-#### [ ] Implementar addSession / removeSession
+#### [x] Implementar addSession / removeSession
 
 Helpers para manipular lista de sessões.
 
-#### [ ] Implementar findSessionByTask
+#### [x] Implementar findSessionByTask
 
 Buscar sessão existente por taskId.
 
-#### [ ] Adicionar testes unitários
+#### [x] Adicionar testes unitários
 
 Cobrir casos com vitest:
 
