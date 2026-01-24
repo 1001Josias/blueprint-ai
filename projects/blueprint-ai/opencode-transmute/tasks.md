@@ -339,7 +339,7 @@ Novas classes de erro em `errors.ts`:
 
 ### Subtasks
 
-#### [ ] Definir schema de configuração de hooks
+#### [x] Definir schema de configuração de hooks
 
 Schema já definido com Zod:
 
@@ -350,7 +350,7 @@ const hooksConfigSchema = z.object({
 });
 ```
 
-#### [ ] Implementar executeHooks
+#### [x] Implementar executeHooks
 
 Implementado com:
 
@@ -361,7 +361,7 @@ Implementado com:
 - Modo `stopOnError: false` (lenient) - continua após falhas
 - Suporte a variáveis de ambiente customizadas
 
-#### [ ] Implementar logging de hooks
+#### [x] Implementar logging de hooks
 
 Resultado de cada comando inclui:
 
@@ -371,7 +371,7 @@ Resultado de cada comando inclui:
 - `exitCode`: código de saída
 - `duration`: tempo de execução em ms
 
-#### [ ] Adicionar testes unitários
+#### [x] Adicionar testes unitários
 
 32 testes criados em `hooks.test.ts` cobrindo:
 
