@@ -39,7 +39,12 @@ export const TransmutePlugin: Plugin = async (_ctx: PluginInput) => {
         inputSchema: createWorkspace.createWorkspaceInputSchema,
         outputSchema: createWorkspace.createWorkspaceOutputSchema,
         handler: async (input: createWorkspace.CreateWorkspaceInput, options?: any) => {
-            return await createWorkspace.createWorkspace(input, undefined, options);
+            // Safely map sessionId from plugin options if not explicitly provided in options.opencodeSessionId
+            const safeOptions = {
+                ...options,
+                opencodeSessionId: options?.opencodeSessionId ?? options?.sessionId
+            };
+            return await createWorkspace.createWorkspace(input, undefined, safeOptions);
         },
       },
     },

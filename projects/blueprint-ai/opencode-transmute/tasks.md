@@ -396,11 +396,11 @@ Resultado de cada comando inclui:
 
 ### Subtasks
 
-#### [ ] Definir schema de input da tool
+#### [x] Definir schema de input da tool
 
 Schema definido com Zod (agora aceita slug opcional).
 
-#### [ ] Implementar fluxo completo
+#### [x] Implementar fluxo completo
 
 1. Verifica sessão
 2. Gera branch (ou usa slug fornecido)
@@ -409,11 +409,11 @@ Schema definido com Zod (agora aceita slug opcional).
 5. Executa hooks
 6. Abre terminal
 
-#### [ ] Definir schema de output
+#### [x] Definir schema de output
 
-#### [ ] Registrar como tool do OpenCode
+#### [x] Registrar como tool do OpenCode
 
-#### [ ] Adicionar testes unitários
+#### [x] Adicionar testes unitários
 
 ---
 ...
