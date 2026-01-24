@@ -12,7 +12,13 @@ import * as exec from "../core/exec";
 import type { TerminalAdapter } from "../adapters/terminal/types";
 
 // Mock dependencies
-vi.mock("../core/naming");
+vi.mock("../core/naming", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../core/naming")>();
+  return {
+    ...actual,
+    generateBranchName: vi.fn(),
+  };
+});
 vi.mock("../core/worktree");
 vi.mock("../core/session");
 vi.mock("../core/hooks");

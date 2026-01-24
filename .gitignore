@@ -55,5 +55,5 @@ worktrees/
 .opencode/
 !.opencode/agents/*
 !.opencode/transmute.sessions.json
-
+!packages/opencode-transmute/.opencode/
 projects/rpa

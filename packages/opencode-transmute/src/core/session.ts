@@ -60,6 +60,8 @@ export interface State {
   sessions: Session[];
 }
 
+export type SessionState = State;
+
 /**
  * Default state file path relative to repository root
  */
