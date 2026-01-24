@@ -47,7 +47,7 @@ import { tool } from "@opencode-ai/plugin";
 export const TransmutePlugin: Plugin = async () => {
   return {
     tool: {
-      createWorkspace: tool({
+      create_workspace: tool({
         description: "Create or resume an isolated task workspace",
         // Extract the Zod shape from the schema
         args: createWorkspaceTool.createWorkspaceInputSchema.shape, 
@@ -63,7 +63,7 @@ export const TransmutePlugin: Plugin = async () => {
             return JSON.stringify(result);
         },
       }),
-      findTasks: tool({
+      find_tasks: tool({
           description: "Find and list tasks from the project",
           args: findTasksTool.findTasksInputSchema.shape,
           execute: async (input) => {
@@ -71,7 +71,7 @@ export const TransmutePlugin: Plugin = async () => {
               return JSON.stringify(result);
           }
       }),
-      cleanWorkspaces: tool({
+      clean_workspaces: tool({
           description: "Clean up old or orphaned worktrees",
           args: cleanWorkspacesTool.cleanWorkspacesInputSchema.shape,
           execute: async (input) => {
@@ -79,7 +79,7 @@ export const TransmutePlugin: Plugin = async () => {
               return JSON.stringify(result);
           }
       }),
-      setupAgents: tool({
+      setup_agents: tool({
           description: "Install Transmute agents to your project",
           args: setupAgentsTool.setupAgentsInputSchema.shape,
           execute: async (input) => {
