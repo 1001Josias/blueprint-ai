@@ -513,29 +513,30 @@ Funções implementadas:
 ## Task 10: Integration Testing
 
 - **id:** oc-trans-010
-- **status:** todo
+- **status:** done
 - **priority:** medium
 - **description:** Criar testes de integração para o fluxo completo.
 - **dependencies:** oc-trans-007
+- **comment:** Integration tests implemented in `src/integration.test.ts` covering full flow.
 
 ### Subtasks
 
-#### [ ] Setup de ambiente de teste
+#### [x] Setup de ambiente de teste
 
 Criar repositório git temporário para testes.
 Configurar mocks para terminal adapter.
 
-#### [ ] Testar fluxo de criação completo
+#### [x] Testar fluxo de criação completo
 
 Verificar que worktree é criado corretamente.
 Verificar que estado é persistido.
 Verificar que branch existe.
 
-#### [ ] Testar retomada de sessão
+#### [x] Testar retomada de sessão
 
 Criar sessão, verificar que segunda chamada retorna existente.
 
-#### [ ] Testar cleanup
+#### [x] Testar cleanup
 
 Verificar que worktree pode ser removido corretamente.
 
