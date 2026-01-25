@@ -12,6 +12,7 @@ export * from "./core/naming";
 export * from "./core/worktree";
 export * from "./core/session";
 export * from "./core/hooks";
+export * from "./core/config";
 export * from "./core/errors";
 export * from "./core/exec";
 export * from "./core/tasks";
@@ -21,11 +22,15 @@ import * as createWorkspaceTool from "./tools/create-workspace";
 import * as findTasksTool from "./tools/find-tasks";
 import * as cleanWorkspacesTool from "./tools/clean-workspaces";
 import * as setupAgentsTool from "./tools/setup-agents";
+import * as listSessionsTool from "./tools/list-sessions";
+
 
 export * from "./tools/create-workspace";
 export * from "./tools/find-tasks";
 export * from "./tools/clean-workspaces";
+export * from "./tools/clean-workspaces";
 export * from "./tools/setup-agents";
+export * from "./tools/list-sessions";
 
 /**
  * Main Transmute Plugin
@@ -98,6 +103,14 @@ export const TransmutePlugin: Plugin = async () => {
           args: setupAgentsTool.setupAgentsInputSchema.shape,
           execute: async (input) => {
               const result = await setupAgentsTool.setupAgents(input);
+              return JSON.stringify(result);
+          }
+      }),
+      list_sessions: tool({
+          description: "List active sessions and worktrees",
+          args: listSessionsTool.listSessionsInputSchema.shape,
+          execute: async (input) => {
+              const result = await listSessionsTool.listSessions(input);
               return JSON.stringify(result);
           }
       })

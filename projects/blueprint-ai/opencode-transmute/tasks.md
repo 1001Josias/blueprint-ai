@@ -214,7 +214,7 @@ Cobrir casos com vitest:
 ## Task 4: Core - Session Persistence
 
 - **id:** oc-trans-004
-- **status:** todo
+- **status:** done
 - **priority:** high
 - **description:** Implementar persistência mínima de estado de sessões.
 - **dependencies:** oc-trans-001
@@ -272,7 +272,7 @@ Cobrir casos com vitest:
 ## Task 5: Adapter - WezTerm Integration
 
 - **id:** oc-trans-005
-- **status:** todo
+- **status:** done
 - **priority:** high
 - **description:** Implementar integração com WezTerm para abrir sessões de terminal.
 - **dependencies:** oc-trans-001
@@ -332,7 +332,7 @@ Novas classes de erro em `errors.ts`:
 ## Task 6: Core - Hooks System
 
 - **id:** oc-trans-006
-- **status:** todo
+- **status:** done
 - **priority:** medium
 - **description:** Implementar sistema de hooks declarativos para execução pós-setup.
 - **dependencies:** oc-trans-001
@@ -424,17 +424,17 @@ Schema definido com Zod (agora aceita slug opcional).
 ## Task 8: Agents - Task Manager
 
 - **id:** oc-trans-008
-- **status:** todo
+- **status:** done
 - **priority:** high
 - **description:** Implementar agentes coordenadores para orquestrar as tools.
 - **dependencies:** oc-trans-007
 
 ### Subtasks
 
-#### [ ] Criar agente task-manager
+#### [x] Criar agente task-manager
 Agente que orquestra list-tasks -> branch-namer -> create-workspace.
 
-#### [ ] Criar agente workspace-cleaner
+#### [x] Criar agente workspace-cleaner
 Agente que orquestra list-sessions -> cleanup.
 
 ---
@@ -442,14 +442,14 @@ Agente que orquestra list-sessions -> cleanup.
 ## Task 9: Configuration
 
 - **id:** oc-trans-009
-- **status:** todo
+- **status:** done
 - **priority:** medium
 - **description:** Implementar sistema de configuração do plugin.
 - **dependencies:** oc-trans-001
 
 ### Subtasks
 
-#### [ ] Definir schema de configuração
+#### [x] Definir schema de configuração
 
 Schema implementado em `config.ts`:
 
@@ -467,7 +467,7 @@ const configSchema = z.object({
 });
 ```
 
-#### [ ] Implementar loadConfig
+#### [x] Implementar loadConfig
 
 Buscar configuração em ordem de precedência:
 
@@ -483,19 +483,19 @@ Funções implementadas:
 - `loadConfigFromOpencodeConfig()` - carrega de opencode.config.ts
 - `findConfigFile()` - encontra arquivo de config no repositório
 
-#### [ ] Validar configuração
+#### [x] Validar configuração
 
 - `validateConfig()` - valida com Zod e retorna resultado tipado
 - `mergeConfig()` - merge com defaults via Zod parse
 
-#### [ ] Integração com plugin
+#### [x] Integração com plugin
 
 - Plugin agora carrega config na inicialização
 - Terminal adapter criado baseado em config
 - Hooks e flags respeitam configuração
 - Logs de fonte de configuração para debugging
 
-#### [ ] Adicionar testes unitários
+#### [x] Adicionar testes unitários
 
 30 testes criados em `config.test.ts` cobrindo:
 
@@ -545,20 +545,20 @@ Verificar que worktree pode ser removido corretamente.
 ## Task 11: Documentation
 
 - **id:** oc-trans-011
-- **status:** todo
+- **status:** done
 - **priority:** low
 - **description:** Documentar uso e configuração do plugin.
 - **dependencies:** oc-trans-007, oc-trans-008
 
 ### Subtasks
 
-#### [ ] Criar seção Plugins no docs
+#### [x] Criar seção Plugins no docs
 
 Nova seção `apps/docs/content/docs/plugins/` criada com:
 
 - `index.mdx` - Overview da seção de plugins
 
-#### [ ] Documentação do Plugin
+#### [x] Documentação do Plugin
 
 Documentação completa em `apps/docs/content/docs/plugins/opencode-transmute/`:
 
@@ -567,7 +567,7 @@ Documentação completa em `apps/docs/content/docs/plugins/opencode-transmute/`:
 - `api.mdx` - Referência de API (tools, funções, schemas, erros)
 - `troubleshooting.mdx` - Guia de solução de problemas
 
-#### [ ] Build do docs funcionando
+#### [x] Build do docs funcionando
 
 Verificado que `pnpm build` no apps/docs compila as novas páginas corretamente.
 
@@ -582,7 +582,7 @@ As tarefas abaixo estão planejadas para iterações futuras, após validação 
 ## Task 12: Tool - list-sessions
 
 - **id:** oc-trans-012
-- **status:** todo
+- **status:** done
 - **priority:** low
 - **description:** Implementar tool para listar sessões/worktrees ativos.
 - **dependencies:** oc-trans-007
@@ -590,11 +590,11 @@ As tarefas abaixo estão planejadas para iterações futuras, após validação 
 
 ### Subtasks
 
-#### [ ] Implementar listagem de sessões
+#### [x] Implementar listagem de sessões
 
 Combinar dados persistidos com worktrees existentes.
 
-#### [ ] Detectar sessões órfãs
+#### [x] Detectar sessões órfãs
 
 Worktrees sem sessão registrada e vice-versa.
 
@@ -603,7 +603,7 @@ Worktrees sem sessão registrada e vice-versa.
 ## Task 13: Tool - cleanup-sessions
 
 - **id:** oc-trans-013
-- **status:** todo
+- **status:** done
 - **priority:** low
 - **description:** Implementar tool para limpar worktrees antigos ou órfãos.
 - **dependencies:** oc-trans-011
@@ -611,15 +611,15 @@ Worktrees sem sessão registrada e vice-versa.
 
 ### Subtasks
 
-#### [ ] Implementar remoção de worktree
+#### [x] Implementar remoção de worktree
 
 Executar `git worktree remove` e atualizar estado.
 
-#### [ ] Implementar cleanup por idade
+#### [x] Implementar cleanup por idade
 
 Remover worktrees mais antigos que X dias.
 
-#### [ ] Implementar cleanup de órfãos
+#### [x] Implementar cleanup de órfãos
 
 Remover worktrees sem sessão correspondente.
 
