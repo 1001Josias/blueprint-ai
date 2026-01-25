@@ -14,6 +14,8 @@ updated_at: "2026-01-25"
 - **priority:** high
 - **description:** Setup the MCP server infrastructure within the monorepo.
 
+**PR:** [feat: MCP Server Integration - Server Initialization](https://github.com/1001Josias/transmute/pull/61)
+
 ### Subtasks
 
 #### [x] Create Package
